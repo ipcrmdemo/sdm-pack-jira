@@ -1,0 +1,30 @@
+subscription OnJiraIssueEvent {
+    JiraIssue {
+        timestamp
+        webhookEvent
+        issue_event_type_name
+        issue {
+            id
+            self
+            key
+        }
+        user {
+            self
+        }
+        changelog {
+            id
+            items {
+                field
+                fieldtype
+                from
+                fromString
+                to
+                toString
+            }
+        }
+        comment {
+            self
+            id
+        }
+    }
+}

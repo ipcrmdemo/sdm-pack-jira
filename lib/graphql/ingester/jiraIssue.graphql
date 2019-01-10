@@ -1,0 +1,33 @@
+type JiraIssue @rootType {
+    timestamp: String!
+    webhookEvent: String!
+    issue_event_type_name: String!
+    issue: JiraIssueDetail!
+    user: JiraIssueUser
+    changelog: JiraIssueChangelog
+    comment: JiraIssueComment
+}
+type JiraIssueDetail {
+    id: String!
+    self: String!
+    key: String!
+}
+type JiraIssueChangelog {
+    id: String!
+    items: [JiraIssueChangelogItem]!
+}
+type JiraIssueChangelogItem {
+    field: String!
+    fieldtype: String!
+    from: String!
+    fromString: String!
+    to: String!
+    toString: String!
+}
+type JiraIssueComment {
+    self: String!
+    id: String!
+}
+type JiraIssueUser {
+    self: String!
+}
