@@ -22,7 +22,8 @@
   "main": "./index.js",
   "types": "./index.d.ts",
   "dependencies": {
-    "@atomist/slack-messages": "^1.1.0"
+    "@atomist/slack-messages": "^1.1.0",
+    "jira2slack": "^1.0.2"
   },
   "peerDependencies": {
     "@atomist/automation-client": "*",
