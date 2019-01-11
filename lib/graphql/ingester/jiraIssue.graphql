@@ -11,6 +11,7 @@ type JiraIssueDetail {
     id: String!
     self: String!
     key: String!
+    fields: JiraIssueFields!
 }
 type JiraIssueChangelog {
     id: String!
@@ -30,4 +31,74 @@ type JiraIssueComment {
 }
 type JiraIssueUser {
     self: String!
+}
+type JiraIssueUser {
+    self: String!
+    name: String!
+    key: String!
+}
+type JiraIssueFields {
+    issueType: JiraIssueType!
+    parent: JiraIssueParent
+    components: [JiraIssueComponent]
+    timespent: Int
+    timeoriginalestimate: Int
+    project: JiraProject
+    aggregatetimespent: Int
+    resolution: String
+    summary: String!
+    creator: JiraIssueUser!
+    reporter: JiraIssueUser!
+    priority: JiraIssuePriority!
+    labels: [String]
+    assignee: JiraIssueUser
+    status: JiraIssueStatus!
+    created: String!
+    updated: String!
+}
+type JiraProject {
+    self: String!
+    id: String!
+    name: String!
+    projectTypeKey: String!
+}
+type JiraIssueType {
+    subtask: Boolean!
+}
+type JiraIssueComponent {
+    self: String!
+    id: String!
+    name: String!
+    description: String!
+}
+type JiraIssueParent {
+    id: String
+    key: String
+    self: String
+    fields: JiraSubTaskFields
+}
+type JiraSubTaskFields {
+    summary: String!
+    status: JiraIssueStatus!
+    priority: JiraIssuePriority!
+    issueType: JiraIssueType!
+}
+type JiraIssueStatus {
+    self: String!
+    description: String!
+    name: String!
+    id: String!
+    statusCategory: JiraIssueStatusCategory!
+}
+type JiraIssueStatusCategory {
+    self: String!
+    id: Int!
+    key: String!
+    colorName: String!
+    name: String!
+}
+type JiraIssuePriority {
+    self: String!
+    name: String!
+    id: String!
 }

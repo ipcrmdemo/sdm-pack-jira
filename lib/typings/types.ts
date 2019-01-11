@@ -10286,6 +10286,38 @@ export enum CommitIssueRelationshipType {
 // Documents
 // ====================================================
 
+export namespace ChatIdByEmail {
+  export type Variables = {
+    email: string;
+  };
+
+  export type Query = {
+    __typename?: "Query";
+
+    ChatId?: (ChatId | null)[] | null;
+  };
+
+  export type ChatId = {
+    __typename?: "ChatId";
+
+    person?: Person | null;
+
+    screenName?: string | null;
+  };
+
+  export type Person = {
+    __typename?: "Person";
+
+    emails?: (Emails | null)[] | null;
+  };
+
+  export type Emails = {
+    __typename?: "Email";
+
+    address?: string | null;
+  };
+}
+
 export namespace GetChannelByRepo {
   export type Variables = {
     name: string;

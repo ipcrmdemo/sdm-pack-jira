@@ -1,0 +1,10 @@
+query ChatIdByEmail($email: String!) {
+  ChatId {
+    person @required {
+      emails(address: $email) @required {
+        address
+      }
+    }
+    screenName
+  }
+}
