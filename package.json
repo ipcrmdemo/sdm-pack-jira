@@ -21,7 +21,9 @@
   ],
   "main": "./index.js",
   "types": "./index.d.ts",
-  "dependencies": {},
+  "dependencies": {
+    "@atomist/slack-messages": "^1.1.0"
+  },
   "peerDependencies": {
     "@atomist/automation-client": "*",
     "@atomist/sdm": "*",

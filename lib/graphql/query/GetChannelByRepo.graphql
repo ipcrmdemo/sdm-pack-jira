@@ -1,0 +1,7 @@
+query GetChannelByRepo($name: String!){
+  Repo(name: $name){
+    channels {
+      name
+    }
+  }
+}
