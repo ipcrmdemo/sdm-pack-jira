@@ -28,9 +28,11 @@ type JiraIssueChangelogItem {
 type JiraIssueComment {
     self: String!
     id: String!
-}
-type JiraIssueUser {
-    self: String!
+    author: JiraIssueUser!
+    body: String!
+    updateAuthor: JiraIssueUser
+    created: String!
+    updated: String
 }
 type JiraIssueUser {
     self: String!

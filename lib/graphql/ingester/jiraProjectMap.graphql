@@ -1,0 +1,5 @@
+type JiraProjectMap @rootType {
+    projectId: String @compositeId
+    channel: String @compositeId
+    active: Boolean
+}

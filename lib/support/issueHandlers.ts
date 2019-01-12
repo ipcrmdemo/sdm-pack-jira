@@ -1,7 +1,7 @@
 import { HandlerContext, logger } from "@atomist/automation-client";
 import { SlackMessage } from "@atomist/slack-messages";
 import * as types from "../typings/types";
-import { findChannelsByRepos } from "./channelLookups";
+import { findChannelsByRepos, jiraChannelLookup } from "./helpers/channelLookup";
 import { prepareIssueCommentedMessage, prepareStateChangeMessage } from "./helpers/msgHelpers";
 import { getJiraIssueRepos } from "./jiraDataLookup";
 
@@ -32,11 +32,11 @@ export const issueStateChange = async (ctx: HandlerContext, event: types.OnJiraI
 };
 
 export const issueCreated = async (ctx: HandlerContext, event: types.OnJiraIssueEvent.JiraIssue): Promise<void> => {
-    // do stuff
-    // Need a way to map this
+    const channels = await jiraChannelLookup(ctx, event);
+    logger.debug(`Issue Created Channels: ${JSON.stringify(channels)}`);
 };
 
 export const issueDeleted = async (ctx: HandlerContext, event: types.OnJiraIssueEvent.JiraIssue): Promise<void> => {
-    // do stuff
-    // Need a way to map this
+    const channels = await jiraChannelLookup(ctx, event);
+    logger.debug(`Issue Deleted Channels: ${JSON.stringify(channels)}`);
 };

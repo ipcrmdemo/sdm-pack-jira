@@ -10318,6 +10318,53 @@ export namespace ChatIdByEmail {
   };
 }
 
+export namespace GetChannelByComponent {
+  export type Variables = {
+    componentId: string;
+    projectId: string;
+  };
+
+  export type Query = {
+    __typename?: "Query";
+
+    JiraComponentMap?: (JiraComponentMap | null)[] | null;
+  };
+
+  export type JiraComponentMap = {
+    __typename?: "JiraComponentMap";
+
+    channel?: string | null;
+
+    projectId?: string | null;
+
+    componentId?: string | null;
+
+    active?: boolean | null;
+  };
+}
+
+export namespace GetChannelByProject {
+  export type Variables = {
+    projectid: (string | null)[];
+  };
+
+  export type Query = {
+    __typename?: "Query";
+
+    JiraProjectMap?: (JiraProjectMap | null)[] | null;
+  };
+
+  export type JiraProjectMap = {
+    __typename?: "JiraProjectMap";
+
+    channel?: string | null;
+
+    projectId?: string | null;
+
+    active?: boolean | null;
+  };
+}
+
 export namespace GetChannelByRepo {
   export type Variables = {
     name: string;
@@ -10377,12 +10424,176 @@ export namespace OnJiraIssueEvent {
     self: string;
 
     key: string;
+
+    fields: Fields;
+  };
+
+  export type Fields = {
+    __typename?: "JiraIssueFields";
+
+    issueType: IssueType;
+
+    parent?: Parent | null;
+
+    components?: (Components | null)[] | null;
+
+    timespent?: number | null;
+
+    timeoriginalestimate?: number | null;
+
+    project?: Project | null;
+
+    aggregatetimespent?: number | null;
+
+    resolution?: string | null;
+
+    summary: string;
+
+    creator: Creator;
+
+    reporter: Reporter;
+
+    priority: _Priority;
+
+    labels?: (string | null)[] | null;
+
+    assignee?: Assignee | null;
+
+    status: _Status;
+
+    created: string;
+
+    updated: string;
+  };
+
+  export type IssueType = {
+    __typename?: "JiraIssueType";
+
+    subtask: boolean;
+  };
+
+  export type Parent = {
+    __typename?: "JiraIssueParent";
+
+    id?: string | null;
+
+    key?: string | null;
+
+    self?: string | null;
+
+    fields?: _Fields | null;
+  };
+
+  export type _Fields = {
+    __typename?: "JiraSubTaskFields";
+
+    summary: string;
+
+    status: Status;
+
+    priority: Priority;
+
+    issueType: _IssueType;
+  };
+
+  export type Status = {
+    __typename?: "JiraIssueStatus";
+
+    self: string;
+
+    name: string;
+  };
+
+  export type Priority = {
+    __typename?: "JiraIssuePriority";
+
+    self: string;
+
+    name: string;
+  };
+
+  export type _IssueType = {
+    __typename?: "JiraIssueType";
+
+    subtask: boolean;
+  };
+
+  export type Components = {
+    __typename?: "JiraIssueComponent";
+
+    self: string;
+
+    name: string;
+
+    id: string;
+  };
+
+  export type Project = {
+    __typename?: "JiraProject";
+
+    self: string;
+
+    name: string;
+
+    id: string;
+
+    projectTypeKey: string;
+  };
+
+  export type Creator = {
+    __typename?: "JiraIssueUser";
+
+    self: string;
+
+    name: string;
+
+    key: string;
+  };
+
+  export type Reporter = {
+    __typename?: "JiraIssueUser";
+
+    self: string;
+
+    name: string;
+
+    key: string;
+  };
+
+  export type _Priority = {
+    __typename?: "JiraIssuePriority";
+
+    self: string;
+
+    name: string;
+  };
+
+  export type Assignee = {
+    __typename?: "JiraIssueUser";
+
+    self: string;
+
+    name: string;
+
+    key: string;
+  };
+
+  export type _Status = {
+    __typename?: "JiraIssueStatus";
+
+    self: string;
+
+    name: string;
   };
 
   export type User = {
     __typename?: "JiraIssueUser";
 
     self: string;
+
+    name: string;
+
+    key: string;
   };
 
   export type Changelog = {
@@ -10415,5 +10626,35 @@ export namespace OnJiraIssueEvent {
     self: string;
 
     id: string;
+
+    author: Author;
+
+    body: string;
+
+    updateAuthor?: UpdateAuthor | null;
+
+    created: string;
+
+    updated?: string | null;
+  };
+
+  export type Author = {
+    __typename?: "JiraIssueUser";
+
+    self: string;
+
+    name: string;
+
+    key: string;
+  };
+
+  export type UpdateAuthor = {
+    __typename?: "JiraIssueUser";
+
+    self: string;
+
+    name: string;
+
+    key: string;
   };
 }

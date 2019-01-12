@@ -23,7 +23,8 @@
   "types": "./index.d.ts",
   "dependencies": {
     "@atomist/slack-messages": "^1.1.0",
-    "jira2slack": "^1.0.2"
+    "jira2slack": "^1.0.2",
+    "lodash": "^4.17.11"
   },
   "peerDependencies": {
     "@atomist/automation-client": "*",

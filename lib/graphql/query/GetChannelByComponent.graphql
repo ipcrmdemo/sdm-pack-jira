@@ -1,0 +1,8 @@
+query GetChannelByComponent ($componentId: String!, $projectId: String!) {
+  JiraComponentMap (componentId: [$componentId], projectId: [$projectId]) {
+    channel
+    projectId
+    componentId
+    active
+  }
+}

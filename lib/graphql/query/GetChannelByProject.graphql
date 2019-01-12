@@ -1,0 +1,7 @@
+query GetChannelByProject($projectid: [String]!){
+  JiraProjectMap (projectId: $projectid) {
+    channel
+    projectId
+    active
+  }
+}

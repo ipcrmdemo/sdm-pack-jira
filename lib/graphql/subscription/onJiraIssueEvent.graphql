@@ -7,9 +7,77 @@ subscription OnJiraIssueEvent {
             id
             self
             key
+            fields {
+                issueType {
+                    subtask
+                }
+                parent {
+                    id
+                    key
+                    self
+                    fields {
+                        summary
+                        status {
+                            self
+                            name
+                        }
+                        priority {
+                            self
+                            name
+                        }
+                        issueType {
+                           subtask 
+                        }
+                    }
+                }
+                components {
+                    self
+                    name
+                    id
+                }
+                timespent
+                timeoriginalestimate
+                project {
+                    self
+                    name
+                    id
+                    projectTypeKey
+                }
+                aggregatetimespent
+                resolution
+                summary
+                creator {
+                    self
+                    name
+                    key
+                }
+                reporter {
+                    self
+                    name
+                    key
+                }
+                priority {
+                    self
+                    name
+                }
+                labels
+                assignee {
+                    self
+                    name
+                    key
+                }
+                status {
+                    self
+                    name
+                }
+                created
+                updated
+            }
         }
         user {
             self
+            name
+            key
         }
         changelog {
             id
@@ -25,6 +93,19 @@ subscription OnJiraIssueEvent {
         comment {
             self
             id
+            author {
+                self
+                name
+                key
+            }
+            body
+            updateAuthor {
+                self
+                name
+                key
+            }
+            created
+            updated
         }
     }
 }
