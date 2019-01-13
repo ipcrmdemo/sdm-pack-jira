@@ -1,11 +1,23 @@
-import { configurationValue, HandlerResult, MappedParameter, MappedParameters, Parameter, Parameters, HttpClientFactory, logger, HttpMethod, MenuSpecification, menuForCommand } from "@atomist/automation-client";
+import {
+  configurationValue,
+  HandlerResult,
+  HttpClientFactory,
+  HttpMethod,
+  logger,
+  MappedParameter,
+  MappedParameters,
+  menuForCommand,
+  MenuSpecification,
+  Parameter,
+  Parameters,
+} from "@atomist/automation-client";
 import { CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs } from "@atomist/sdm";
+import { SelectOption, SlackMessage } from "@atomist/slack-messages";
 import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
 import { sdmPostWebhook } from "../helpers/postWebhook";
 import { getIngesterWebhookUrl } from "../helpers/registrationInfo";
 import { getJiraDetails } from "../jiraDataLookup";
-import { SelectOption, SlackMessage } from "@atomist/slack-messages";
 
 // export const lookupChannelMapping = (ctx: HandlerContext, ) {
 //     // Return
@@ -67,7 +79,6 @@ interface JiraProject {
 }
 
 export async function createProjectChannelMappingOptions(ci: CommandListenerInvocation): Promise<HandlerResult> {
-    // http://localhost:8080/rest/api/2/project
     const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create();
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
     const lookupUrl = `${jiraConfig.url}/rest/api/2/project`;
