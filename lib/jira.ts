@@ -1,6 +1,7 @@
 import { GraphQL } from "@atomist/automation-client";
 import { ExtensionPack, metadata } from "@atomist/sdm";
 import { onJiraIssueEvent } from "./event/onJiraIssueEvent";
+import { createProjectChannelMappingReg, produceProjectChannelMappingOptions } from "./support/commands/channelMappers";
 
 export const jiraSupport = (): ExtensionPack => {
     return {
@@ -8,17 +9,12 @@ export const jiraSupport = (): ExtensionPack => {
         requiredConfigurationValues: [
         ],
         configure: sdm => {
-            sdm.addIngester(GraphQL.ingester({
-                name: "jiraIssue",
-            }));
-            sdm.addIngester(GraphQL.ingester({
-                name: "jiraComponentMap",
-            }));
-            sdm.addIngester(GraphQL.ingester({
-                name: "jiraProjectMap",
-            }));
+            sdm.addIngester(GraphQL.ingester({ name: "jiraIssue" }));
+            sdm.addIngester(GraphQL.ingester({ name: "jiraComponentMap" }));
+            sdm.addIngester(GraphQL.ingester({ name: "jiraProjectMap" }));
             sdm.addEvent(onJiraIssueEvent());
-
+            sdm.addCommand(createProjectChannelMappingReg);
+            sdm.addCommand(produceProjectChannelMappingOptions);
             return sdm;
         },
     };
