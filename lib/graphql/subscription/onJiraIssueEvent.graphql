@@ -41,6 +41,7 @@ subscription OnJiraIssueEvent {
                     self
                     name
                     id
+                    key
                     projectTypeKey
                 }
                 aggregatetimespent

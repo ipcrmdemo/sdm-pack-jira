@@ -62,6 +62,7 @@ type JiraProject {
     self: String!
     id: String!
     name: String!
+    key: String!
     projectTypeKey: String!
 }
 type JiraIssueType {

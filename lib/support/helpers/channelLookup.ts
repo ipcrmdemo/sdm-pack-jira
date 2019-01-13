@@ -1,6 +1,7 @@
-import { HandlerContext, logger } from "@atomist/automation-client";
+import { configurationValue, HandlerContext, logger } from "@atomist/automation-client";
 import _ = require("lodash");
 import * as types from "../../typings/types";
+import { getJiraIssueRepos } from "../jiraDataLookup";
 
 const getProjectChannels = async (ctx: HandlerContext, projectId: string, onlyActive: boolean = true): Promise<string[]> => {
     const projectChannels = await ctx.graphClient.query<types.GetChannelByProject.Query, types.GetChannelByProject.Variables>({
@@ -42,16 +43,19 @@ const getComponentChannels = async (
                 componentId: c,
             },
         });
-        switch (onlyActive) {
-            case(true): {
-                if (result.JiraComponentMap[0].active === true) {
-                    componentChannels.push(result.JiraComponentMap[0].channel);
+
+        if (result.JiraComponentMap && result.JiraComponentMap.length > 0) {
+            switch (onlyActive) {
+                case(true): {
+                    if (result.JiraComponentMap[0].active === true) {
+                        componentChannels.push(result.JiraComponentMap[0].channel);
+                    }
+                    break;
                 }
-                break;
-            }
-            case(false): {
-                componentChannels.push(result.JiraComponentMap[0].channel);
-                break;
+                case(false): {
+                    componentChannels.push(result.JiraComponentMap[0].channel);
+                    break;
+                }
             }
         }
     }));
@@ -65,12 +69,15 @@ export const jiraChannelLookup = async (
     const projectChannels = await getProjectChannels(ctx, event.issue.fields.project.id);
     logger.debug(`JIRA jiraChannelLookup => project channels ${JSON.stringify(projectChannels)}`);
 
-    const componentChannels = await getComponentChannels(
-        ctx,
-        event.issue.fields.project.id,
-        event.issue.fields.components.map(c => c.id),
-    );
-    logger.debug(`JIRA jiraChannelLookup => component channels ${JSON.stringify(componentChannels)}`);
+    let componentChannels: string[];
+    if (event.issue.fields.components.length > 0) {
+        componentChannels = await getComponentChannels(
+            ctx,
+            event.issue.fields.project.id,
+            event.issue.fields.components.map(c => c.id),
+        );
+        logger.debug(`JIRA jiraChannelLookup => component channels ${JSON.stringify(componentChannels)}`);
+    }
 
     let channels: string[];
     if (componentChannels) {
@@ -80,6 +87,19 @@ export const jiraChannelLookup = async (
             );
     } else {
         channels = projectChannels;
+    }
+
+    if (configurationValue<boolean>("sdm.jira.useDynamicChannels", true)) {
+        let jiraDynamicallyLinkedChannels: string[] = [];
+        const repos = await getJiraIssueRepos(event.issue.id);
+        if (repos) {
+            jiraDynamicallyLinkedChannels = await findChannelsByRepos(ctx, repos);
+        }
+        logger.debug(`JIRA jiraChannelLookup => dynamically linked channels ${JSON.stringify(jiraDynamicallyLinkedChannels)}`);
+        channels = _.union(
+            channels,
+            jiraDynamicallyLinkedChannels,
+        );
     }
 
     logger.debug(`JIRA jiraChannelLookup => found these unique channels: ${JSON.stringify(channels)}`);

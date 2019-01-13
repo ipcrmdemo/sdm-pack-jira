@@ -73,8 +73,8 @@ export async function getJiraIssueRepos(issueId: string): Promise<string[]> {
             // tslint:disable-next-line:max-line-length
             `${jiraConfig.url}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=${jiraConfig.vcstype}&dataType=repository`;
 
-        logger.debug(`getJiraIssueRepos: issueID/${issueId}`);
-        logger.debug(`getJiraIssueRepos: lookupUrl/${JSON.stringify(lookupUrl)}`);
+        logger.debug(`JIRA getJiraIssueRepos: using issueID => ${issueId}`);
+        logger.debug(`JIRA getJiraIssueRepos: using lookupUrl => ${JSON.stringify(lookupUrl)}`);
 
         await httpClient.exchange(
             lookupUrl,
@@ -94,7 +94,7 @@ export async function getJiraIssueRepos(issueId: string): Promise<string[]> {
             .then(result => {
                 const repos: string[] = [];
                 const data = result.body as JiraIssueRepo;
-                logger.debug(`getJiraIssueRepos: detail ${JSON.stringify(data.detail)}`);
+                logger.debug(`JIRA getJiraIssueRepos: ticket detail => ${JSON.stringify(data.detail)}`);
 
                 if (data.detail && data.detail.length > 0) {
                     data.detail.forEach(d => {
@@ -103,10 +103,10 @@ export async function getJiraIssueRepos(issueId: string): Promise<string[]> {
                         });
                     });
 
-                    logger.debug(`getJiraIssueRepos: Found repos: ${JSON.stringify(repos)}`);
+                    logger.debug(`JIRA getJiraIssueRepos: Found repos => ${JSON.stringify(repos)}`);
                     resolve(repos);
                 } else {
-                    logger.warn(`getJiraIssueRepos: no repos found! IssueId: ${issueId}`);
+                    logger.warn(`JIRA getJiraIssueRepos: no repos found! IssueId => ${issueId}`);
                     resolve([]);
                 }
             })

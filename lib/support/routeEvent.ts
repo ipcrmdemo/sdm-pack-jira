@@ -9,7 +9,7 @@ export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEv
     }
 
     if (event.webhookEvent === "jira:issue_updated" &&
-        event.issue_event_type_name.match(/^(issue_generic|issue_updated)$/) &&
+        event.issue_event_type_name.match(/^(issue_generic|issue_updated|issue_assigned)$/) &&
         event.changelog !== null
        ) {
         logger.info(`JIRA routeEvent: New Issue state change detected`);

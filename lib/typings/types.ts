@@ -10537,6 +10537,8 @@ export namespace OnJiraIssueEvent {
 
     id: string;
 
+    key: string;
+
     projectTypeKey: string;
   };
 
