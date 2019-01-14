@@ -48,6 +48,9 @@ export class JiraProjectMappingParams {
 
 @Parameters()
 class JiraProjectMappingOptionsParams {
+    @MappedParameter(MappedParameters.SlackChannelName)
+    public slackChannelName: string;
+
     @Parameter()
     public cmd: string = "CreateProjectChannelMapping";
 }
@@ -66,7 +69,10 @@ export async function createProjectChannelMapping(ci: CommandListenerInvocation<
     ci.addressChannels(slackSuccessMessage(
         `New JIRA Project mapping created successfully!`,
         `Added new mapping from Project *${projectDetails.name}* to *${ci.parameters.slackChannelName}*`,
-    ));
+    ), {
+        ttl: 60 * 1000,
+        id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
+    });
 
     return { code: 0 };
 }
@@ -124,7 +130,10 @@ export async function createProjectChannelMappingOptions(ci: CommandListenerInvo
                 }],
             };
 
-            ci.addressChannels(message);
+            ci.addressChannels(message, {
+                ttl: 60 * 1000,
+                id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
+            });
         })
         .catch(e => {
             logger.error(`Failed to retrieve project list! ${e}`);

@@ -8,8 +8,10 @@ import {
   Parameter,
   Parameters,
   SelectOption,
+  ButtonSpecification,
+  buttonForCommand,
 } from "@atomist/automation-client";
-import { CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs } from "@atomist/sdm";
+import { CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs, slackInfoMessage } from "@atomist/sdm";
 import { SlackMessage } from "@atomist/slack-messages";
 import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
@@ -42,6 +44,9 @@ class JiraComponentMappingParams {
 
 @Parameters()
 class JiraComponentMappingOptionsParams {
+    @MappedParameter(MappedParameters.SlackChannelName)
+    public slackChannelName: string;
+
     @Parameter()
     public cmd: string = "CreateComponentChannelOptionsMapping";
 }
@@ -61,7 +66,10 @@ export async function createComponentChannelMapping(ci: CommandListenerInvocatio
     ci.addressChannels(slackSuccessMessage(
         `New JIRA Component mapping created successfully!`,
         `Added new mapping from Component *${componentDetails.name}* to *${ci.parameters.slackChannelName}*`,
-    ));
+    ), {
+        ttl: 60 * 1000,
+        id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
+    });
 
     return { code: 0 };
 }
@@ -92,20 +100,47 @@ export async function createComponentChannelMappingOptions(ci: CommandListenerIn
         options: componentValues,
     };
 
-    const message: SlackMessage = {
-        attachments: [{
-            pretext: `Create a new JIRA Component Mapping`,
-            color: "#45B254",
-            fallback: `Create a new project mapping`,
-            ts: slackTs(),
-            actions: [
-                menuForCommand(menuSpec, "CreateComponentChannelMapping", "componentId", {
-                    projectId: ci.parameters.projectId,
-                }),
+    if (componentValues.length > 0) {
+        const message: SlackMessage = {
+            attachments: [{
+                pretext: `Create a new JIRA Component Mapping`,
+                color: "#45B254",
+                fallback: `Create a new Jira Component mapping`,
+                ts: slackTs(),
+                actions: [
+                    menuForCommand(menuSpec, "CreateComponentChannelMapping", "componentId", {
+                        projectId: ci.parameters.projectId,
+                    }),
+                ],
+            }],
+        };
+        ci.addressChannels(message, {
+            ttl: 60 * 1000,
+            id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
+        });
+    } else {
+        const button = buttonForCommand(
+            {
+                text: "OK",
+            },
+            "StartComponentChannelOptionsMapping",
+        );
+
+        const message: SlackMessage = {
+            attachments: [
+                {
+                    fallback: `JIRA Project Contains no components`,
+                    pretext: `JIRA Project Contains no components`,
+                    actions: [button],
+                },
             ],
-        }],
-    };
-    ci.addressChannels(message);
+        };
+
+        ci.addressChannels(message, {
+            ttl: 60 * 1000,
+            id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
+        });
+    }
 
     return { code: 0 };
 }
