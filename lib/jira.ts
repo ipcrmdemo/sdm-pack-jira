@@ -1,7 +1,7 @@
 import { GraphQL } from "@atomist/automation-client";
 import { ExtensionPack, metadata } from "@atomist/sdm";
 import { onJiraIssueEvent } from "./event/onJiraIssueEvent";
-import { createProjectChannelMappingReg, produceProjectChannelMappingOptions } from "./support/commands/channelMappers";
+import { createProjectChannelMappingReg, produceProjectChannelMappingOptions } from "./support/commands/mapProjectChannel";
 
 export const jiraSupport = (): ExtensionPack => {
     return {

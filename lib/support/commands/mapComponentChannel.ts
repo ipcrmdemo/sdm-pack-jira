@@ -10,28 +10,20 @@ import {
   MenuSpecification,
   Parameter,
   Parameters,
+  SelectOption,
 } from "@atomist/automation-client";
 import { CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs } from "@atomist/sdm";
-import { SelectOption, SlackMessage } from "@atomist/slack-messages";
+import { SlackMessage } from "@atomist/slack-messages";
 import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
 import { sdmPostWebhook } from "../helpers/postWebhook";
 import { getIngesterWebhookUrl } from "../helpers/registrationInfo";
 import { getJiraDetails } from "../jiraDataLookup";
-
-// export const lookupChannelMapping = (ctx: HandlerContext, ) {
-//     // Return
-//     // This channel is mapped to the following projects/components
-//     // For each returned project/component - include action button to unlink
-// }
-
-// export const setChannelPrefrences = (ctx: HandlerContext) {
-//     // Create or edit JiraChannelPrefs object
-//     // What types of items we should report to this channel
-// }
+import { createProjectChannelMappingReg } from "./mapProjectChannel";
+import { JiraProject } from "./shared";
 
 @Parameters()
-class JiraProjectMappingParams {
+class JiraComponentMappingParams {
     @MappedParameter(MappedParameters.SlackChannelName)
     public slackChannelName: string;
 
@@ -42,43 +34,43 @@ class JiraProjectMappingParams {
         required: true,
     })
     public projectId: string;
+
+    @Parameter({
+        description: "JIRA Component ID to link",
+        displayName: "JIRA Component ID",
+        type: "string",
+        required: true,
+    })
+    public componentId: string;
 }
 
-export async function createProjectChannelMapping(ci: CommandListenerInvocation<JiraProjectMappingParams>): Promise<HandlerResult> {
-    // Create new thing
+export async function createComponentChannelMapping(ci: CommandListenerInvocation<JiraComponentMappingParams>): Promise<HandlerResult> {
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
-    const endpoint = await getIngesterWebhookUrl("JiraProjectMap");
+    const endpoint = await getIngesterWebhookUrl("JiraComponentMap");
     const payload = {
         channel: ci.parameters.slackChannelName,
         projectId: ci.parameters.projectId,
         active: true,
     };
     await sdmPostWebhook(endpoint, payload);
-
-    const projectDetails = await getJiraDetails<types.OnJiraIssueEvent.Project>(`${jiraConfig.url}/rest/api/2/project/${ci.parameters.projectId}`);
+    const componentDetails =
+        await getJiraDetails<types.OnJiraIssueEvent.Project>(`${jiraConfig.url}/rest/api/2/component/${ci.parameters.componentId}`);
     ci.addressChannels(slackSuccessMessage(
-        `New Project mapping created successfully!`,
-        `Adding new mapping from Project ${projectDetails.name} to ${ci.parameters.slackChannelName}`,
+        `New JIRA Component mapping created successfully!`,
+        `Added new mapping from Component *${componentDetails.name}* to *${ci.parameters.slackChannelName}*`,
     ));
 
     return { code: 0 };
 }
 
-export const createProjectChannelMappingReg: CommandHandlerRegistration<JiraProjectMappingParams> = {
+export const createComponentChannelMappingReg: CommandHandlerRegistration<JiraComponentMappingParams> = {
     name: "CreateProjectChannelMapping",
     description: "Create a mapping between a JIRA Project ID and a Chat channel",
-    paramsMaker: JiraProjectMappingParams,
-    listener: createProjectChannelMapping,
+    paramsMaker: JiraComponentMappingParams,
+    listener: createComponentChannelMapping,
 };
 
-interface JiraProject {
-    id: string;
-    key: string;
-    name: string;
-    self: string;
-}
-
-export async function createProjectChannelMappingOptions(ci: CommandListenerInvocation): Promise<HandlerResult> {
+export async function createComponentChannelMappingOptions(ci: CommandListenerInvocation): Promise<HandlerResult> {
     const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create();
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
     const lookupUrl = `${jiraConfig.url}/rest/api/2/project`;
@@ -134,13 +126,3 @@ export async function createProjectChannelMappingOptions(ci: CommandListenerInvo
 
     return { code: 0 };
 }
-
-export const produceProjectChannelMappingOptions: CommandHandlerRegistration = {
-    name: "CreateProjectChannelMappingOptions",
-    description: "Enable JIRA notifications for a project",
-    intent: "create jira project mapping",
-    listener: createProjectChannelMappingOptions,
-};
-
-// export const createComponentChannelMapping = (ctx) {
-// }
