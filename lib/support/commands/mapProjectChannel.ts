@@ -33,7 +33,7 @@ import { JiraProject } from "./shared";
 // }
 
 @Parameters()
-class JiraProjectMappingParams {
+export class JiraProjectMappingParams {
     @MappedParameter(MappedParameters.SlackChannelName)
     public slackChannelName: string;
 
