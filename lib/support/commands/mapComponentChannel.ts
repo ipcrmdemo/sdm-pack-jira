@@ -151,7 +151,7 @@ export const createComponentChannelMappingOptionsReg: CommandHandlerRegistration
 export const startComponentChannelMappingOptionsReg: CommandHandlerRegistration<JiraComponentMappingOptionsParams> = {
     name: "StartComponentChannelOptionsMapping",
     description: "Enable JIRA notifications for a component",
-    intent: "create jira component mapping",
+    intent: "jira create component mapping",
     paramsMaker: JiraComponentMappingOptionsParams,
     listener: createProjectChannelMappingOptions,
 };

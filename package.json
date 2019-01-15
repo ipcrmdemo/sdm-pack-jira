@@ -1,8 +1,8 @@
 {
   "name": "sdm-pack-jira",
-  "version": "0.1.0",
-  "description": "my new project",
-  "author": "matt",
+  "version": "0.0.1",
+  "description": "SDM Pack for JIRA",
+  "author": "ipcrm",
   "license": "Apache-2.0",
   "homepage": "https://github.com/ipcrmdemo/sdm-pack-jira#readme",
   "repository": {
