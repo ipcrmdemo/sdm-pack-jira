@@ -1,0 +1,7 @@
+query GetAllComponentMappingsforChannel ($channel: [String!]) {
+   JiraComponentMap(channel: $channel, active: [true]){
+    projectId
+    componentId
+    active
+  }
+}

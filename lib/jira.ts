@@ -1,6 +1,7 @@
 import { GraphQL } from "@atomist/automation-client";
 import { ExtensionPack, metadata } from "@atomist/sdm";
 import { onJiraIssueEvent } from "./event/onJiraIssueEvent";
+import { getCurrentChannelMappingsReg } from "./support/commands/getCurrentChannelMappings";
 import {
   createComponentChannelMappingOptionsReg,
   createComponentChannelMappingReg,
@@ -23,6 +24,7 @@ export const jiraSupport = (): ExtensionPack => {
             sdm.addCommand(createComponentChannelMappingOptionsReg);
             sdm.addCommand(createComponentChannelMappingReg);
             sdm.addCommand(startComponentChannelMappingOptionsReg);
+            sdm.addCommand(getCurrentChannelMappingsReg);
             return sdm;
         },
     };

@@ -1,4 +1,5 @@
 import {
+  buttonForCommand,
   configurationValue,
   HandlerResult,
   MappedParameter,
@@ -8,10 +9,8 @@ import {
   Parameter,
   Parameters,
   SelectOption,
-  ButtonSpecification,
-  buttonForCommand,
 } from "@atomist/automation-client";
-import { CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs, slackInfoMessage } from "@atomist/sdm";
+import { CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs } from "@atomist/sdm";
 import { SlackMessage } from "@atomist/slack-messages";
 import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
@@ -19,6 +18,7 @@ import { sdmPostWebhook } from "../helpers/postWebhook";
 import { getIngesterWebhookUrl } from "../helpers/registrationInfo";
 import { getJiraDetails } from "../jiraDataLookup";
 import { createProjectChannelMappingOptions, JiraProjectMappingParams } from "./mapProjectChannel";
+import { JiraProject } from "./shared";
 
 @Parameters()
 class JiraComponentMappingParams {
@@ -81,14 +81,10 @@ export const createComponentChannelMappingReg: CommandHandlerRegistration<JiraCo
     listener: createComponentChannelMapping,
 };
 
-interface JiraProjectComponents {
-    components: types.OnJiraIssueEvent.Components[];
-}
-
 export async function createComponentChannelMappingOptions(ci: CommandListenerInvocation<JiraProjectMappingParams>): Promise<HandlerResult> {
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
     const lookupUrl = `${jiraConfig.url}/rest/api/2/project/${ci.parameters.projectId}`;
-    const projectDetails = await getJiraDetails<JiraProjectComponents>(lookupUrl);
+    const projectDetails = await getJiraDetails<JiraProject>(lookupUrl);
     const componentValues: SelectOption[] = [];
 
     projectDetails.components.forEach(c => {

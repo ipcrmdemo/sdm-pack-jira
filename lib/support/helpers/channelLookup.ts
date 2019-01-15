@@ -28,6 +28,45 @@ const getProjectChannels = async (ctx: HandlerContext, projectId: string, onlyAc
     return returnChannels;
 };
 
+export const getMappedProjectsbyChannel = async (
+    ctx: HandlerContext,
+    channel: string,
+): Promise<string[]> => {
+    const projects = await ctx.graphClient.query<types.GetAllProjectMappingsforChannel.Query, types.GetAllProjectMappingsforChannel.Variables>({
+        name: "GetAllProjectMappingsforChannel",
+        variables: {
+            channel: [channel],
+        },
+    });
+    if (projects && projects.JiraProjectMap.length > 0) {
+        return projects.JiraProjectMap.map(c => c.projectId);
+    } else {
+        return [];
+    }
+};
+
+export interface JiraProjectComponentMap {
+    componentId: string;
+    projectId: string;
+}
+
+export const getMappedComponentsbyChannel = async (
+    ctx: HandlerContext,
+    channel: string,
+): Promise<JiraProjectComponentMap[]> => {
+    const components = await ctx.graphClient.query<types.GetAllComponentMappingsforChannel.Query, types.GetAllComponentMappingsforChannel.Variables>({
+        name: "GetAllComponentMappingsforChannel",
+        variables: {
+            channel: [channel],
+        },
+    });
+    if (components && components.JiraComponentMap && components.JiraComponentMap.length > 0) {
+        return components.JiraComponentMap.map<JiraProjectComponentMap>(c => ({componentId: c.componentId, projectId: c.projectId}));
+    } else {
+        return [];
+    }
+};
+
 const getComponentChannels = async (
     ctx: HandlerContext,
     projectId: string,
@@ -44,7 +83,7 @@ const getComponentChannels = async (
             },
         });
 
-        if (result.JiraComponentMap && result.JiraComponentMap.length > 0) {
+        if (result.JiraComponentMap && result.JiraComponentMap && result.JiraComponentMap.length > 0) {
             switch (onlyActive) {
                 case(true): {
                     if (result.JiraComponentMap[0].active === true) {

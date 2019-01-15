@@ -10318,6 +10318,50 @@ export namespace ChatIdByEmail {
   };
 }
 
+export namespace GetAllComponentMappingsforChannel {
+  export type Variables = {
+    channel?: string[] | null;
+  };
+
+  export type Query = {
+    __typename?: "Query";
+
+    JiraComponentMap?: (JiraComponentMap | null)[] | null;
+  };
+
+  export type JiraComponentMap = {
+    __typename?: "JiraComponentMap";
+
+    projectId?: string | null;
+
+    componentId?: string | null;
+
+    active?: boolean | null;
+  };
+}
+
+export namespace GetAllProjectMappingsforChannel {
+  export type Variables = {
+    channel?: string[] | null;
+  };
+
+  export type Query = {
+    __typename?: "Query";
+
+    JiraProjectMap?: (JiraProjectMap | null)[] | null;
+  };
+
+  export type JiraProjectMap = {
+    __typename?: "JiraProjectMap";
+
+    channel?: string | null;
+
+    projectId?: string | null;
+
+    active?: boolean | null;
+  };
+}
+
 export namespace GetChannelByComponent {
   export type Variables = {
     componentId: string;

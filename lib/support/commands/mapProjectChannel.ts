@@ -21,17 +21,6 @@ import { getIngesterWebhookUrl } from "../helpers/registrationInfo";
 import { getJiraDetails } from "../jiraDataLookup";
 import { JiraProject } from "./shared";
 
-// export const lookupChannelMapping = (ctx: HandlerContext, ) {
-//     // Return
-//     // This channel is mapped to the following projects/components
-//     // For each returned project/component - include action button to unlink
-// }
-
-// export const setChannelPrefrences = (ctx: HandlerContext) {
-//     // Create or edit JiraChannelPrefs object
-//     // What types of items we should report to this channel
-// }
-
 @Parameters()
 export class JiraProjectMappingParams {
     @MappedParameter(MappedParameters.SlackChannelName)
@@ -153,6 +142,3 @@ export const produceProjectChannelMappingOptions: CommandHandlerRegistration<Jir
     listener: createProjectChannelMappingOptions,
     paramsMaker: JiraProjectMappingOptionsParams,
 };
-
-// export const createComponentChannelMapping = (ctx) {
-// }
