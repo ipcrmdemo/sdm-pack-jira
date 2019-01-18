@@ -1,0 +1,11 @@
+
+query GetGoalByJiraIssueId($issueId: String!){
+  SdmGoal(data:[$issueId]){
+    data
+    repo {
+      name
+      owner
+      providerId
+    }
+  }
+}

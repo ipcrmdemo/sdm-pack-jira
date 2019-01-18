@@ -57,6 +57,7 @@ type JiraIssueFields {
     status: JiraIssueStatus!
     created: String!
     updated: String!
+    environment: String
 }
 type JiraProject {
     self: String!

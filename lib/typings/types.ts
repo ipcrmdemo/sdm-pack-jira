@@ -10268,14 +10268,14 @@ export enum _Ordering {
   asc = "asc"
 }
 
-export enum SdmDeployState {
-  requested = "requested",
-  disabled = "disabled"
-}
-
 export enum CommitIssueRelationshipType {
   references = "references",
   fixes = "fixes"
+}
+
+export enum SdmDeployState {
+  requested = "requested",
+  disabled = "disabled"
 }
 
 // ====================================================
@@ -10433,6 +10433,36 @@ export namespace GetChannelByRepo {
   };
 }
 
+export namespace GetGoalByJiraIssueId {
+  export type Variables = {
+    issueId: string;
+  };
+
+  export type Query = {
+    __typename?: "Query";
+
+    SdmGoal?: (SdmGoal | null)[] | null;
+  };
+
+  export type SdmGoal = {
+    __typename?: "SdmGoal";
+
+    data?: string | null;
+
+    repo?: Repo | null;
+  };
+
+  export type Repo = {
+    __typename?: "SdmRepository";
+
+    name?: string | null;
+
+    owner?: string | null;
+
+    providerId?: string | null;
+  };
+}
+
 export namespace OnJiraIssueEvent {
   export type Variables = {};
 
@@ -10474,6 +10504,8 @@ export namespace OnJiraIssueEvent {
 
   export type Fields = {
     __typename?: "JiraIssueFields";
+
+    environment?: string | null;
 
     issueType: IssueType;
 

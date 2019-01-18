@@ -1,4 +1,4 @@
-import { HandlerContext, logger, MessageOptions } from "@atomist/automation-client";
+import { HandlerContext, logger } from "@atomist/automation-client";
 import { SlackMessage } from "@atomist/slack-messages";
 import * as types from "../typings/types";
 import { jiraChannelLookup } from "./helpers/channelLookup";
@@ -10,7 +10,7 @@ export const issueCommented = async (ctx: HandlerContext, event: types.OnJiraIss
         const message: SlackMessage = await prepareIssueCommentedMessage(event);
         await ctx.messageClient.addressChannels(message, channels);
     } else {
-        logger.debug(`JIRA issueCommented: No associated repos to this issue.  Ignorning event.`);
+        logger.debug(`JIRA issueCommented: No channels to notify.  Ignorning event.`);
     }
 };
 
@@ -20,7 +20,7 @@ export const issueStateChange = async (ctx: HandlerContext, event: types.OnJiraI
         const message: SlackMessage = await prepareStateChangeMessage(event);
         await ctx.messageClient.addressChannels(message, channels);
     } else {
-        logger.debug(`JIRA issueStateChange: No associated repos to this issue.  Ignorning event.`);
+        logger.debug(`JIRA issueStateChange: No channels to notify.  Ignorning event.`);
     }
 };
 

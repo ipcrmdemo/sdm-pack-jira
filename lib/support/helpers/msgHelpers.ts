@@ -4,8 +4,8 @@ import * as slack from "@atomist/slack-messages";
 import jira2slack = require("jira2slack");
 import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
-import * as jiraTypes from "../issueDefs";
 import { getJiraDetails } from "../jiraDataLookup";
+import * as jiraTypes from "../jiraDefs";
 
 export const upperCaseFirstLetter = (word: string): string => {
     return word.charAt(0).toUpperCase() + word.slice(1);
