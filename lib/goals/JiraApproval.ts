@@ -1,5 +1,6 @@
 import { GoalWithFulfillment, IndependentOfEnvironment, SdmGoalState, slackErrorMessage } from "@atomist/sdm";
 import { createJiraTicket } from "../support/helpers/createJiraTicket";
+import { readSdmVersion } from "@atomist/sdm-core";
 
 export const JiraApproval = new GoalWithFulfillment({
     uniqueName: "jiraApprovalGoal",
@@ -26,22 +27,33 @@ export const JiraApproval = new GoalWithFulfillment({
         }
 
         const enviornmentData = [
+            `[atomist:generated]`,
             `[atomist:sha:${gi.id.sha}]`,
             `[atomist:owner:${gi.id.owner}]`,
             `[atomist:repo:${gi.id.repo}]`,
             `[atomist:branch:${gi.id.branch}]`,
         ];
 
+        const newVersion = await readSdmVersion(
+            gi.goalEvent.repo.owner,
+            gi.goalEvent.repo.name,
+            gi.goalEvent.repo.providerId,
+            gi.goalEvent.sha,
+            gi.goalEvent.branch,
+            gi.context,
+        );
+
         const data = {
             fields: {
-                description: `Requesting approval to deploy version ${gi.sdmGoal.version} (${gi.id.sha})\n${enviornmentData.join("\n")}`,
+                description: `[${gi.id.repo}] Requesting approval to deploy version ${newVersion} (${gi.id.sha})` +
+                    `\n\n\n${enviornmentData.join("\n")}`,
                 project: {
                     key: project,
                 },
                 parent: {
                     key: issue,
                 },
-                summary: `Deployment Approval requested for version: ${gi.sdmGoal.version} (${gi.id.sha})}`,
+                summary: `[${gi.id.repo}] Requesting approval to deploy version ${newVersion}`,
                 issuetype: {
                     name: "Sub-task",
                 },
@@ -57,6 +69,7 @@ export const JiraApproval = new GoalWithFulfillment({
 
         return {
             state: SdmGoalState.in_process,
+            description: gi.goal.inProcessDescription,
             data: result.id,
         };
     },

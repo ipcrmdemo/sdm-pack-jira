@@ -1,5 +1,6 @@
-import { GitHubRepoRef, GraphQL, logger, OnEvent, Success } from "@atomist/automation-client";
+import { configurationValue, GitHubRepoRef, GraphQL, logger, OnEvent, Success } from "@atomist/automation-client";
 import { EventHandlerRegistration, findSdmGoalOnCommit, Goal, SdmGoalState, updateGoal } from "@atomist/sdm";
+import { JiraConfig } from "../jira";
 import { getJiraDetails } from "../support/jiraDataLookup";
 import { Issue } from "../support/jiraDefs";
 import { routeEvent } from "../support/routeEvent";
@@ -80,9 +81,11 @@ export const onJiraIssueEventApprovalHandler = (goal: Goal): OnEvent<types.OnJir
             );
 
             // Set goal state to succesful
+            const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
             await updateGoal(ctx, sdmGoal, {
                 state: SdmGoalState.success,
                 description: goal.successDescription,
+                url: `${jiraConfig.url}/browse/${event.issue.key}`,
             });
 
             // Update JIRA ticket?

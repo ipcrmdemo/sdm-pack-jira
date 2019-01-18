@@ -28,13 +28,15 @@ import {
 import {
     configureSdm,
     createSoftwareDeliveryMachine,
+    Version,
 } from "@atomist/sdm-core";
 import {
     DockerBuild,
 } from "@atomist/sdm-pack-docker";
-import { KubernetesDeploy } from "@atomist/sdm-pack-k8";
+import { KubernetesDeploy, k8 } from "@atomist/sdm-pack-k8";
 import {
     IsMaven,
+    MavenProjectVersioner,
     MvnPackage,
     MvnVersion,
 } from "@atomist/sdm-pack-spring";
@@ -50,6 +52,7 @@ export function machineMaker(config: SoftwareDeliveryMachineConfiguration): Soft
             configuration: config,
         },
     );
+    const mavenVersion = new Version().withVersioner(MavenProjectVersioner);
     const dockerBuild = new DockerBuild()
     .with({
         options: { push: true, ...sdm.configuration.sdm.dockerinfo },
@@ -67,13 +70,15 @@ export function machineMaker(config: SoftwareDeliveryMachineConfiguration): Soft
     );
     sdm.addEvent(onJiraIssueEventApproval(JiraApproval));
 
+    const myGoals = goals("build-goals")
+        .plan(mavenVersion)
+        .plan(dockerBuild).after(mavenVersion)
+        .plan(JiraApproval).after(dockerBuild)
+        .plan(k8sDeployGoals).after(JiraApproval);
+
     sdm.withPushRules(
         onAnyPush()
-            .setGoals(dockerBuild),
-        onAnyPush()
-            .setGoals(JiraApproval),
-        onAnyPush()
-            .setGoals(k8sDeployGoals),
+            .setGoals(myGoals),
     );
 
     return sdm;

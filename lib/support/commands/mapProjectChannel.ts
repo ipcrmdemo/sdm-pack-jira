@@ -138,7 +138,7 @@ export async function createProjectChannelMappingOptions(ci: CommandListenerInvo
 export const produceProjectChannelMappingOptions: CommandHandlerRegistration<JiraProjectMappingOptionsParams> = {
     name: "CreateProjectChannelMappingOptions",
     description: "Enable JIRA notifications for a project",
-    intent: "jira create project mapping",
+    intent: "jira map project",
     listener: createProjectChannelMappingOptions,
     paramsMaker: JiraProjectMappingOptionsParams,
 };

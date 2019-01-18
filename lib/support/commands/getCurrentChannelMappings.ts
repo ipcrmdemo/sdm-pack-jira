@@ -163,7 +163,7 @@ export async function getCurrentChannelMappings(ci: CommandListenerInvocation<Ji
 export const getCurrentChannelMappingsReg: CommandHandlerRegistration<JiraGetCurrenChannelMappingsParams> = {
     name: "GetCurrentChannelMappings",
     description: "Create a mapping between a JIRA Component ID and a Chat channel",
-    intent: "jira show current mappings",
+    intent: "jira mappings",
     paramsMaker: JiraGetCurrenChannelMappingsParams,
     listener: getCurrentChannelMappings,
 };
