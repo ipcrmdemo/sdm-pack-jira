@@ -1,4 +1,4 @@
-import { configurationValue, HandlerContext, logger } from "@atomist/automation-client";
+import { configurationValue, HandlerContext, logger, QueryNoCacheOptions } from "@atomist/automation-client";
 import _ = require("lodash");
 import * as types from "../../typings/types";
 import { getJiraIssueRepos } from "../jiraDataLookup";
@@ -37,6 +37,7 @@ export const getMappedProjectsbyChannel = async (
         variables: {
             channel: [channel],
         },
+        options: QueryNoCacheOptions,
     });
     if (projects && projects.JiraProjectMap.length > 0) {
         return projects.JiraProjectMap.map(c => c.projectId);
@@ -59,6 +60,7 @@ export const getMappedComponentsbyChannel = async (
         variables: {
             channel: [channel],
         },
+        options: QueryNoCacheOptions,
     });
     if (components && components.JiraComponentMap && components.JiraComponentMap.length > 0) {
         return components.JiraComponentMap.map<JiraProjectComponentMap>(c => ({componentId: c.componentId, projectId: c.projectId}));

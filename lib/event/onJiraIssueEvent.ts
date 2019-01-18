@@ -52,7 +52,8 @@ export const onJiraIssueEventApprovalHandler = (goal: Goal): OnEvent<types.OnJir
         // Get new status
         const status = event.changelog.items.filter(c => c.field === "status");
         logger.info(`JIRA onJiraIssueEventApprovalHandler: New status => ${JSON.stringify(status)}`);
-        if (status[0].toString === "Approved") {
+        // TODO: Make the 'status' required confifgurable
+        if (status[0].toString === "Done") {
             const repoRef = GitHubRepoRef.from({
                 owner,
                 repo,

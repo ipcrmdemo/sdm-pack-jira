@@ -6,6 +6,8 @@ import {
   MappedParameter,
   MappedParameters,
   Parameters,
+  Secret,
+  Secrets,
 } from "@atomist/automation-client";
 import { CommandHandlerRegistration, CommandListenerInvocation, slackTs } from "@atomist/sdm";
 import * as slack from "@atomist/slack-messages";
@@ -22,6 +24,8 @@ class JiraGetCurrenChannelMappingsParams {
 
 const findRequiredProjects = async (components: JiraProjectComponentMap[], projectIds: string[]): Promise<string[]> => {
     // Determine if the project ids are the same (so we can make just 1 query for those projects/components)
+    logger.debug(`JIRA findRequiredProjects: projectIds to lookup => ${JSON.stringify(projectIds)}`);
+    logger.debug(`JIRA findRequiredProjects: componentIds to lookup => ${JSON.stringify(components.filter(c => c.componentId !== null))}`);
     const projects: string[] = [];
     if (projectIds.length > 0 && components.length > 0) {
         components.map(c => {
@@ -29,12 +33,16 @@ const findRequiredProjects = async (components: JiraProjectComponentMap[], proje
                 projects.push(c.projectId);
             }
         });
+        projectIds.forEach(p => projects.push(p));
     } else if (projectIds.length === 0) {
         components.map(c => {
             projects.push(c.projectId);
         });
+    } else if (components.length === 0) {
+        projectIds.forEach(p => projects.push(p));
     }
 
+    logger.debug(`JIRA findRequiredProjects: merged projectIds to lookup => ${JSON.stringify(projects)}`);
     return projects;
 };
 

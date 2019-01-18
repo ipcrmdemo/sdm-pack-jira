@@ -68,8 +68,8 @@ export function machineMaker(config: SoftwareDeliveryMachineConfiguration): Soft
     sdm.addEvent(onJiraIssueEventApproval(JiraApproval));
 
     sdm.withPushRules(
-        // onAnyPush()
-        //     .setGoals(dockerBuild),
+        onAnyPush()
+            .setGoals(dockerBuild),
         onAnyPush()
             .setGoals(JiraApproval),
         onAnyPush()
