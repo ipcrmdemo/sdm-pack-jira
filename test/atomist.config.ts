@@ -33,7 +33,7 @@ import {
 import {
     DockerBuild,
 } from "@atomist/sdm-pack-docker";
-import { KubernetesDeploy, k8 } from "@atomist/sdm-pack-k8";
+import { KubernetesDeploy } from "@atomist/sdm-pack-k8s";
 import {
     IsMaven,
     MavenProjectVersioner,

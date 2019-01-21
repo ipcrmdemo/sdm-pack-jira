@@ -7,6 +7,7 @@ const getProjectChannels = async (ctx: HandlerContext, projectId: string, onlyAc
     const projectChannels = await ctx.graphClient.query<types.GetChannelByProject.Query, types.GetChannelByProject.Variables>({
         name: "GetChannelByProject",
         variables: { projectid: [projectId] },
+        options: QueryNoCacheOptions,
     });
 
     const returnChannels: string[] = [];
@@ -83,6 +84,7 @@ const getComponentChannels = async (
                 projectId,
                 componentId: c,
             },
+            options: QueryNoCacheOptions,
         });
 
         if (result.JiraComponentMap && result.JiraComponentMap && result.JiraComponentMap.length > 0) {
@@ -158,6 +160,7 @@ export async function findChannelByRepo(ctx: HandlerContext, name: string): Prom
         await ctx.graphClient.query<types.GetChannelByRepo.Query, types.GetChannelByRepo.Variables>({
             name: "GetChannelByRepo",
             variables: { name },
+            options: QueryNoCacheOptions,
         })
             .then(
                 channels => {

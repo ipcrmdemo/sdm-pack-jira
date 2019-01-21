@@ -5,9 +5,11 @@ import { getCurrentChannelMappingsReg } from "./support/commands/getCurrentChann
 import {
   createComponentChannelMappingOptionsReg,
   createComponentChannelMappingReg,
+  disableComponentChannelMappingOptionsReg,
+  removeComponentChannelMappingReg,
   startComponentChannelMappingOptionsReg,
 } from "./support/commands/mapComponentChannel";
-import { createProjectChannelMappingReg, produceProjectChannelMappingOptions } from "./support/commands/mapProjectChannel";
+import { createProjectChannelMappingReg, produceProjectChannelMappingOptions, removeProjectMappingReg } from "./support/commands/mapProjectChannel";
 
 export const jiraSupport = (): ExtensionPack => {
     return {
@@ -18,13 +20,17 @@ export const jiraSupport = (): ExtensionPack => {
             sdm.addIngester(GraphQL.ingester({ name: "jiraIssue" }));
             sdm.addIngester(GraphQL.ingester({ name: "jiraComponentMap" }));
             sdm.addIngester(GraphQL.ingester({ name: "jiraProjectMap" }));
+            sdm.addIngester(GraphQL.ingester({ name: "jiraChannelPrefs" }));
             sdm.addEvent(onJiraIssueEvent());
             sdm.addCommand(createProjectChannelMappingReg);
             sdm.addCommand(produceProjectChannelMappingOptions);
             sdm.addCommand(createComponentChannelMappingOptionsReg);
             sdm.addCommand(createComponentChannelMappingReg);
             sdm.addCommand(startComponentChannelMappingOptionsReg);
+            sdm.addCommand(disableComponentChannelMappingOptionsReg);
             sdm.addCommand(getCurrentChannelMappingsReg);
+            sdm.addCommand(removeProjectMappingReg);
+            sdm.addCommand(removeComponentChannelMappingReg);
             return sdm;
         },
     };

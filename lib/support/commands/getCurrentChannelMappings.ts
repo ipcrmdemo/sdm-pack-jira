@@ -6,8 +6,6 @@ import {
   MappedParameter,
   MappedParameters,
   Parameters,
-  Secret,
-  Secrets,
 } from "@atomist/automation-client";
 import { CommandHandlerRegistration, CommandListenerInvocation, slackTs } from "@atomist/sdm";
 import * as slack from "@atomist/slack-messages";
@@ -22,7 +20,7 @@ class JiraGetCurrenChannelMappingsParams {
     public slackChannelName: string;
 }
 
-const findRequiredProjects = async (components: JiraProjectComponentMap[], projectIds: string[]): Promise<string[]> => {
+export const findRequiredProjects = async (components: JiraProjectComponentMap[], projectIds: string[]): Promise<string[]> => {
     // Determine if the project ids are the same (so we can make just 1 query for those projects/components)
     logger.debug(`JIRA findRequiredProjects: projectIds to lookup => ${JSON.stringify(projectIds)}`);
     logger.debug(`JIRA findRequiredProjects: componentIds to lookup => ${JSON.stringify(components.filter(c => c.componentId !== null))}`);
@@ -46,7 +44,7 @@ const findRequiredProjects = async (components: JiraProjectComponentMap[], proje
     return projects;
 };
 
-const lookupJiraProjectDetails = async (projectsToLookup: string[]): Promise<JiraProject[]> => {
+export const lookupJiraProjectDetails = async (projectsToLookup: string[]): Promise<JiraProject[]> => {
     // Lookup JIRA details
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
     const projectDetails: JiraProject[] = [];
@@ -59,7 +57,7 @@ const lookupJiraProjectDetails = async (projectsToLookup: string[]): Promise<Jir
     return projectDetails;
 };
 
-const prepareFriendlyComponentNames = async (components: JiraProjectComponentMap[], projectDetails: JiraProject[]): Promise<string[]> => {
+export const prepareFriendlyComponentNames = async (components: JiraProjectComponentMap[], projectDetails: JiraProject[]): Promise<string[]> => {
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
     const returnComponents: string[] = [];
     const baseComponentUrl = `${jiraConfig.url}/projects`;
@@ -80,7 +78,7 @@ const prepareFriendlyComponentNames = async (components: JiraProjectComponentMap
     return returnComponents;
 };
 
-const prepareFriendProjectNames = async (projects: JiraProject[]): Promise<string[]> => {
+export const prepareFriendProjectNames = async (projects: JiraProject[]): Promise<string[]> => {
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
     const returnProjects: string[] =  [];
     const baseComponentUrl = `${jiraConfig.url}/projects`;
@@ -131,21 +129,8 @@ export async function getCurrentChannelMappings(ci: CommandListenerInvocation<Ji
                 text: `All projects/components listed above are currently displaying notices in this channel.`,
                 color: "#45B254",
                 actions: [
-                    buttonForCommand(
-                        {
-                            text: "Disable Component",
-                        },
-                        "DisableComponentChannelMapping",
-                    ),
-                    buttonForCommand(
-                        {
-                            text: "Disable Project",
-                        },
-                        "DisableProjectChannelMapping",
-                        {
-
-                        },
-                    ),
+                    buttonForCommand({ text: "Disable Component"}, "DisableComponentChannelMapping"),
+                    buttonForCommand( { text: "Disable Project"}, "RemoveChannelProjectMapping", { enabled: "false"}),
                 ],
                 ts: slackTs(),
             },

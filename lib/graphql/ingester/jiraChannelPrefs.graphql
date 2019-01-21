@@ -1,0 +1,8 @@
+type JiraChannelPrefs @rootType {
+    channel: String @compositeId
+    issueCreated: Boolean
+    issueDeleted: Boolean
+    issueComment: Boolean
+    issueStatus: Boolean
+    issueState: Boolean
+}

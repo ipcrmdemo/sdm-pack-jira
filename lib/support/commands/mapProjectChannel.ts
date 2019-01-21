@@ -1,4 +1,5 @@
 import {
+  addressEvent,
   configurationValue,
   HandlerResult,
   HttpClientFactory,
@@ -10,15 +11,15 @@ import {
   MenuSpecification,
   Parameter,
   Parameters,
-  Value,
 } from "@atomist/automation-client";
 import { CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs } from "@atomist/sdm";
 import { SelectOption, SlackMessage } from "@atomist/slack-messages";
 import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
-import { sdmPostWebhook } from "../helpers/postWebhook";
+import { getMappedProjectsbyChannel } from "../helpers/channelLookup";
 import { getIngesterWebhookUrl } from "../helpers/registrationInfo";
 import { getJiraDetails } from "../jiraDataLookup";
+import { lookupJiraProjectDetails } from "./getCurrentChannelMappings";
 import { JiraProject } from "./shared";
 
 @Parameters()
@@ -33,6 +34,26 @@ export class JiraProjectMappingParams {
         required: true,
     })
     public projectId: string;
+
+    @Parameter({
+        required: false,
+        displayable: false,
+        type: "boolean",
+    })
+    public enabled: boolean = true;
+}
+
+@Parameters()
+class JiraProjectRemoveMappingOptionsParams {
+    @MappedParameter(MappedParameters.SlackChannelName)
+    public slackChannelName: string;
+
+    @Parameter({
+        required: false,
+        type: "boolean",
+        displayable: false,
+    })
+    public enabled: boolean = false;
 }
 
 @Parameters()
@@ -42,26 +63,40 @@ class JiraProjectMappingOptionsParams {
 
     @Parameter()
     public cmd: string = "CreateProjectChannelMapping";
+
+    @Parameter({
+        required: false,
+        displayable: false,
+        type: "boolean",
+    })
+    public enabled: boolean = true;
 }
 
-export async function createProjectChannelMapping(ci: CommandListenerInvocation<JiraProjectMappingParams>): Promise<HandlerResult> {
+export async function createProjectChannelMapping(
+    ci: CommandListenerInvocation<JiraProjectMappingParams>,
+    ): Promise<HandlerResult> {
+
+    logger.debug(`JIRA createProjectChannelMapping: enabled => ${ci.parameters.enabled}`);
+
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
-    const endpoint = await getIngesterWebhookUrl("JiraProjectMap");
     const payload = {
         channel: ci.parameters.slackChannelName,
         projectId: ci.parameters.projectId,
-        active: true,
+        active: ci.parameters.enabled,
     };
-    await sdmPostWebhook(endpoint, payload);
+    await ci.context.messageClient.send(payload, addressEvent("JiraProjectMap"));
 
     const projectDetails = await getJiraDetails<types.OnJiraIssueEvent.Project>(`${jiraConfig.url}/rest/api/2/project/${ci.parameters.projectId}`);
+
+    const subject = ci.parameters.enabled ? `New JIRA Project mapping created successfully!` : `JIRA Project mapping removed successfully!`;
+    const message = ci.parameters.enabled ?
+        `Added new mapping from Project *${projectDetails.name}* to *${ci.parameters.slackChannelName}*` :
+        `Removed mapping from Project *${projectDetails.name}* to *${ci.parameters.slackChannelName}*`;
+
     ci.addressChannels(slackSuccessMessage(
-        `New JIRA Project mapping created successfully!`,
-        `Added new mapping from Project *${projectDetails.name}* to *${ci.parameters.slackChannelName}*`,
-    ), {
-        ttl: 60 * 1000,
-        id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
-    });
+        subject,
+        message,
+    ));
 
     return { code: 0 };
 }
@@ -114,13 +149,15 @@ export async function createProjectChannelMappingOptions(ci: CommandListenerInvo
                     fallback: `Create a new project mapping`,
                     ts: slackTs(),
                     actions: [
-                      menuForCommand(menuSpec, ci.parameters.cmd, "projectId"),
+                      menuForCommand(menuSpec, ci.parameters.cmd, "projectId", {
+                          enabled: ci.parameters.enabled,
+                      }),
                     ],
                 }],
             };
 
             ci.addressChannels(message, {
-                ttl: 60 * 1000,
+                ttl: 15000,
                 id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
             });
         })
@@ -141,4 +178,46 @@ export const produceProjectChannelMappingOptions: CommandHandlerRegistration<Jir
     intent: "jira map project",
     listener: createProjectChannelMappingOptions,
     paramsMaker: JiraProjectMappingOptionsParams,
+};
+
+export async function removeProjectMapping(ci: CommandListenerInvocation<JiraProjectRemoveMappingOptionsParams>): Promise<HandlerResult> {
+    // Get current channel projects
+    const projects = await getMappedProjectsbyChannel(ci.context, ci.parameters.slackChannelName);
+    const projectDetails = await lookupJiraProjectDetails(projects);
+
+    const projectValues: SelectOption[] = [];
+
+    projectDetails.forEach(p => {
+       projectValues.push({text: p.name, value: p.id});
+    });
+
+    const menuSpec: MenuSpecification = {
+        text: "Select Project",
+        options: projectValues,
+    };
+
+    const message: SlackMessage = {
+        attachments: [{
+            pretext: `Remove a JIRA Project Mapping`,
+            color: "#45B254",
+            fallback: `Remove a new Jira Project mapping`,
+            ts: slackTs(),
+            actions: [
+                menuForCommand(menuSpec, "CreateProjectChannelMapping", "projectId", {
+                    enabled: "false",
+                }),
+            ],
+        }],
+    };
+
+    ci.addressChannels(message);
+    return { code: 0 };
+}
+
+export const removeProjectMappingReg: CommandHandlerRegistration<JiraProjectRemoveMappingOptionsParams> = {
+    name: "RemoveChannelProjectMapping",
+    description: "Enable JIRA notifications for a project",
+    intent: "jira disable project map",
+    listener: removeProjectMapping,
+    paramsMaker: JiraProjectRemoveMappingOptionsParams,
 };
