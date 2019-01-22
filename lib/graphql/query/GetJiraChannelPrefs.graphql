@@ -1,0 +1,10 @@
+query GetJiraChannelPrefs($channel: [String!]!){
+  JiraChannelPrefs (channel: $channel) {
+    channel @required
+    issueState
+    issueStatus
+    issueComment
+    issueCreated
+    issueDeleted
+  }
+}

@@ -10268,14 +10268,14 @@ export enum _Ordering {
   asc = "asc"
 }
 
-export enum CommitIssueRelationshipType {
-  references = "references",
-  fixes = "fixes"
-}
-
 export enum SdmDeployState {
   requested = "requested",
   disabled = "disabled"
+}
+
+export enum CommitIssueRelationshipType {
+  references = "references",
+  fixes = "fixes"
 }
 
 // ====================================================
@@ -10460,6 +10460,34 @@ export namespace GetGoalByJiraIssueId {
     owner?: string | null;
 
     providerId?: string | null;
+  };
+}
+
+export namespace GetJiraChannelPrefs {
+  export type Variables = {
+    channel: string[];
+  };
+
+  export type Query = {
+    __typename?: "Query";
+
+    JiraChannelPrefs?: (JiraChannelPrefs | null)[] | null;
+  };
+
+  export type JiraChannelPrefs = {
+    __typename?: "JiraChannelPrefs";
+
+    channel?: string | null;
+
+    issueState?: boolean | null;
+
+    issueStatus?: boolean | null;
+
+    issueComment?: boolean | null;
+
+    issueCreated?: boolean | null;
+
+    issueDeleted?: boolean | null;
   };
 }
 
