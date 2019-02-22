@@ -1,6 +1,7 @@
 import { configurationValue, HandlerContext, logger, QueryNoCacheOptions } from "@atomist/automation-client";
 import _ = require("lodash");
 import * as types from "../../typings/types";
+import { queryJiraChannelPrefs } from "../commands/configureChannelPrefs";
 import { getJiraIssueRepos } from "../jiraDataLookup";
 
 const getProjectChannels = async (ctx: HandlerContext, projectId: string, onlyActive: boolean = true): Promise<string[]> => {
@@ -21,6 +22,7 @@ const getProjectChannels = async (ctx: HandlerContext, projectId: string, onlyAc
             }
             case(false): {
                 returnChannels.push(c.channel);
+
                 break;
             }
         }
@@ -97,6 +99,7 @@ const getComponentChannels = async (
                 }
                 case(false): {
                     componentChannels.push(result.JiraComponentMap[0].channel);
+
                     break;
                 }
             }
@@ -148,6 +151,30 @@ export const jiraChannelLookup = async (
     logger.debug(`JIRA jiraChannelLookup => found these unique channels: ${JSON.stringify(channels)}`);
     return channels;
 };
+
+export const jiraDetermineNotifyChannels = async (
+    ctx: HandlerContext,
+    event: types.OnJiraIssueEvent.JiraIssue,
+): Promise<types.GetJiraChannelPrefs.JiraChannelPrefs[]> => {
+    const notifyChannels: types.GetJiraChannelPrefs.JiraChannelPrefs[] = [];
+    const channels = await jiraChannelLookup(ctx, event);
+    logger.debug(`JIRA jiraDetermineNotifyChannels: channels found for event => ${JSON.stringify(channels)}`);
+
+    await Promise.all(
+        await channels.map(async c => {
+            const prefs = await queryJiraChannelPrefs(ctx, c);
+            logger.debug(`JIRA jiraDetermineNotifyChannels: prefs found for channel ${c} => ${JSON.stringify(prefs)}`);
+            notifyChannels.push(prefs);
+        }),
+    );
+
+    logger.debug(`JIRA jiraDetermineNotifyChannels: channels to notify => ${JSON.stringify(notifyChannels)}`);
+    return notifyChannels;
+};
+
+// Get channels for this event/repo
+// Lookup prefs for the resulting channels
+// Return just the channels that should get notified about this event type
 
 /**
  * Use this function to retrieve the chat channels for a given repo

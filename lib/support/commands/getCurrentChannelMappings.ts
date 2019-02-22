@@ -15,7 +15,7 @@ import { getJiraDetails } from "../jiraDataLookup";
 import { JiraProject } from "./shared";
 
 @Parameters()
-class JiraGetCurrenChannelMappingsParams {
+class JiraGetCurrentChannelMappingsParams {
     @MappedParameter(MappedParameters.SlackChannelName)
     public slackChannelName: string;
 }
@@ -90,7 +90,7 @@ export const prepareFriendProjectNames = async (projects: JiraProject[]): Promis
     return returnProjects;
 };
 
-export async function getCurrentChannelMappings(ci: CommandListenerInvocation<JiraGetCurrenChannelMappingsParams>): Promise<HandlerResult> {
+export async function getCurrentChannelMappings(ci: CommandListenerInvocation<JiraGetCurrentChannelMappingsParams>): Promise<HandlerResult> {
     // Get current channel projects
     const projects = await getMappedProjectsbyChannel(ci.context, ci.parameters.slackChannelName);
     logger.debug(`JIRA getCurrentChannelMappings: found projects ${JSON.stringify(projects)} - ${projects.length}`);
@@ -145,10 +145,10 @@ export async function getCurrentChannelMappings(ci: CommandListenerInvocation<Ji
     return { code: 0 };
 }
 
-export const getCurrentChannelMappingsReg: CommandHandlerRegistration<JiraGetCurrenChannelMappingsParams> = {
+export const getCurrentChannelMappingsReg: CommandHandlerRegistration<JiraGetCurrentChannelMappingsParams> = {
     name: "GetCurrentChannelMappings",
     description: "Create a mapping between a JIRA Component ID and a Chat channel",
     intent: "jira mappings",
-    paramsMaker: JiraGetCurrenChannelMappingsParams,
+    paramsMaker: JiraGetCurrentChannelMappingsParams,
     listener: getCurrentChannelMappings,
 };

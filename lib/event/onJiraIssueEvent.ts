@@ -36,7 +36,7 @@ export const onJiraIssueEventApprovalHandler = (goal: Goal): OnEvent<types.OnJir
         const branch = /\[atomist:branch:(.*)\]/gm.exec(issue.fields.description)[1];
 
         if (!sha || !owner || !repo || !branch) {
-            logger.info(`JIRA onJiraIssueEventApprovalHandler: No enviornment data found on issue, skipping event...`);
+            logger.info(`JIRA onJiraIssueEventApprovalHandler: No environment data found on issue, skipping event...`);
             return Success;
         }
 
@@ -53,7 +53,7 @@ export const onJiraIssueEventApprovalHandler = (goal: Goal): OnEvent<types.OnJir
         // Get new status
         const status = event.changelog.items.filter(c => c.field === "status");
         logger.info(`JIRA onJiraIssueEventApprovalHandler: New status => ${JSON.stringify(status)}`);
-        // TODO: Make the 'status' required confifgurable
+        // TODO: Make the 'status' required configuration
         if (status[0].toString === "Done") {
             const repoRef = GitHubRepoRef.from({
                 owner,

@@ -1,6 +1,6 @@
 import { GoalWithFulfillment, IndependentOfEnvironment, SdmGoalState, slackErrorMessage } from "@atomist/sdm";
-import { createJiraTicket } from "../support/helpers/createJiraTicket";
 import { readSdmVersion } from "@atomist/sdm-core";
+import { createJiraTicket } from "../support/helpers/createJiraTicket";
 
 export const JiraApproval = new GoalWithFulfillment({
     uniqueName: "jiraApprovalGoal",
@@ -12,12 +12,14 @@ export const JiraApproval = new GoalWithFulfillment({
     name: "jiraApprovalGoalFulfillment",
     goalExecutor: async gi => {
         // Read Commit message and determine if issue is present(or fail goal)
-        const issue = /((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)/gm.exec(gi.sdmGoal.push.commits[0].message)[1];
-        const project = issue.split("-")[0];
-        if (!issue) {
-            gi.addressChannels(slackErrorMessage(
-                `JIRA: No Issue Link found in commit`,
-                `You must supply an issue key in your commit message.`,
+        const match = /((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)/gm.exec(gi.goalEvent.push.commits[0].message);
+        let issue: string;
+        if (match) {
+            issue = match[1];
+        } else {
+            await gi.addressChannels(slackErrorMessage(
+                `JIRA: Approval Goal => No Issue Link found in commit`,
+                `You must supply an issue key in your commit message in order to setup a new approval request.`,
                 gi.context,
             ));
             return {
@@ -26,6 +28,7 @@ export const JiraApproval = new GoalWithFulfillment({
             };
         }
 
+        const project = issue.split("-")[0];
         const enviornmentData = [
             `[atomist:generated]`,
             `[atomist:sha:${gi.id.sha}]`,
@@ -43,6 +46,7 @@ export const JiraApproval = new GoalWithFulfillment({
             gi.context,
         );
 
+        // TODO: Add lookup for the reporter from the committer id
         const data = {
             fields: {
                 description: `[${gi.id.repo}] Requesting approval to deploy version ${newVersion} (${gi.id.sha})` +
@@ -60,7 +64,7 @@ export const JiraApproval = new GoalWithFulfillment({
             },
         };
         // Open JIRA Subtask for approval
-        // In env field
+        // In body
         // [atomist:sha:]
         // [atomist:owner:]
         // [atomist:repo:]

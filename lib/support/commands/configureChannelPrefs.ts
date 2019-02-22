@@ -12,7 +12,6 @@ import {
 import { CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs } from "@atomist/sdm";
 import { SlackMessage } from "@atomist/slack-messages";
 import * as types from "../../typings/types";
-import { jiraSlackFooter } from "../helpers/msgHelpers";
 
 @Parameters()
 class JiraChannelPrefsBase {
@@ -72,7 +71,7 @@ export async function setJiraChannelPrefs(
     };
     await ci.context.messageClient.send(payload, addressEvent("JiraChannelPrefs"));
 
-    ci.addressChannels(slackSuccessMessage(
+    await ci.addressChannels(slackSuccessMessage(
         `Updated JIRA notification preferences for channel ${ci.parameters.slackChannelName}`,
         `Successfully updated channel notification preferences.`,
     ));
@@ -91,33 +90,35 @@ export const setJiraChannelPrefsReg: CommandHandlerRegistration<JiraChannelPrefs
 export const queryJiraChannelPrefs = async (
     ctx: HandlerContext,
     channel: string,
-): Promise<types.GetJiraChannelPrefs.Query> => {
-    return ctx.graphClient.query<types.GetJiraChannelPrefs.Query, types.GetJiraChannelPrefs.Variables>({
+): Promise<types.GetJiraChannelPrefs.JiraChannelPrefs> => {
+    const result = await ctx.graphClient.query<types.GetJiraChannelPrefs.Query, types.GetJiraChannelPrefs.Variables>({
         name: "GetJiraChannelPrefs",
         variables: {
             channel: [channel],
         },
         options: QueryNoCacheOptions,
     });
+
+    let setPrefs: types.GetJiraChannelPrefs.JiraChannelPrefs;
+    if (result.JiraChannelPrefs.length > 0) {
+        setPrefs = result.JiraChannelPrefs[0];
+    } else {
+        setPrefs = {
+            channel,
+            issueComment: true,
+            issueDeleted: true,
+            issueCreated: true,
+            issueState: true,
+            issueStatus: true,
+        };
+    }
+    return setPrefs;
 };
 
 export async function getJiraChannelPrefs(
     ci: CommandListenerInvocation<JiraChannelPrefsBase>,
     ): Promise<HandlerResult> {
         const prefs = await queryJiraChannelPrefs(ci.context, ci.parameters.slackChannelName);
-
-        let setPrefs: types.GetJiraChannelPrefs.JiraChannelPrefs;
-        if (prefs.JiraChannelPrefs.length > 0) {
-            setPrefs = prefs.JiraChannelPrefs[0];
-        } else {
-            setPrefs = {
-                issueComment: true,
-                issueDeleted: true,
-                issueCreated: true,
-                issueState: true,
-                issueStatus: true,
-            };
-        }
 
         const message: SlackMessage = {
             attachments: [
@@ -132,27 +133,27 @@ export async function getJiraChannelPrefs(
                         {
                             short: true,
                             title: "Issue Comments",
-                            value: setPrefs.issueComment.toString(),
+                            value: prefs.issueComment.toString(),
                         },
                         {
                             short: true,
                             title: "Issue Created",
-                            value: setPrefs.issueDeleted.toString(),
+                            value: prefs.issueDeleted.toString(),
                         },
                         {
                             short: true,
                             title: "Issue Deleted",
-                            value: setPrefs.issueDeleted.toString(),
+                            value: prefs.issueDeleted.toString(),
                         },
                         {
                             short: true,
                             title: "Issue State Changes",
-                            value: setPrefs.issueState.toString(),
+                            value: prefs.issueState.toString(),
                         },
                         {
                             short: true,
                             title: "Issue Status Changes",
-                            value: setPrefs.issueState.toString(),
+                            value: prefs.issueState.toString(),
                         },
                     ],
                     actions: [

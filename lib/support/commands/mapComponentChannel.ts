@@ -90,7 +90,7 @@ export async function createComponentChannelMapping(ci: CommandListenerInvocatio
     await ci.context.messageClient.send(payload, addressEvent("JiraComponentMap"));
     const componentDetails =
         await getJiraDetails<types.OnJiraIssueEvent.Components>(`${jiraConfig.url}/rest/api/2/component/${ci.parameters.componentId}`);
-    ci.addressChannels(slackSuccessMessage(
+    await ci.addressChannels(slackSuccessMessage(
         `New JIRA Component mapping created successfully!`,
         `Added new mapping from Component *${componentDetails.name}* to *${ci.parameters.slackChannelName}*`,
     ), {
@@ -137,7 +137,7 @@ export async function createComponentChannelMappingOptions(ci: CommandListenerIn
                 ],
             }],
         };
-        ci.addressChannels(message, {
+        await ci.addressChannels(message, {
             ttl: 15000,
             id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
         });
@@ -159,7 +159,7 @@ export async function createComponentChannelMappingOptions(ci: CommandListenerIn
             ],
         };
 
-        ci.addressChannels(message, {
+        await ci.addressChannels(message, {
             ttl: 15000,
             id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
         });
@@ -200,7 +200,7 @@ export async function removeComponentChannelMapping(ci: CommandListenerInvocatio
     await ci.context.messageClient.send(payload, addressEvent("JiraComponentMap"));
     const componentDetails =
         await getJiraDetails<types.OnJiraIssueEvent.Components>(`${jiraConfig.url}/rest/api/2/component/${paramDetails.componentId}`);
-    ci.addressChannels(slackSuccessMessage(
+    await ci.addressChannels(slackSuccessMessage(
         `Removed JIRA Component mapping successfully!`,
         `Removed mapping from Component *${componentDetails.name}* to *${ci.parameters.slackChannelName}*`,
     ));
@@ -252,7 +252,7 @@ export async function removeComponentMapping(ci: CommandListenerInvocation<JiraC
         }],
     };
 
-    ci.addressChannels(message);
+    await ci.addressChannels(message);
     return { code: 0 };
 }
 

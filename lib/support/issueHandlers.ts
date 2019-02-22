@@ -1,11 +1,9 @@
 import { HandlerContext, logger } from "@atomist/automation-client";
 import { SlackMessage } from "@atomist/slack-messages";
 import * as types from "../typings/types";
-import { jiraChannelLookup } from "./helpers/channelLookup";
 import { prepareIssueCommentedMessage, prepareIssueDeletedMessage, prepareNewIssueMessage, prepareStateChangeMessage } from "./helpers/msgHelpers";
 
-export const issueCommented = async (ctx: HandlerContext, event: types.OnJiraIssueEvent.JiraIssue): Promise<void> => {
-    const channels = await jiraChannelLookup(ctx, event);
+export const issueCommented = async (ctx: HandlerContext, channels: string[], event: types.OnJiraIssueEvent.JiraIssue): Promise<void> => {
     if (channels.length > 0) {
         const message: SlackMessage = await prepareIssueCommentedMessage(event);
         await ctx.messageClient.addressChannels(message, channels);
@@ -14,8 +12,7 @@ export const issueCommented = async (ctx: HandlerContext, event: types.OnJiraIss
     }
 };
 
-export const issueStateChange = async (ctx: HandlerContext, event: types.OnJiraIssueEvent.JiraIssue): Promise<void> => {
-    const channels = await jiraChannelLookup(ctx, event);
+export const issueStateChange = async (ctx: HandlerContext, channels: string[], event: types.OnJiraIssueEvent.JiraIssue): Promise<void> => {
     if (channels.length > 0) {
         const message: SlackMessage = await prepareStateChangeMessage(event);
         await ctx.messageClient.addressChannels(message, channels);
@@ -24,8 +21,7 @@ export const issueStateChange = async (ctx: HandlerContext, event: types.OnJiraI
     }
 };
 
-export const issueCreated = async (ctx: HandlerContext, event: types.OnJiraIssueEvent.JiraIssue): Promise<void> => {
-    const channels = await jiraChannelLookup(ctx, event);
+export const issueCreated = async (ctx: HandlerContext, channels: string[], event: types.OnJiraIssueEvent.JiraIssue): Promise<void> => {
     if (channels.length > 0) {
         const message: SlackMessage = await prepareNewIssueMessage(event);
         await ctx.messageClient.addressChannels(message, channels);
@@ -34,8 +30,7 @@ export const issueCreated = async (ctx: HandlerContext, event: types.OnJiraIssue
     }
 };
 
-export const issueDeleted = async (ctx: HandlerContext, event: types.OnJiraIssueEvent.JiraIssue): Promise<void> => {
-    const channels = await jiraChannelLookup(ctx, event);
+export const issueDeleted = async (ctx: HandlerContext, channels: string[], event: types.OnJiraIssueEvent.JiraIssue): Promise<void> => {
     if (channels.length > 0) {
         const message: SlackMessage = await prepareIssueDeletedMessage(event);
         await ctx.messageClient.addressChannels(message, channels);

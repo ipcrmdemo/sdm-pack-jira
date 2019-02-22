@@ -17,7 +17,6 @@ import { SelectOption, SlackMessage } from "@atomist/slack-messages";
 import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
 import { getMappedProjectsbyChannel } from "../helpers/channelLookup";
-import { getIngesterWebhookUrl } from "../helpers/registrationInfo";
 import { getJiraDetails } from "../jiraDataLookup";
 import { lookupJiraProjectDetails } from "./getCurrentChannelMappings";
 import { JiraProject } from "./shared";
@@ -93,7 +92,7 @@ export async function createProjectChannelMapping(
         `Added new mapping from Project *${projectDetails.name}* to *${ci.parameters.slackChannelName}*` :
         `Removed mapping from Project *${projectDetails.name}* to *${ci.parameters.slackChannelName}*`;
 
-    ci.addressChannels(slackSuccessMessage(
+    await ci.addressChannels(slackSuccessMessage(
         subject,
         message,
     ));
@@ -131,7 +130,7 @@ export async function createProjectChannelMappingOptions(ci: CommandListenerInvo
             },
         },
     )
-        .then(result => {
+        .then(async result => {
             const projects = result.body as JiraProject[];
             projects.forEach(p => {
                 projectValues.push({text: p.name, value: p.id});
@@ -156,7 +155,7 @@ export async function createProjectChannelMappingOptions(ci: CommandListenerInvo
                 }],
             };
 
-            ci.addressChannels(message, {
+            await ci.addressChannels(message, {
                 ttl: 15000,
                 id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
             });
@@ -210,7 +209,7 @@ export async function removeProjectMapping(ci: CommandListenerInvocation<JiraPro
         }],
     };
 
-    ci.addressChannels(message);
+    await ci.addressChannels(message);
     return { code: 0 };
 }
 
