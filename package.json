@@ -14,10 +14,9 @@
   },
   "keywords": [
     "atomist",
-    "automation",
     "pack",
     "sdm",
-    "seed"
+    "jira"
   ],
   "main": "./index.js",
   "types": "./index.d.ts",
