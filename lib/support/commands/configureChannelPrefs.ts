@@ -2,7 +2,7 @@ import {
     addressEvent,
     buttonForCommand,
     HandlerContext,
-    HandlerResult,
+    HandlerResult, logger,
     MappedParameter,
     MappedParameters,
     Parameter,
@@ -115,58 +115,67 @@ export const queryJiraChannelPrefs = async (
     return setPrefs;
 };
 
-export async function getJiraChannelPrefs(
+export function getJiraChannelPrefs(
     ci: CommandListenerInvocation<JiraChannelPrefsBase>,
     ): Promise<HandlerResult> {
-        const prefs = await queryJiraChannelPrefs(ci.context, ci.parameters.slackChannelName);
-
-        const message: SlackMessage = {
-            attachments: [
-                {
-                    author_icon: "https://wac-cdn.atlassian.com/dam/jcr:b5e4a5a5-94b9-4098-ad1f-af4ba39b401f/corporate-deck@2x_V2.png?cdnVersion=kr",
-                    author_name: `JIRA Notification Preferences`,
-                    fallback: `JIRA Notification Preferences`,
-                },
-                {
-                    fallback: `JIRA Preferences`,
-                    fields: [
-                        {
-                            short: true,
-                            title: "Issue Comments",
-                            value: prefs.issueComment.toString(),
-                        },
-                        {
-                            short: true,
-                            title: "Issue Created",
-                            value: prefs.issueDeleted.toString(),
-                        },
-                        {
-                            short: true,
-                            title: "Issue Deleted",
-                            value: prefs.issueDeleted.toString(),
-                        },
-                        {
-                            short: true,
-                            title: "Issue State Changes",
-                            value: prefs.issueState.toString(),
-                        },
-                        {
-                            short: true,
-                            title: "Issue Status Changes",
-                            value: prefs.issueState.toString(),
-                        },
-                    ],
-                    actions: [
+    return new Promise<HandlerResult>(async (resolve, reject) => {
+        try {
+            const prefs = await queryJiraChannelPrefs(ci.context, ci.parameters.slackChannelName);
+            const message: SlackMessage = {
+                attachments: [
+                    {
+                        author_icon: "https://wac-cdn.atlassian.com/dam/jcr:b5e4a5a5-94b9-4098-ad1f-af4ba39b401f/corporate-deck@2x_V2.png?cdnVersion=kr",
+                        author_name: `JIRA Notification Preferences`,
+                        fallback: `JIRA Notification Preferences`,
+                    },
+                    {
+                        fallback: `JIRA Preferences`,
+                        fields: [
+                            {
+                                short: true,
+                                title: "Issue Comments",
+                                value: prefs.issueComment.toString(),
+                            },
+                            {
+                                short: true,
+                                title: "Issue Created",
+                                value: prefs.issueDeleted.toString(),
+                            },
+                            {
+                                short: true,
+                                title: "Issue Deleted",
+                                value: prefs.issueDeleted.toString(),
+                            },
+                            {
+                                short: true,
+                                title: "Issue State Changes",
+                                value: prefs.issueState.toString(),
+                            },
+                            {
+                                short: true,
+                                title: "Issue Status Changes",
+                                value: prefs.issueState.toString(),
+                            },
+                        ],
+                        actions: [
                             buttonForCommand({ text: "Update Preferences"}, "SetJiraChannelPrefs"),
-                    ],
-                    ts: slackTs(),
-                },
-            ],
-        };
+                        ],
+                        ts: slackTs(),
+                    },
+                ],
+            };
 
-        await ci.addressChannels(message);
-        return { code: 0 };
-    }
+            await ci.addressChannels(message);
+            resolve({ code: 0 });
+        } catch (e) {
+            logger.error(`JIRA getJiraChannelPrefs: Failed to lookup channel prefs.  Error => ${e}`);
+            reject({
+                code: 1,
+                message: e,
+            });
+        }
+    });
+}
 
 export const getJiraChannelPrefsReg: CommandHandlerRegistration<JiraChannelPrefsBase> = {
     name: "GetJiraChannelPrefs",

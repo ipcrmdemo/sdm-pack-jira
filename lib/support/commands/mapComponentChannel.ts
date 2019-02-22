@@ -79,26 +79,36 @@ export class JiraComponentDisableMappingParams {
     public details: string;
 }
 
-export async function createComponentChannelMapping(ci: CommandListenerInvocation<JiraComponentMappingParams>): Promise<HandlerResult> {
-    const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
-    const payload = {
-        channel: ci.parameters.slackChannelName,
-        projectId: ci.parameters.projectId,
-        componentId: ci.parameters.componentId,
-        active: true,
-    };
-    await ci.context.messageClient.send(payload, addressEvent("JiraComponentMap"));
-    const componentDetails =
-        await getJiraDetails<types.OnJiraIssueEvent.Components>(`${jiraConfig.url}/rest/api/2/component/${ci.parameters.componentId}`);
-    await ci.addressChannels(slackSuccessMessage(
-        `New JIRA Component mapping created successfully!`,
-        `Added new mapping from Component *${componentDetails.name}* to *${ci.parameters.slackChannelName}*`,
-    ), {
-        ttl: 15000,
-        id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
-    });
+export function createComponentChannelMapping(ci: CommandListenerInvocation<JiraComponentMappingParams>): Promise<HandlerResult> {
+    return new Promise<HandlerResult>(async (resolve, reject) => {
+        try {
+            const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
+            const payload = {
+                channel: ci.parameters.slackChannelName,
+                projectId: ci.parameters.projectId,
+                componentId: ci.parameters.componentId,
+                active: true,
+            };
+            await ci.context.messageClient.send(payload, addressEvent("JiraComponentMap"));
+            const componentDetails =
+                await getJiraDetails<types.OnJiraIssueEvent.Components>(`${jiraConfig.url}/rest/api/2/component/${ci.parameters.componentId}`);
+            await ci.addressChannels(slackSuccessMessage(
+                `New JIRA Component mapping created successfully!`,
+                `Added new mapping from Component *${componentDetails.name}* to *${ci.parameters.slackChannelName}*`,
+            ), {
+                ttl: 15000,
+                id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
+            });
 
-    return { code: 0 };
+            resolve({code: 0});
+        } catch (e) {
+            logger.error(`JIRA createComponentChannelMapping: Failed to create channel mapping! Error => ${e}`);
+            reject({
+                code: 1,
+                message: e,
+            });
+        }
+    });
 }
 
 export const createComponentChannelMappingReg: CommandHandlerRegistration<JiraComponentMappingParams> = {
@@ -108,64 +118,73 @@ export const createComponentChannelMappingReg: CommandHandlerRegistration<JiraCo
     listener: createComponentChannelMapping,
 };
 
-export async function createComponentChannelMappingOptions(ci: CommandListenerInvocation<JiraProjectMappingParams>): Promise<HandlerResult> {
-    const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
-    const lookupUrl = `${jiraConfig.url}/rest/api/2/project/${ci.parameters.projectId}`;
-    const projectDetails = await getJiraDetails<JiraProject>(lookupUrl);
-    const componentValues: SelectOption[] = [];
+export function createComponentChannelMappingOptions(ci: CommandListenerInvocation<JiraProjectMappingParams>): Promise<HandlerResult> {
+    return new Promise<HandlerResult>(async (resolve, reject) => {
+        try {
+            const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
+            const lookupUrl = `${jiraConfig.url}/rest/api/2/project/${ci.parameters.projectId}`;
+            const projectDetails = await getJiraDetails<JiraProject>(lookupUrl);
+            const componentValues: SelectOption[] = [];
 
-    projectDetails.components.forEach(c => {
-       componentValues.push({text: c.name, value: c.id});
+            projectDetails.components.forEach(c => {
+                componentValues.push({text: c.name, value: c.id});
+            });
+
+            const menuSpec: MenuSpecification = {
+                text: "Select Component",
+                options: componentValues,
+            };
+
+            if (componentValues.length > 0) {
+                const message: SlackMessage = {
+                    attachments: [{
+                        pretext: `Create a new JIRA Component Mapping`,
+                        color: "#45B254",
+                        fallback: `Create a new Jira Component mapping`,
+                        ts: slackTs(),
+                        actions: [
+                            menuForCommand(menuSpec, "CreateComponentChannelMapping", "componentId", {
+                                projectId: ci.parameters.projectId,
+                            }),
+                        ],
+                    }],
+                };
+                await ci.addressChannels(message, {
+                    ttl: 15000,
+                    id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
+                });
+            } else {
+                const button = buttonForCommand(
+                    {
+                        text: "OK",
+                    },
+                    "StartComponentChannelOptionsMapping",
+                );
+
+                const message: SlackMessage = {
+                    attachments: [
+                        {
+                            fallback: `JIRA Project Contains no components`,
+                            pretext: `JIRA Project Contains no components`,
+                            actions: [button],
+                        },
+                    ],
+                };
+
+                await ci.addressChannels(message, {
+                    ttl: 15000,
+                    id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
+                });
+            }
+            resolve({ code: 0 });
+        } catch (e) {
+            logger.error(`JIRA createComponentChannelMappingOptions: Failed to create channel map options.  Error => ${e}`);
+            reject({
+                code: 1,
+                message: e,
+            });
+        }
     });
-
-    const menuSpec: MenuSpecification = {
-        text: "Select Component",
-        options: componentValues,
-    };
-
-    if (componentValues.length > 0) {
-        const message: SlackMessage = {
-            attachments: [{
-                pretext: `Create a new JIRA Component Mapping`,
-                color: "#45B254",
-                fallback: `Create a new Jira Component mapping`,
-                ts: slackTs(),
-                actions: [
-                    menuForCommand(menuSpec, "CreateComponentChannelMapping", "componentId", {
-                        projectId: ci.parameters.projectId,
-                    }),
-                ],
-            }],
-        };
-        await ci.addressChannels(message, {
-            ttl: 15000,
-            id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
-        });
-    } else {
-        const button = buttonForCommand(
-            {
-                text: "OK",
-            },
-            "StartComponentChannelOptionsMapping",
-        );
-
-        const message: SlackMessage = {
-            attachments: [
-                {
-                    fallback: `JIRA Project Contains no components`,
-                    pretext: `JIRA Project Contains no components`,
-                    actions: [button],
-                },
-            ],
-        };
-
-        await ci.addressChannels(message, {
-            ttl: 15000,
-            id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
-        });
-    }
-
-    return { code: 0 };
 }
 
 export const createComponentChannelMappingOptionsReg: CommandHandlerRegistration<JiraProjectMappingParams> = {
@@ -183,29 +202,39 @@ export const startComponentChannelMappingOptionsReg: CommandHandlerRegistration<
     listener: createProjectChannelMappingOptions,
 };
 
-export async function removeComponentChannelMapping(ci: CommandListenerInvocation<JiraComponentDisableMappingParams>): Promise<HandlerResult> {
-    const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
-    const paramDetails: JiraProjectComponentMap = {
-        projectId: ci.parameters.details.split(":")[0],
-        componentId: ci.parameters.details.split(":")[1],
-    };
+export function removeComponentChannelMapping(ci: CommandListenerInvocation<JiraComponentDisableMappingParams>): Promise<HandlerResult> {
+    return new Promise<HandlerResult>(async (resolve, reject) => {
+        try {
+            const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
+            const paramDetails: JiraProjectComponentMap = {
+                projectId: ci.parameters.details.split(":")[0],
+                componentId: ci.parameters.details.split(":")[1],
+            };
 
-    const payload = {
-        channel: ci.parameters.slackChannelName,
-        componentId: paramDetails.componentId,
-        projectId: paramDetails.projectId,
-        active: false,
-    };
+            const payload = {
+                channel: ci.parameters.slackChannelName,
+                componentId: paramDetails.componentId,
+                projectId: paramDetails.projectId,
+                active: false,
+            };
 
-    await ci.context.messageClient.send(payload, addressEvent("JiraComponentMap"));
-    const componentDetails =
-        await getJiraDetails<types.OnJiraIssueEvent.Components>(`${jiraConfig.url}/rest/api/2/component/${paramDetails.componentId}`);
-    await ci.addressChannels(slackSuccessMessage(
-        `Removed JIRA Component mapping successfully!`,
-        `Removed mapping from Component *${componentDetails.name}* to *${ci.parameters.slackChannelName}*`,
-    ));
+            await ci.context.messageClient.send(payload, addressEvent("JiraComponentMap"));
+            const componentDetails =
+                await getJiraDetails<types.OnJiraIssueEvent.Components>(`${jiraConfig.url}/rest/api/2/component/${paramDetails.componentId}`);
+            await ci.addressChannels(slackSuccessMessage(
+                `Removed JIRA Component mapping successfully!`,
+                `Removed mapping from Component *${componentDetails.name}* to *${ci.parameters.slackChannelName}*`,
+            ));
 
-    return { code: 0 };
+            resolve({ code: 0 });
+        } catch (e) {
+            logger.error(`JIRA removeComponentChannelMapping: Error removing component mapping => ${e}`);
+            reject({
+                code: 1,
+                message: e,
+            });
+        }
+    });
 }
 
 export const removeComponentChannelMappingReg: CommandHandlerRegistration<JiraComponentDisableMappingParams> = {
@@ -215,45 +244,55 @@ export const removeComponentChannelMappingReg: CommandHandlerRegistration<JiraCo
     listener: removeComponentChannelMapping,
 };
 
-export async function removeComponentMapping(ci: CommandListenerInvocation<JiraComponentDisableMappingOptionsParams>): Promise<HandlerResult> {
-    // Get linked componentids/projectids
-    // Resolve ids to names
-    // Present dropdown of componetns to remove
-    // Remove and notify
-    const components = await getMappedComponentsbyChannel(ci.context, ci.parameters.slackChannelName);
-    logger.debug(`JIRA removeComponentMapping: components found for channel => ${JSON.stringify(components)}`);
+export function removeComponentMapping(ci: CommandListenerInvocation<JiraComponentDisableMappingOptionsParams>): Promise<HandlerResult> {
+    return new Promise<HandlerResult>(async (resolve, reject) => {
+        try {
+            // Get linked componentids/projectids
+            // Resolve ids to names
+            // Present dropdown of componetns to remove
+            // Remove and notify
+            const components = await getMappedComponentsbyChannel(ci.context, ci.parameters.slackChannelName);
+            logger.debug(`JIRA removeComponentMapping: components found for channel => ${JSON.stringify(components)}`);
 
-    const projectsToLookup = await findRequiredProjects(components, []);
-    const projectDetails = await lookupJiraProjectDetails(projectsToLookup);
+            const projectsToLookup = await findRequiredProjects(components, []);
+            const projectDetails = await lookupJiraProjectDetails(projectsToLookup);
 
-    const componentDetails: SelectOption[] = [];
+            const componentDetails: SelectOption[] = [];
 
-    components.forEach(c => {
-        const thisProject = projectDetails.filter(p => p.id === c.projectId)[0];
-        const thisComponent = thisProject.components.filter(component => component.id === c.componentId)[0];
-        const display = `${thisProject.name}/${thisComponent.name}`;
-        componentDetails.push({text: display, value: `${c.projectId}:${c.componentId}` });
-     });
+            components.forEach(c => {
+                const thisProject = projectDetails.filter(p => p.id === c.projectId)[0];
+                const thisComponent = thisProject.components.filter(component => component.id === c.componentId)[0];
+                const display = `${thisProject.name}/${thisComponent.name}`;
+                componentDetails.push({text: display, value: `${c.projectId}:${c.componentId}` });
+            });
 
-    const menuSpec: MenuSpecification = {
-        text: "Select Component",
-        options: componentDetails,
-    };
+            const menuSpec: MenuSpecification = {
+                text: "Select Component",
+                options: componentDetails,
+            };
 
-    const message: SlackMessage = {
-        attachments: [{
-            pretext: `Remove a JIRA Project/Component Mapping`,
-            color: "#45B254",
-            fallback: `Remove a Jira Project/Component mapping`,
-            ts: slackTs(),
-            actions: [
-                menuForCommand(menuSpec, "RemoveComponentChannelMapping", "details"),
-            ],
-        }],
-    };
+            const message: SlackMessage = {
+                attachments: [{
+                    pretext: `Remove a JIRA Project/Component Mapping`,
+                    color: "#45B254",
+                    fallback: `Remove a Jira Project/Component mapping`,
+                    ts: slackTs(),
+                    actions: [
+                        menuForCommand(menuSpec, "RemoveComponentChannelMapping", "details"),
+                    ],
+                }],
+            };
 
-    await ci.addressChannels(message);
-    return { code: 0 };
+            await ci.addressChannels(message);
+            resolve({ code: 0 });
+        } catch (e) {
+            logger.error(`JIRA removeComponentMapping: Failed to remove component mapping.  Error => ${e}`);
+            reject({
+                code: 1,
+                message: e,
+            });
+        }
+    });
 }
 
 export const disableComponentChannelMappingOptionsReg: CommandHandlerRegistration<JiraComponentDisableMappingOptionsParams> = {

@@ -90,59 +90,69 @@ export const prepareFriendProjectNames = async (projects: JiraProject[]): Promis
     return returnProjects;
 };
 
-export async function getCurrentChannelMappings(ci: CommandListenerInvocation<JiraGetCurrentChannelMappingsParams>): Promise<HandlerResult> {
-    // Get current channel projects
-    const projects = await getMappedProjectsbyChannel(ci.context, ci.parameters.slackChannelName);
-    logger.debug(`JIRA getCurrentChannelMappings: found projects ${JSON.stringify(projects)} - ${projects.length}`);
+export function getCurrentChannelMappings(ci: CommandListenerInvocation<JiraGetCurrentChannelMappingsParams>): Promise<HandlerResult> {
+    return new Promise<HandlerResult>(async (resolve, reject) => {
+        // Get current channel projects
+        try {
+            const projects = await getMappedProjectsbyChannel(ci.context, ci.parameters.slackChannelName);
+            logger.debug(`JIRA getCurrentChannelMappings: found projects ${JSON.stringify(projects)} - ${projects.length}`);
 
-    // Get current components
-    const components = await getMappedComponentsbyChannel(ci.context, ci.parameters.slackChannelName);
-    const projectsToLookup = await findRequiredProjects(components, projects);
-    const projectDetails = await lookupJiraProjectDetails(projectsToLookup);
+            // Get current components
+            const components = await getMappedComponentsbyChannel(ci.context, ci.parameters.slackChannelName);
+            const projectsToLookup = await findRequiredProjects(components, projects);
+            const projectDetails = await lookupJiraProjectDetails(projectsToLookup);
 
-    // Prepare message
-    const componentMapped = await prepareFriendlyComponentNames(components, projectDetails);
-    const projectMapped = await prepareFriendProjectNames(projectDetails);
+            // Prepare message
+            const componentMapped = await prepareFriendlyComponentNames(components, projectDetails);
+            const projectMapped = await prepareFriendProjectNames(projectDetails);
 
-    const message: slack.SlackMessage = {
-        attachments: [
-            {
-                fallback: `Current JIRA Project/Component Mapping Infomation`,
-                pretext: `Current JIRA Project/Component Mapping Information`,
-                color: "#45B254",
-                fields: [
+            const message: slack.SlackMessage = {
+                attachments: [
                     {
-                        title: `Projects`,
-                        value: projects.length === 0 ? "N/A" : projectMapped.join("\n"),
-                        short: true,
+                        fallback: `Current JIRA Project/Component Mapping Infomation`,
+                        pretext: `Current JIRA Project/Component Mapping Information`,
+                        color: "#45B254",
+                        fields: [
+                            {
+                                title: `Projects`,
+                                value: projects.length === 0 ? "N/A" : projectMapped.join("\n"),
+                                short: true,
+                            },
+                            {
+                                title: `Components`,
+                                value: componentMapped.join("\n"),
+                                short: true,
+                            },
+                        ],
+                        ts: slackTs(),
                     },
                     {
-                        title: `Components`,
-                        value: componentMapped.join("\n"),
-                        short: true,
+                        fallback: `All projects/components listed above are currently displaying notices in this channel.`,
+                        text: `All projects/components listed above are currently displaying notices in this channel.`,
+                        color: "#45B254",
+                        actions: [
+                            buttonForCommand({ text: "Disable Component"}, "DisableComponentChannelMapping"),
+                            buttonForCommand( { text: "Disable Project"}, "RemoveChannelProjectMapping", { enabled: "false"}),
+                        ],
+                        ts: slackTs(),
                     },
                 ],
-                ts: slackTs(),
-            },
-            {
-                fallback: `All projects/components listed above are currently displaying notices in this channel.`,
-                text: `All projects/components listed above are currently displaying notices in this channel.`,
-                color: "#45B254",
-                actions: [
-                    buttonForCommand({ text: "Disable Component"}, "DisableComponentChannelMapping"),
-                    buttonForCommand( { text: "Disable Project"}, "RemoveChannelProjectMapping", { enabled: "false"}),
-                ],
-                ts: slackTs(),
-            },
-        ],
 
-    };
+            };
 
-    logger.debug(`JIRA getCurrentChannelMappings: component detail => ${JSON.stringify(componentMapped)}`);
-    logger.debug(`JIRA getCurrentChannelMappings: project detail => ${JSON.stringify(projectDetails)}`);
+            logger.debug(`JIRA getCurrentChannelMappings: component detail => ${JSON.stringify(componentMapped)}`);
+            logger.debug(`JIRA getCurrentChannelMappings: project detail => ${JSON.stringify(projectDetails)}`);
 
-    await ci.addressChannels(message);
-    return { code: 0 };
+            await ci.addressChannels(message);
+            resolve({ code: 0 });
+        } catch (e) {
+            logger.error(`JIRA getCurrentChannelMappings: Failed to lookup mappings! Error => ${e}`);
+            reject({
+                code: 1,
+                message: e,
+            });
+        }
+    });
 }
 
 export const getCurrentChannelMappingsReg: CommandHandlerRegistration<JiraGetCurrentChannelMappingsParams> = {
