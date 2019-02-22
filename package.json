@@ -1,5 +1,5 @@
 {
-  "name": "sdm-pack-jira",
+  "name": "@ipcrmdemo/sdm-pack-jira",
   "version": "0.0.1",
   "description": "SDM Pack for JIRA",
   "author": "ipcrm",
