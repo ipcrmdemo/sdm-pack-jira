@@ -1,0 +1,10 @@
+query GetEmailByChatId ($screenName: String!){
+    ChatId (screenName:$screenName){
+        person {
+            emails {
+                address
+            }
+        }
+        screenName
+    }
+}

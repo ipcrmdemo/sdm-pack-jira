@@ -30,12 +30,16 @@ export const onJiraIssueEventApprovalHandler = (goal: Goal): OnEvent<types.OnJir
         const issue = await getJiraDetails<Issue>(e.data.JiraIssue[0].issue.self);
 
         // Search environment for tags
-        const sha = /\[atomist:sha:(.*)\]/gm.exec(issue.fields.description)[1];
-        const owner = /\[atomist:owner:(.*)\]/gm.exec(issue.fields.description)[1];
-        const repo = /\[atomist:repo:(.*)\]/gm.exec(issue.fields.description)[1];
-        const branch = /\[atomist:branch:(.*)\]/gm.exec(issue.fields.description)[1];
-
-        if (!sha || !owner || !repo || !branch) {
+        let sha: string;
+        let owner: string;
+        let repo: string;
+        let branch: string;
+        try {
+            sha = /\[atomist:sha:(.*)\]/gm.exec(issue.fields.description)[1];
+            owner = /\[atomist:owner:(.*)\]/gm.exec(issue.fields.description)[1];
+            repo = /\[atomist:repo:(.*)\]/gm.exec(issue.fields.description)[1];
+            branch = /\[atomist:branch:(.*)\]/gm.exec(issue.fields.description)[1];
+        } catch (e) {
             logger.info(`JIRA onJiraIssueEventApprovalHandler: No environment data found on issue, skipping event...`);
             return Success;
         }
@@ -88,8 +92,7 @@ export const onJiraIssueEventApprovalHandler = (goal: Goal): OnEvent<types.OnJir
                 url: `${jiraConfig.url}/browse/${event.issue.key}`,
             });
 
-            // Update JIRA ticket?
-
+            // TODO: Update JIRA ticket?
             return Success;
         } else {
             return Success;

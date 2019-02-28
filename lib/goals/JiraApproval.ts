@@ -1,6 +1,6 @@
 import { GoalWithFulfillment, IndependentOfEnvironment, SdmGoalState, slackErrorMessage } from "@atomist/sdm";
 import { readSdmVersion } from "@atomist/sdm-core";
-import { createJiraTicket } from "../support/helpers/createJiraTicket";
+import { createJiraTicket } from "../support/commands/createJiraTicket";
 
 export const JiraApproval = new GoalWithFulfillment({
     uniqueName: "jiraApprovalGoal",

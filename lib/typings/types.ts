@@ -10318,6 +10318,38 @@ export namespace ChatIdByEmail {
   };
 }
 
+export namespace GetEmailByChatId {
+  export type Variables = {
+    screenName: string;
+  };
+
+  export type Query = {
+    __typename?: "Query";
+
+    ChatId?: (ChatId | null)[] | null;
+  };
+
+  export type ChatId = {
+    __typename?: "ChatId";
+
+    person?: Person | null;
+
+    screenName?: string | null;
+  };
+
+  export type Person = {
+    __typename?: "Person";
+
+    emails?: (Emails | null)[] | null;
+  };
+
+  export type Emails = {
+    __typename?: "Email";
+
+    address?: string | null;
+  };
+}
+
 export namespace GetAllComponentMappingsforChannel {
   export type Variables = {
     channel?: string[] | null;

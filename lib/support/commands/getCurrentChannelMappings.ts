@@ -63,12 +63,16 @@ export const prepareFriendlyComponentNames = async (components: JiraProjectCompo
     const baseComponentUrl = `${jiraConfig.url}/projects`;
     const componentSuffix = `?selectedItem=com.atlassian.jira.jira-projects-plugin:components-page`;
     components.map(c => {
-        const project = projectDetails.filter(p => p.id === c.projectId)[0];
-        const projectName = project.name;
-        const componentName = project.components.filter(comp => comp.id === c.componentId)[0].name;
-        const componentUrl = `${baseComponentUrl}/${project.key}${componentSuffix}`;
-        const projectUrl = `${baseComponentUrl}/${project.key}/issues`;
-        returnComponents.push(`${slack.url(projectUrl, projectName)}/${slack.url(componentUrl, componentName)}`);
+        try {
+            const project = projectDetails.filter(p => p.id === c.projectId)[0];
+            const projectName = project.name;
+            const componentName = project.components.filter(comp => comp.id === c.componentId)[0].name;
+            const componentUrl = `${baseComponentUrl}/${project.key}${componentSuffix}`;
+            const projectUrl = `${baseComponentUrl}/${project.key}/issues`;
+            returnComponents.push(`${slack.url(projectUrl, projectName)}/${slack.url(componentUrl, componentName)}`);
+        } catch {
+           logger.warn(`Couldn't resolve details for component ${c.componentId}`);
+        }
     });
 
     if (returnComponents.length === 0) {
