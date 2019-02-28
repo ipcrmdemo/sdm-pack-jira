@@ -3,18 +3,18 @@ import {
     HandlerResult,
     HttpClientFactory,
     HttpMethod,
-    logger, MappedParameter, MappedParameters, menuForCommand, MenuSpecification, NoParameters,
+    logger, MappedParameter, MappedParameters, menuForCommand, MenuSpecification,
     Parameter,
     Parameters, SelectOption,
 } from "@atomist/automation-client";
 import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata";
-import {CommandHandlerRegistration, CommandListenerInvocation, ParametersDefinition, slackTs} from "@atomist/sdm";
+import {CommandHandlerRegistration, CommandListenerInvocation, slackTs} from "@atomist/sdm";
 import {SlackMessage} from "@atomist/slack-messages";
+import jira2slack = require("jira2slack");
 import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
 import {getJiraDetails} from "../jiraDataLookup";
 import * as jiraTypes from "../jiraDefs";
-import jira2slack = require("jira2slack");
 
 export interface JiraIssueCreated {
     id: string;

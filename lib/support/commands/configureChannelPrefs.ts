@@ -124,6 +124,7 @@ export function getJiraChannelPrefs(
             const message: SlackMessage = {
                 attachments: [
                     {
+                        /* ts-lint:ignore-next-line */
                         author_icon: "https://wac-cdn.atlassian.com/dam/jcr:b5e4a5a5-94b9-4098-ad1f-af4ba39b401f/corporate-deck@2x_V2.png?cdnVersion=kr",
                         author_name: `JIRA Notification Preferences`,
                         fallback: `JIRA Notification Preferences`,

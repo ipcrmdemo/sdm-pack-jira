@@ -161,7 +161,7 @@ export const jiraDetermineNotifyChannels = async (
     logger.debug(`JIRA jiraDetermineNotifyChannels: channels found for event => ${JSON.stringify(channels)}`);
 
     await Promise.all(
-        await channels.map(async c => {
+        channels.map(async c => {
             const prefs = await queryJiraChannelPrefs(ctx, c);
             logger.debug(`JIRA jiraDetermineNotifyChannels: prefs found for channel ${c} => ${JSON.stringify(prefs)}`);
             notifyChannels.push(prefs);
