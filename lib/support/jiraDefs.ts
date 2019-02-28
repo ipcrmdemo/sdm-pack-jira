@@ -38,6 +38,7 @@ export interface Project {
     name: string;
     projectTypeKey: string;
     avatarUrls: AvatarUrls;
+    issueTypes: Issuetype[];
 }
 export interface FixVersion {
     self: string;

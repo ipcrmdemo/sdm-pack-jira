@@ -105,9 +105,9 @@ export class CreateJiraIssueParamsIssueType extends CreateJiraTicketParamsBase {
 export async function h2createJiraTicket(cli: CommandListenerInvocation<CreateJiraIssueParamsIssueType>): Promise<HandlerResult> {
     try {
         const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
-        const availIssueTypes = await getJiraDetails<jiraTypes.Issuetype[]>(`${jiraConfig.url}/rest/api/2/issuetype`);
+        const availIssueTypes = await getJiraDetails<jiraTypes.Project>(`${jiraConfig.url}/rest/api/2/project/${cli.parameters.project}`);
         const issueOptions: SelectOption[] = [];
-        availIssueTypes.forEach(t => {
+        availIssueTypes.issueTypes.forEach(t => {
             issueOptions.push({
                 text: t.name,
                 value: t.name,
