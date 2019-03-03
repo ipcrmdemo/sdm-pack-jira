@@ -7,7 +7,12 @@ import { issueCommented, issueCreated, issueDeleted, issueStateChange } from "./
 export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEvent.JiraIssue): Promise<void> => {
     if (
         (event.webhookEvent === "jira:issue_updated" && event.issue_event_type_name.match(/^(issue_comment_edited|issue_commented)$/)) ||
-        (event.webhookEvent === "jira:issue_updated" && event.issue_event_type_name.match(/^(issue_updated)$/) && event.changelog === null)
+        (event.webhookEvent === "jira:issue_updated" && event.issue_event_type_name.match(/^(issue_updated)$/) && event.changelog === null) ||
+        (event.webhookEvent === "jira:issue_updated" &&
+            event.issue_event_type_name.match(/^(issue_updated)$/) &&
+            event.changelog !== null &&
+           event.hasOwnProperty("comment")
+        )
     ) {
         logger.info(`JIRA routeEvent: New issue comment detected`);
         const channels = await jiraDetermineNotifyChannels(ctx, event);
@@ -17,7 +22,7 @@ export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEv
 
     if (event.webhookEvent === "jira:issue_updated" &&
         event.issue_event_type_name.match(/^(issue_generic|issue_updated|issue_assigned)$/) &&
-        event.changelog !== null
+        event.changelog !== null && event.comment === null
        ) {
         logger.info(`JIRA routeEvent: New Issue state change detected`);
         let notifyChannels: types.GetJiraChannelPrefs.JiraChannelPrefs[];

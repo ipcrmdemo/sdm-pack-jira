@@ -18,7 +18,9 @@ export class CommentOnIssueParams {
     @MappedParameter(MappedParameters.SlackUserName)
     public screenName: string;
 
-    @Parameter()
+    @Parameter({
+        displayable: false,
+    })
     public issueId: string;
 
     @Parameter()
