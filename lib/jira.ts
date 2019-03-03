@@ -12,6 +12,7 @@ import {
   startComponentChannelMappingOptionsReg,
 } from "./support/commands/mapComponentChannel";
 import { createProjectChannelMappingReg, produceProjectChannelMappingOptions, removeProjectMappingReg } from "./support/commands/mapProjectChannel";
+import {commentOnIssue} from "./support/helpers/issueActions";
 
 export const jiraSupport = (): ExtensionPack => {
     return {
@@ -38,6 +39,7 @@ export const jiraSupport = (): ExtensionPack => {
             sdm.addCommand(h1createJiraTicketReg);
             sdm.addCommand(h2createJiraTicketReg);
             sdm.addCommand(h3createJiraTicketReg);
+            sdm.addCommand(commentOnIssue);
             return sdm;
         },
     };

@@ -8,24 +8,25 @@ import {
     Parameters, SelectOption,
 } from "@atomist/automation-client";
 import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata";
-import {CommandHandlerRegistration, CommandListenerInvocation, slackTs} from "@atomist/sdm";
+import {
+    CommandHandlerRegistration,
+    CommandListenerInvocation,
+    slackErrorMessage,
+    slackTs,
+} from "@atomist/sdm";
 import {SlackMessage} from "@atomist/slack-messages";
 import jira2slack = require("jira2slack");
 import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
 import {getJiraDetails} from "../jiraDataLookup";
 import * as jiraTypes from "../jiraDefs";
+import {convertEmailtoJiraUser} from "./shared";
 
 export interface JiraIssueCreated {
     id: string;
     key: string;
     self: string;
 }
-
-const trueFalse: Option[] = [
-    {description: "True", value: "true"},
-    {description: "False", value: "false"},
-];
 
 // Handler 1 takes this
 //  - the produces a menuForCommand that has all the project detail
@@ -34,7 +35,11 @@ export class CreateJiraTicketParamsBase {
     @MappedParameter(MappedParameters.SlackUserName)
     public screenName: string;
 
-    @Parameter({order: 1})
+    @Parameter({
+        displayName: `Please enter the summary for your issue`,
+        description: `Summary`,
+        order: 1,
+    })
     public summary: string;
 }
 
@@ -57,7 +62,13 @@ export async function h1createJiraTicket(cli: CommandListenerInvocation<CreateJi
         };
 
         const message: SlackMessage = {
-            attachments: [{
+            attachments: [
+                {
+                    fallback: undefined,
+                    image_url: "https://www.atlassian.com/dam/jcr:e33efd9e-e0b8-4d61-a24d-68a48ef99ed5/Jira%20Software@2x-blue.png",
+                },
+                {
+                author_icon: "https://www.atlassian.com/dam/jcr:e33efd9e-e0b8-4d61-a24d-68a48ef99ed5/Jira%20Software@2x-blue.png",
                 pretext: `Please select which JIRA project this issue should be created in:`,
                 color: "#45B254",
                 fallback: `Please select which JIRA project this issue should be created in:`,
@@ -108,10 +119,12 @@ export async function h2createJiraTicket(cli: CommandListenerInvocation<CreateJi
         const availIssueTypes = await getJiraDetails<jiraTypes.Project>(`${jiraConfig.url}/rest/api/2/project/${cli.parameters.project}`);
         const issueOptions: SelectOption[] = [];
         availIssueTypes.issueTypes.forEach(t => {
-            issueOptions.push({
-                text: t.name,
-                value: t.name,
-            });
+            if (t.name !== "Sub-task") {
+                issueOptions.push({
+                    text: t.name,
+                    value: t.name,
+                });
+            }
         });
 
         const menuSpec: MenuSpecification = {
@@ -120,7 +133,12 @@ export async function h2createJiraTicket(cli: CommandListenerInvocation<CreateJi
         };
 
         const message: SlackMessage = {
-            attachments: [{
+            attachments: [
+                {
+                    fallback: undefined,
+                    image_url: "https://www.atlassian.com/dam/jcr:e33efd9e-e0b8-4d61-a24d-68a48ef99ed5/Jira%20Software@2x-blue.png",
+                },
+                {
                 pretext: `Please select a JIRA Issue Type`,
                 color: "#45B254",
                 fallback: `Please select a JIRA Issue Type`,
@@ -153,34 +171,27 @@ export const h2createJiraTicketReg: CommandHandlerRegistration<CreateJiraIssuePa
 };
 
 // Handler 3 takes params from H2 + issue type
-//  - if issueType === sub-issue, prompt for parent id
+//  - if issueType === sub-issue, run H4 for parent id, else run H5
 //  - then create issue
 @Parameters()
 export class CreateJiraIssueParamsSubIssue extends CreateJiraIssueParamsIssueType {
     @Parameter()
     public issueType: string;
+
+    @Parameter({
+        description: "Please enter description for this issue:",
+        pattern: /[\s\S]*/,
+    })
+    public description: string;
 }
 
 export async function h3createJiraTicket(cli: CommandListenerInvocation<CreateJiraIssueParamsSubIssue>): Promise<HandlerResult> {
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
-    let parent: {parent: string};
-    if (cli.parameters.issueType === "Sub-task") {
-        parent = await cli.promptFor<{parent: string}>({
-            parent: {
-                description: `Please enter a Parent Issue ID in project ${cli.parameters.project}`,
-            },
-        });
-    }
-    const description = await cli.promptFor<{description: string}>({
-       description: {
-           description: "Please enter description for this issue:",
-           pattern: /[\s\S]*/,
-       },
-    });
 
+    let data: any;
     try {
-        let data = {
-            description: jira2slack.toJira(description.description),
+        data = {
+            description: jira2slack.toJira(cli.parameters.description),
             project: {
                 key: cli.parameters.project,
             },
@@ -190,18 +201,6 @@ export async function h3createJiraTicket(cli: CommandListenerInvocation<CreateJi
             },
         };
 
-        // Add parent
-        if (cli.parameters.issueType === "Sub-task") {
-            data = {
-                ...data,
-                ...{
-                    parent: {
-                        key: parent.parent,
-                    },
-                },
-            };
-        }
-
         // Lookup requester
         let realRequester: string;
         const requester = await cli.context.graphClient.query<types.GetEmailByChatId.Query, types.GetEmailByChatId.Variables>({
@@ -209,12 +208,16 @@ export async function h3createJiraTicket(cli: CommandListenerInvocation<CreateJi
             variables: { screenName: cli.parameters.screenName },
         });
 
-        if (requester.ChatId[0].person.emails.length > 0 ) {
+        if ( requester &&
+            requester.hasOwnProperty("ChatId") &&
+            requester.ChatId.length > 0 &&
+            requester.ChatId[0].person.emails.length > 0
+        ) {
             // Try to find requester
             await Promise.all(requester.ChatId[0].person.emails.map(async e => {
-                const res = await getJiraDetails<jiraTypes.User[]>(`${jiraConfig.url}/rest/api/2/user/search?username=${e.address}`);
-                if (res.length > 0) {
-                    realRequester = res[0].key;
+                const res = await convertEmailtoJiraUser(e.address);
+                if (res) {
+                    realRequester = res;
                 }
             }));
         }
@@ -229,27 +232,42 @@ export async function h3createJiraTicket(cli: CommandListenerInvocation<CreateJi
                 },
             };
         }
-
-        try {
-            const res = await createJiraTicket({fields: data});
-            await cli.addressChannels(`Created new JIRA issue successfully! Link: <${jiraConfig.url}/browse/${res.key}|${res.key}>`, {
-                ttl: 60 * 120,
-                id: `createJiraIssue-${cli.parameters.screenName}`,
-            });
-            return {code: 0};
-        } catch (e) {
-            logger.error(e);
-            await cli.addressChannels(`Failed to create JIRA issue; error => ${e}`, {
-                ttl: 60 * 120,
-                id: `createJiraIssue-${cli.parameters.screenName}`,
-            });
-            return {
-                code: 1,
-                message: e,
-            };
-        }
     } catch (e) {
+        logger.error(e);
+        await cli.addressChannels(
+            slackErrorMessage(
+                `Error Creating JIRA Issue`,
+                `Failed to lookup JIRA requester data; error => ${e}`,
+                cli.context,
+            ), {
+                ttl: 60 * 1000,
+                id: `createJiraIssue-${cli.parameters.screenName}`,
+            });
         return { code: 1, message: e };
+    }
+
+    try {
+        const res = await createJiraTicket({fields: data});
+        await cli.addressChannels(`Created new JIRA issue successfully! Link: <${jiraConfig.url}/browse/${res.key}|${res.key}>`, {
+            ttl: 60 * 1000,
+            id: `createJiraIssue-${cli.parameters.screenName}`,
+        });
+        return {code: 0};
+    } catch (e) {
+        logger.error(e);
+        await cli.addressChannels(
+            slackErrorMessage(
+                `Error Creating JIRA Issue`,
+                `Failed to create JIRA issue; error => ${e}`,
+                cli.context,
+            ), {
+            ttl: 60 * 1000,
+            id: `createJiraIssue-${cli.parameters.screenName}`,
+        });
+        return {
+            code: 1,
+            message: e,
+        };
     }
 
     return {code: 0};

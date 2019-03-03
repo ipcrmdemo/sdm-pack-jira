@@ -27,8 +27,18 @@ export const onJiraIssueEvent = ():
 export const onJiraIssueEventApprovalHandler = (goal: Goal): OnEvent<types.OnJiraIssueEvent.Subscription> => {
     return async (e, ctx) => {
         const event =  e.data.JiraIssue[0];
-        const issue = await getJiraDetails<Issue>(e.data.JiraIssue[0].issue.self);
 
+        // Validate new state is approved (only process if this issue is a state change)
+        if (
+            event.webhookEvent !== "jira:issue_updated" ||
+            !event.issue_event_type_name.match(/^(issue_generic|issue_updated|issue_assigned)$/) ||
+            event.changelog === null
+        ) {
+            logger.info(`JIRA onJiraIssueEventApprovalHandler: Not searching for approval, wrong event type.`);
+            return Success;
+        }
+
+        const issue = await getJiraDetails<Issue>(e.data.JiraIssue[0].issue.self);
         // Search environment for tags
         let sha: string;
         let owner: string;
@@ -44,15 +54,6 @@ export const onJiraIssueEventApprovalHandler = (goal: Goal): OnEvent<types.OnJir
             return Success;
         }
 
-        // Validate new state is approved (only process if this issue is a state change)
-        if (
-            event.webhookEvent !== "jira:issue_updated" ||
-            !event.issue_event_type_name.match(/^(issue_generic|issue_updated|issue_assigned)$/) ||
-            event.changelog === null
-        ) {
-           logger.info(`JIRA onJiraIssueEventApprovalHandler: Not searching for approval, wrong event type.`);
-           return Success;
-        }
 
         // Get new status
         const status = event.changelog.items.filter(c => c.field === "status");

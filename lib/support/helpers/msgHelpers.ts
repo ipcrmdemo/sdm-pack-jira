@@ -1,4 +1,4 @@
-import { configurationValue, logger } from "@atomist/automation-client";
+import {buttonForCommand, configurationValue, logger} from "@atomist/automation-client";
 import { slackTs } from "@atomist/sdm";
 import * as slack from "@atomist/slack-messages";
 import jira2slack = require("jira2slack");
@@ -18,7 +18,7 @@ export const prepareIssueCommentedMessage = async (event: types.OnJiraIssueEvent
 
     return {
         attachments: [{
-            pretext: `<${jiraConfig.url}/browse/${event.issue.key}|Updated Issue ${event.issue.key}: ${event.issue.fields.summary}>`,
+            pretext: `<${jiraConfig.url}/browse/${event.issue.key}|New Comment on Issue ${event.issue.key}: ${event.issue.fields.summary}>`,
             color: "#45B254",
             author_name: `@${event.comment.author.name}`,
             author_icon: authorDetail.author.avatarUrls["48x48"],
@@ -32,7 +32,14 @@ export const prepareIssueCommentedMessage = async (event: types.OnJiraIssueEvent
             ),
             footer_icon: "https://wac-cdn.atlassian.com/dam/jcr:b5e4a5a5-94b9-4098-ad1f-af4ba39b401f/corporate-deck@2x_V2.png?cdnVersion=kr",
             ts: slackTs(),
-        }],
+        },
+        {
+            fallback: "Actions",
+            actions: [
+                buttonForCommand({text: "Comment"}, "JiraCommentOnIssue", {issueId: event.issue.id}),
+            ],
+        },
+        ],
     };
 };
 
@@ -78,7 +85,14 @@ export const prepareStateChangeMessage = async (event: types.OnJiraIssueEvent.Ji
             ),
             footer_icon: "https://wac-cdn.atlassian.com/dam/jcr:b5e4a5a5-94b9-4098-ad1f-af4ba39b401f/corporate-deck@2x_V2.png?cdnVersion=kr",
             ts: slackTs(),
-        }],
+        },
+        {
+            fallback: "Actions",
+            actions: [
+                buttonForCommand({text: "Comment"}, "JiraCommentOnIssue", {issueId: event.issue.id}),
+            ],
+        },
+        ],
     };
 
 };
@@ -163,7 +177,14 @@ export const prepareNewIssueMessage = async (event: types.OnJiraIssueEvent.JiraI
             ),
             footer_icon: "https://wac-cdn.atlassian.com/dam/jcr:b5e4a5a5-94b9-4098-ad1f-af4ba39b401f/corporate-deck@2x_V2.png?cdnVersion=kr",
             ts: slackTs(),
-        }],
+        },
+        {
+           fallback: "Actions",
+            actions: [
+                buttonForCommand({text: "Comment"}, "JiraCommentOnIssue", {issueId: event.issue.id}),
+            ],
+        },
+        ],
     };
 };
 
