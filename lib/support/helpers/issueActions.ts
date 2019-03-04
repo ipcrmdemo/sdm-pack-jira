@@ -6,7 +6,7 @@ import {
     logger, MappedParameter,
     MappedParameters,
     Parameter,
-    Parameters
+    Parameters,
 } from "@atomist/automation-client";
 import {CommandHandlerRegistration, CommandListenerInvocation, slackErrorMessage} from "@atomist/sdm";
 import {JiraConfig} from "../../jira";
@@ -103,7 +103,7 @@ export async function commentOnIssueHandler(cli: CommandListenerInvocation<Comme
             "JIRA commentOnIssueHandler: Failed to issue comment with error - " +
             `(${JSON.stringify(e.response.status)}) ${JSON.stringify(e.response.data)}`,
             cli.context,
-        ))
+        ));
         return { code: 1, message: JSON.stringify(e.response.data)};
     });
 
@@ -114,4 +114,4 @@ export const commentOnIssue: CommandHandlerRegistration<CommentOnIssueParams> = 
     name: "JiraCommentOnIssue",
     paramsMaker: CommentOnIssueParams,
     listener: commentOnIssueHandler,
-}
+};
