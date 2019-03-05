@@ -1,5 +1,6 @@
 import { GraphQL } from "@atomist/automation-client";
 import { ExtensionPack, metadata } from "@atomist/sdm";
+import * as NodeCache from "node-cache";
 import { onJiraIssueEvent } from "./event/onJiraIssueEvent";
 import { getJiraChannelPrefsReg, setJiraChannelPrefsReg } from "./support/commands/configureChannelPrefs";
 import {h1createJiraTicketReg, h2createJiraTicketReg, h3createJiraTicketReg} from "./support/commands/createJiraTicket";
@@ -40,6 +41,11 @@ export const jiraSupport = (): ExtensionPack => {
             sdm.addCommand(h2createJiraTicketReg);
             sdm.addCommand(h3createJiraTicketReg);
             sdm.addCommand(commentOnIssue);
+
+            sdm.configuration.sdm.jiraCache = new NodeCache({
+                stdTTL: 3600,
+                checkperiod: 30,
+            });
             return sdm;
         },
     };

@@ -1,16 +1,49 @@
 import { configurationValue, HandlerContext, logger, QueryNoCacheOptions } from "@atomist/automation-client";
 import _ = require("lodash");
+import * as NodeCache from "node-cache";
+import * as objectHash from "object-hash";
 import * as types from "../../typings/types";
 import { queryJiraChannelPrefs } from "../commands/configureChannelPrefs";
 import { getJiraIssueRepos } from "../jiraDataLookup";
 
-const getProjectChannels = async (ctx: HandlerContext, projectId: string, onlyActive: boolean = true): Promise<string[]> => {
-    const projectChannels = await ctx.graphClient.query<types.GetChannelByProject.Query, types.GetChannelByProject.Variables>({
-        name: "GetChannelByProject",
-        variables: { projectid: [projectId] },
-        options: QueryNoCacheOptions,
-    });
+/**
+ * Query Graph for JIRA Mappings using cache if available
+ * @param {HandlerContext} ctx
+ * @param {string} queryName
+ * @param {any} variables
+ */
+export async function cachedJiraMappingLookup<Q, V>(
+    ctx: HandlerContext,
+    queryName: string,
+    variables: V,
+): Promise<Q> {
+    const hashKey = `${ctx.workspaceId}-${queryName}-${objectHash(variables)}`;
+    return new Promise<Q>((resolve, reject) => {
+        const jiraCache = configurationValue<NodeCache>("sdm.jiraCache");
+        const result = jiraCache.get<Q>(hashKey);
 
+        if (result !== undefined) {
+            logger.debug(`JIRA cachedJiraMappingLookup => ${hashKey}: Cache hit, re-using value...`);
+            resolve(result);
+        } else {
+            logger.debug(`JIRA cachedJiraMappingLookup => ${hashKey}): Cache miss, querying...`);
+            ctx.graphClient.query<Q, V>({
+                name: queryName,
+                variables,
+                options: QueryNoCacheOptions,
+            }).then( res => {
+                jiraCache.set(hashKey, res);
+                resolve(res);
+            }).catch(e => {
+                reject(e);
+            });
+        }
+    });
+}
+
+const getProjectChannels = async (ctx: HandlerContext, projectId: string, onlyActive: boolean = true): Promise<string[]> => {
+    const projectChannels =
+        await cachedJiraMappingLookup<types.GetChannelByProject.Query, types.GetChannelByProject.Variables>(ctx, "GetChannelByProject", {projectid: [projectId]});
     const returnChannels: string[] = [];
     projectChannels.JiraProjectMap.forEach(c => {
         switch (onlyActive) {
@@ -34,13 +67,8 @@ export const getMappedProjectsbyChannel = async (
     ctx: HandlerContext,
     channel: string,
 ): Promise<string[]> => {
-    const projects = await ctx.graphClient.query<types.GetAllProjectMappingsforChannel.Query, types.GetAllProjectMappingsforChannel.Variables>({
-        name: "GetAllProjectMappingsforChannel",
-        variables: {
-            channel: [channel],
-        },
-        options: QueryNoCacheOptions,
-    });
+    const projects =
+        await cachedJiraMappingLookup<types.GetAllProjectMappingsforChannel.Query, types.GetAllProjectMappingsforChannel.Variables>(ctx, "GetAllProjectMappingsforChannel", {channel: [channel]});
     if (projects && projects.JiraProjectMap.length > 0) {
         return projects.JiraProjectMap.map(c => c.projectId);
     } else {
@@ -57,13 +85,8 @@ export const getMappedComponentsbyChannel = async (
     ctx: HandlerContext,
     channel: string,
 ): Promise<JiraProjectComponentMap[]> => {
-    const components = await ctx.graphClient.query<types.GetAllComponentMappingsforChannel.Query, types.GetAllComponentMappingsforChannel.Variables>({
-        name: "GetAllComponentMappingsforChannel",
-        variables: {
-            channel: [channel],
-        },
-        options: QueryNoCacheOptions,
-    });
+    const components =
+        await cachedJiraMappingLookup<types.GetAllComponentMappingsforChannel.Query, types.GetAllComponentMappingsforChannel.Variables>(ctx, "GetAllComponentMappingsforChannel", {channel: [channel]});
     if (components && components.JiraComponentMap && components.JiraComponentMap.length > 0) {
         return components.JiraComponentMap.map<JiraProjectComponentMap>(c => ({componentId: c.componentId, projectId: c.projectId}));
     } else {
@@ -79,14 +102,8 @@ const getComponentChannels = async (
     ): Promise<string[]> => {
     const componentChannels: string[] = [];
     await Promise.all(componentIds.map(async c => {
-        const result = await ctx.graphClient.query<types.GetChannelByComponent.Query, types.GetChannelByComponent.Variables>({
-            name: "GetChannelByComponent",
-            variables: {
-                projectId,
-                componentId: c,
-            },
-            options: QueryNoCacheOptions,
-        });
+        const result =
+            await cachedJiraMappingLookup<types.GetChannelByComponent.Query, types.GetChannelByComponent.Variables>(ctx, "GetChannelByComponent", {projectId, componentId: c});
 
         if (result.JiraComponentMap && result.JiraComponentMap && result.JiraComponentMap.length > 0) {
             switch (onlyActive) {
@@ -182,11 +199,7 @@ export const jiraDetermineNotifyChannels = async (
  */
 export async function findChannelByRepo(ctx: HandlerContext, name: string): Promise<string[]> {
    return new Promise<string[]>( async (resolve, reject) => {
-        await ctx.graphClient.query<types.GetChannelByRepo.Query, types.GetChannelByRepo.Variables>({
-            name: "GetChannelByRepo",
-            variables: { name },
-            options: QueryNoCacheOptions,
-        })
+       await cachedJiraMappingLookup<types.GetChannelByRepo.Query, types.GetChannelByRepo.Variables>(ctx, "GetChannelByRepo" + name, {name})
             .then(
                 channels => {
                     logger.debug(`findChannelByRepo: raw result ${JSON.stringify(channels)}`);
