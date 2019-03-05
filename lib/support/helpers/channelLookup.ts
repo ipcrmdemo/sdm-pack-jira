@@ -22,7 +22,6 @@ const getProjectChannels = async (ctx: HandlerContext, projectId: string, onlyAc
             }
             case(false): {
                 returnChannels.push(c.channel);
-
                 break;
             }
         }
@@ -99,7 +98,6 @@ const getComponentChannels = async (
                 }
                 case(false): {
                     componentChannels.push(result.JiraComponentMap[0].channel);
-
                     break;
                 }
             }
