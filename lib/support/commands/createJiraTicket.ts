@@ -55,7 +55,7 @@ export async function h1createJiraTicket(cli: CommandListenerInvocation<CreateJi
 
         const projectOptions: SelectOption[] = [];
         projects.forEach(p => {
-            if (cli.parameters.projectSearch.toLowerCase().includes(p.name.toLowerCase())) {
+            if (p.name.toLowerCase().includes(cli.parameters.projectSearch.toLowerCase())) {
                 projectOptions.push({
                     text: p.name,
                     value: p.key,
@@ -70,10 +70,6 @@ export async function h1createJiraTicket(cli: CommandListenerInvocation<CreateJi
 
         const message: SlackMessage = {
             attachments: [
-                {
-                    fallback: undefined,
-                    image_url: "https://www.atlassian.com/dam/jcr:e33efd9e-e0b8-4d61-a24d-68a48ef99ed5/Jira%20Software@2x-blue.png",
-                },
                 {
                 author_icon: "https://www.atlassian.com/dam/jcr:e33efd9e-e0b8-4d61-a24d-68a48ef99ed5/Jira%20Software@2x-blue.png",
                 pretext: `Please select which JIRA project this issue should be created in:`,
@@ -141,10 +137,6 @@ export async function h2createJiraTicket(cli: CommandListenerInvocation<CreateJi
 
         const message: SlackMessage = {
             attachments: [
-                {
-                    fallback: undefined,
-                    image_url: "https://www.atlassian.com/dam/jcr:e33efd9e-e0b8-4d61-a24d-68a48ef99ed5/Jira%20Software@2x-blue.png",
-                },
                 {
                 pretext: `Please select a JIRA Issue Type`,
                 color: "#45B254",

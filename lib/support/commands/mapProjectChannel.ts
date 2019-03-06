@@ -172,12 +172,12 @@ export function createProjectChannelMappingOptions(ci: CommandListenerInvocation
         const lookupUrl = `${jiraConfig.url}/rest/api/2/project`;
 
         logger.debug(`JIRA createProjectChannelMappingOptions: Command is ${JSON.stringify(ci.parameters)}`);
-
         const projectValues: SelectOption[] = [];
         const result = await getJiraDetails<JiraProject[]>(lookupUrl, true);
 
         result.forEach(p => {
-            if (ci.parameters.projectSearch.toLowerCase().includes(p.name.toLowerCase())) {
+            if (p.name.toLowerCase().includes(ci.parameters.projectSearch.toLowerCase())) {
+                logger.debug(`JIRA createProjectChannelMappingOptions: Found project match ${p.name}!`);
                 projectValues.push({text: p.name, value: p.id});
             }
         });
