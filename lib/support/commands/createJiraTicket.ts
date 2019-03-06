@@ -40,6 +40,12 @@ export class CreateJiraTicketParamsBase {
         order: 1,
     })
     public summary: string;
+
+    @Parameter({
+        description: "Please enter a search term to find your project",
+        displayName: "Please enter a search term to find your project",
+    })
+    public projectSearch: string;
 }
 
 export async function h1createJiraTicket(cli: CommandListenerInvocation<CreateJiraTicketParamsBase>): Promise<HandlerResult> {
@@ -49,10 +55,12 @@ export async function h1createJiraTicket(cli: CommandListenerInvocation<CreateJi
 
         const projectOptions: SelectOption[] = [];
         projects.forEach(p => {
-            projectOptions.push({
-                text: p.name,
-                value: p.key,
-            });
+            if (cli.parameters.projectSearch.toLowerCase().includes(p.name.toLowerCase())) {
+                projectOptions.push({
+                    text: p.name,
+                    value: p.key,
+                });
+            }
         });
 
         const menuSpec: MenuSpecification = {
