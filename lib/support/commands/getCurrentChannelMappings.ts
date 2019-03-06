@@ -12,7 +12,7 @@ import * as slack from "@atomist/slack-messages";
 import { JiraConfig } from "../../jira";
 import { getMappedComponentsbyChannel, getMappedProjectsbyChannel, JiraProjectComponentMap } from "../helpers/channelLookup";
 import { getJiraDetails } from "../jiraDataLookup";
-import { JiraProject } from "./shared";
+import { JiraProject } from "../shared";
 
 @Parameters()
 class JiraGetCurrentChannelMappingsParams {
@@ -50,7 +50,7 @@ export const lookupJiraProjectDetails = async (projectsToLookup: string[]): Prom
     const projectDetails: JiraProject[] = [];
     await Promise.all(projectsToLookup.map(async p => {
             const lookupUrl = `${jiraConfig.url}/rest/api/2/project/${p}`;
-            const localProjectDetails = await getJiraDetails<JiraProject>(lookupUrl);
+            const localProjectDetails = await getJiraDetails<JiraProject>(lookupUrl, true);
             projectDetails.push(localProjectDetails);
     }));
 

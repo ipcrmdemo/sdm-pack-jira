@@ -20,7 +20,7 @@ import { getMappedComponentsbyChannel, JiraProjectComponentMap } from "../helper
 import { getJiraDetails } from "../jiraDataLookup";
 import { findRequiredProjects, lookupJiraProjectDetails } from "./getCurrentChannelMappings";
 import { createProjectChannelMappingOptions, JiraProjectMappingParams } from "./mapProjectChannel";
-import { JiraProject } from "./shared";
+import { JiraProject } from "../shared";
 
 @Parameters()
 export class JiraComponentMappingParams {
@@ -91,7 +91,7 @@ export function createComponentChannelMapping(ci: CommandListenerInvocation<Jira
             };
             await ci.context.messageClient.send(payload, addressEvent("JiraComponentMap"));
             const componentDetails =
-                await getJiraDetails<types.OnJiraIssueEvent.Components>(`${jiraConfig.url}/rest/api/2/component/${ci.parameters.componentId}`);
+                await getJiraDetails<types.OnJiraIssueEvent.Components>(`${jiraConfig.url}/rest/api/2/component/${ci.parameters.componentId}`, true);
             await ci.addressChannels(slackSuccessMessage(
                 `New JIRA Component mapping created successfully!`,
                 `Added new mapping from Component *${componentDetails.name}* to *${ci.parameters.slackChannelName}*`,
@@ -123,7 +123,7 @@ export function createComponentChannelMappingOptions(ci: CommandListenerInvocati
         try {
             const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
             const lookupUrl = `${jiraConfig.url}/rest/api/2/project/${ci.parameters.projectId}`;
-            const projectDetails = await getJiraDetails<JiraProject>(lookupUrl);
+            const projectDetails = await getJiraDetails<JiraProject>(lookupUrl, true);
             const componentValues: SelectOption[] = [];
 
             projectDetails.components.forEach(c => {

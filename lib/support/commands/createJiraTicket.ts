@@ -20,7 +20,7 @@ import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
 import {getJiraDetails} from "../jiraDataLookup";
 import * as jiraTypes from "../jiraDefs";
-import {convertEmailtoJiraUser} from "./shared";
+import {convertEmailtoJiraUser} from "../shared";
 
 export interface JiraIssueCreated {
     id: string;
@@ -46,7 +46,7 @@ export class CreateJiraTicketParamsBase {
 export async function h1createJiraTicket(cli: CommandListenerInvocation<CreateJiraTicketParamsBase>): Promise<HandlerResult> {
     try {
         const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
-        const projects = await getJiraDetails<jiraTypes.Project[]>(`${jiraConfig.url}/rest/api/2/project`);
+        const projects = await getJiraDetails<jiraTypes.Project[]>(`${jiraConfig.url}/rest/api/2/project`, true);
 
         const projectOptions: SelectOption[] = [];
         projects.forEach(p => {
@@ -116,7 +116,7 @@ export class CreateJiraIssueParamsIssueType extends CreateJiraTicketParamsBase {
 export async function h2createJiraTicket(cli: CommandListenerInvocation<CreateJiraIssueParamsIssueType>): Promise<HandlerResult> {
     try {
         const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
-        const availIssueTypes = await getJiraDetails<jiraTypes.Project>(`${jiraConfig.url}/rest/api/2/project/${cli.parameters.project}`);
+        const availIssueTypes = await getJiraDetails<jiraTypes.Project>(`${jiraConfig.url}/rest/api/2/project/${cli.parameters.project}`, true);
         const issueOptions: SelectOption[] = [];
         availIssueTypes.issueTypes.forEach(t => {
             if (t.name !== "Sub-task") {

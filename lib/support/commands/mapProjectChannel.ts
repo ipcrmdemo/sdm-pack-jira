@@ -2,8 +2,6 @@ import {
   addressEvent,
   configurationValue,
   HandlerResult,
-  HttpClientFactory,
-  HttpMethod,
   logger,
   MappedParameter,
   MappedParameters,
@@ -12,14 +10,14 @@ import {
   Parameter,
   Parameters,
 } from "@atomist/automation-client";
-import {CommandHandlerRegistration, CommandListenerInvocation, slackErrorMessage, slackSuccessMessage, slackTs} from "@atomist/sdm";
+import {CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs} from "@atomist/sdm";
 import { SelectOption, SlackMessage } from "@atomist/slack-messages";
 import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
 import { getMappedProjectsbyChannel } from "../helpers/channelLookup";
 import { getJiraDetails } from "../jiraDataLookup";
+import { JiraProject } from "../shared";
 import { lookupJiraProjectDetails } from "./getCurrentChannelMappings";
-import { JiraProject } from "./shared";
 
 @Parameters()
 export class JiraProjectMappingParams {
@@ -86,7 +84,7 @@ export function createProjectChannelMapping(
             };
             await ci.context.messageClient.send(payload, addressEvent("JiraProjectMap"));
             const projectDetails =
-                await getJiraDetails<types.OnJiraIssueEvent.Project>(`${jiraConfig.url}/rest/api/2/project/${ci.parameters.projectId}`);
+                await getJiraDetails<types.OnJiraIssueEvent.Project>(`${jiraConfig.url}/rest/api/2/project/${ci.parameters.projectId}`, true);
 
             const subject = ci.parameters.enabled ? `New JIRA Project mapping created successfully!` : `JIRA Project mapping removed successfully!`;
             const message = ci.parameters.enabled ?
@@ -118,65 +116,43 @@ export const createProjectChannelMappingReg: CommandHandlerRegistration<JiraProj
 
 export function createProjectChannelMappingOptions(ci: CommandListenerInvocation<JiraProjectMappingOptionsParams>): Promise<HandlerResult> {
     return new Promise<HandlerResult>(async (resolve, reject) => {
-        const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create();
         const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
         const lookupUrl = `${jiraConfig.url}/rest/api/2/project`;
 
         logger.debug(`JIRA createProjectChannelMappingOptions: Command is ${JSON.stringify(ci.parameters)}`);
 
         const projectValues: SelectOption[] = [];
-        await httpClient.exchange(
-            lookupUrl,
+        const result = await getJiraDetails<JiraProject[]>(lookupUrl, true);
+
+        result.forEach(p => {
+            projectValues.push({text: p.name, value: p.id});
+        });
+
+        const menuSpec: MenuSpecification = {
+            text: "Select Project",
+            options: projectValues,
+        };
+
+        const message: SlackMessage = {
+            attachments: [{
+                pretext: `Create a new JIRA Project Mapping`,
+                color: "#45B254",
+                fallback: `Create a new project mapping`,
+                ts: slackTs(),
+                actions: [
+                    menuForCommand(menuSpec, ci.parameters.cmd, "projectId", {
+                        enabled: ci.parameters.enabled,
+                    }),
+                ],
+            }],
+        };
+
+        await ci.addressChannels(message,
             {
-                method: HttpMethod.Get,
-                headers: {
-                    Accept: "application/json",
-                },
-                options: {
-                    auth: {
-                        username: jiraConfig.user,
-                        password: jiraConfig.password,
-                    },
-                },
-            },
-        )
-            .then(async result => {
-                const projects = result.body as JiraProject[];
-                projects.forEach(p => {
-                    projectValues.push({text: p.name, value: p.id});
-                });
-
-                const menuSpec: MenuSpecification = {
-                    text: "Select Project",
-                    options: projectValues,
-                };
-
-                const message: SlackMessage = {
-                    attachments: [{
-                        pretext: `Create a new JIRA Project Mapping`,
-                        color: "#45B254",
-                        fallback: `Create a new project mapping`,
-                        ts: slackTs(),
-                        actions: [
-                            menuForCommand(menuSpec, ci.parameters.cmd, "projectId", {
-                                enabled: ci.parameters.enabled,
-                            }),
-                        ],
-                    }],
-                };
-
-                await ci.addressChannels(message, {
-                    ttl: 15000,
-                    id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
-                });
-                resolve({ code: 0 });
-            })
-            .catch(async e => {
-                reject({
-                    code: 1,
-                    message: e,
-                });
-            });
+            ttl: 15000,
+            id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
+        });
+        resolve({ code: 0 });
     });
 }
 

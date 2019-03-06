@@ -11,7 +11,7 @@ import {
 import {CommandHandlerRegistration, CommandListenerInvocation, slackErrorMessage} from "@atomist/sdm";
 import {JiraConfig} from "../../jira";
 import * as types from "../../typings/types";
-import {convertEmailtoJiraUser} from "../commands/shared";
+import {convertEmailtoJiraUser} from "../shared";
 
 @Parameters()
 export class CommentOnIssueParams {

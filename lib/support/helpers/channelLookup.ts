@@ -1,49 +1,14 @@
-import { configurationValue, HandlerContext, logger, QueryNoCacheOptions } from "@atomist/automation-client";
+import { configurationValue, HandlerContext, logger } from "@atomist/automation-client";
 import _ = require("lodash");
-import * as NodeCache from "node-cache";
-import * as objectHash from "object-hash";
 import * as types from "../../typings/types";
 import { queryJiraChannelPrefs } from "../commands/configureChannelPrefs";
 import { getJiraIssueRepos } from "../jiraDataLookup";
-
-/**
- * Query Graph for JIRA Mappings using cache if available
- * @param {HandlerContext} ctx
- * @param {string} queryName
- * @param {any} variables
- */
-export async function cachedJiraMappingLookup<Q, V>(
-    ctx: HandlerContext,
-    queryName: string,
-    variables: V,
-): Promise<Q> {
-    const hashKey = `${ctx.workspaceId}-${queryName}-${objectHash(variables)}`;
-    return new Promise<Q>((resolve, reject) => {
-        const jiraCache = configurationValue<NodeCache>("sdm.jiraCache");
-        const result = jiraCache.get<Q>(hashKey);
-
-        if (result !== undefined) {
-            logger.debug(`JIRA cachedJiraMappingLookup => ${hashKey}: Cache hit, re-using value...`);
-            resolve(result);
-        } else {
-            logger.debug(`JIRA cachedJiraMappingLookup => ${hashKey}): Cache miss, querying...`);
-            ctx.graphClient.query<Q, V>({
-                name: queryName,
-                variables,
-                options: QueryNoCacheOptions,
-            }).then( res => {
-                jiraCache.set(hashKey, res);
-                resolve(res);
-            }).catch(e => {
-                reject(e);
-            });
-        }
-    });
-}
+import {cachedJiraMappingLookup} from "../shared";
 
 const getProjectChannels = async (ctx: HandlerContext, projectId: string, onlyActive: boolean = true): Promise<string[]> => {
     const projectChannels =
-        await cachedJiraMappingLookup<types.GetChannelByProject.Query, types.GetChannelByProject.Variables>(ctx, "GetChannelByProject", {projectid: [projectId]});
+        await cachedJiraMappingLookup<types.GetChannelByProject.Query, types.GetChannelByProject.Variables>(
+            ctx, "GetChannelByProject", {projectid: [projectId]});
     const returnChannels: string[] = [];
     projectChannels.JiraProjectMap.forEach(c => {
         switch (onlyActive) {
@@ -68,7 +33,8 @@ export const getMappedProjectsbyChannel = async (
     channel: string,
 ): Promise<string[]> => {
     const projects =
-        await cachedJiraMappingLookup<types.GetAllProjectMappingsforChannel.Query, types.GetAllProjectMappingsforChannel.Variables>(ctx, "GetAllProjectMappingsforChannel", {channel: [channel]});
+        await cachedJiraMappingLookup<types.GetAllProjectMappingsforChannel.Query, types.GetAllProjectMappingsforChannel.Variables>(
+            ctx, "GetAllProjectMappingsforChannel", {channel: [channel]});
     if (projects && projects.JiraProjectMap.length > 0) {
         return projects.JiraProjectMap.map(c => c.projectId);
     } else {
@@ -86,7 +52,8 @@ export const getMappedComponentsbyChannel = async (
     channel: string,
 ): Promise<JiraProjectComponentMap[]> => {
     const components =
-        await cachedJiraMappingLookup<types.GetAllComponentMappingsforChannel.Query, types.GetAllComponentMappingsforChannel.Variables>(ctx, "GetAllComponentMappingsforChannel", {channel: [channel]});
+        await cachedJiraMappingLookup<types.GetAllComponentMappingsforChannel.Query, types.GetAllComponentMappingsforChannel.Variables>(
+            ctx, "GetAllComponentMappingsforChannel", {channel: [channel]});
     if (components && components.JiraComponentMap && components.JiraComponentMap.length > 0) {
         return components.JiraComponentMap.map<JiraProjectComponentMap>(c => ({componentId: c.componentId, projectId: c.projectId}));
     } else {
@@ -103,7 +70,8 @@ const getComponentChannels = async (
     const componentChannels: string[] = [];
     await Promise.all(componentIds.map(async c => {
         const result =
-            await cachedJiraMappingLookup<types.GetChannelByComponent.Query, types.GetChannelByComponent.Variables>(ctx, "GetChannelByComponent", {projectId, componentId: c});
+            await cachedJiraMappingLookup<types.GetChannelByComponent.Query, types.GetChannelByComponent.Variables>(
+                ctx, "GetChannelByComponent", {projectId, componentId: c});
 
         if (result.JiraComponentMap && result.JiraComponentMap && result.JiraComponentMap.length > 0) {
             switch (onlyActive) {

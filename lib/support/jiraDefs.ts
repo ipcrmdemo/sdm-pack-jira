@@ -90,7 +90,7 @@ export interface Priority {
 }
 export interface SubTaskFields {
     summary: string;
-    status: Status;
+    status: Status
     priority: Priority;
     issuetype: Issuetype;
 }

@@ -1,9 +1,10 @@
 import {
-  configurationValue,
-  HttpClientFactory,
-  HttpMethod,
-  logger,
+    configurationValue,
+    HttpClientFactory,
+    HttpMethod,
+    logger,
 } from "@atomist/automation-client";
+import * as NodeCache from "node-cache";
 import { JiraConfig } from "../jira";
 
 /**
@@ -14,36 +15,50 @@ import { JiraConfig } from "../jira";
  *  example: const result = await jiraSelfUrl<User>("http://localhost:8080/rest/api/2/user?username=matt");
  *
  * @param {string} jiraSelfUrl Supply the api endpoint to the given user
+ * @param {boolean} cache Can we store the result of this query? Default false
+ * @param {number} ttl If we cache, how long should we store this? Default 3600
  * @returns {User} JIRA user object
  */
-export async function getJiraDetails<T>(jiraSelfUrl: string): Promise<T> {
+export async function getJiraDetails<T>(jiraSelfUrl: string, cache: boolean = false, ttl: number = 3600): Promise<T> {
     return new Promise<T>( async (resolve, reject) => {
         const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create();
         const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
+        const jiraCache = configurationValue<NodeCache>("sdm.jiraCache");
+        const cacheResult = jiraCache.get<T>(jiraSelfUrl);
 
-        await httpClient.exchange(
-            jiraSelfUrl,
-            {
-                method: HttpMethod.Get,
-                headers: {
-                    Accept: "application/json",
-                },
-                options: {
-                    auth: {
-                        username: jiraConfig.user,
-                        password: jiraConfig.password,
+        if (cache && cacheResult !== undefined) {
+            logger.debug(`JIRA getJiraDetails => ${jiraSelfUrl}: Cache hit, re-using value...`);
+            resolve(cacheResult);
+        } else {
+            logger.debug(`JIRA getJiraDetails => ${jiraSelfUrl}): Cache ${cache ? "miss" : "disabled"}, querying...`);
+
+            await httpClient.exchange(
+                jiraSelfUrl,
+                {
+                    method: HttpMethod.Get,
+                    headers: {
+                        Accept: "application/json",
+                    },
+                    options: {
+                        auth: {
+                            username: jiraConfig.user,
+                            password: jiraConfig.password,
+                        },
                     },
                 },
-            },
-        )
-            .then(result => {
-                resolve(result.body as T);
-            })
-            .catch(e => {
-                const error = `JIRA getJiraDetails: Failed to retrieve details for ${jiraSelfUrl}, error thrown: ${e}`;
-                logger.error(error);
-                reject(error);
-            });
+            )
+                .then(result => {
+                    if (cache) {
+                        jiraCache.set(jiraSelfUrl, result.body, ttl);
+                    }
+                    resolve(result.body as T);
+                })
+                .catch(e => {
+                    const error = `JIRA getJiraDetails: Failed to retrieve details for ${jiraSelfUrl}, error thrown: ${e}`;
+                    logger.error(error);
+                    reject(error);
+                });
+        }
     });
 }
 

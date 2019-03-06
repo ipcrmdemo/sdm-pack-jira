@@ -46,7 +46,7 @@ export const prepareIssueCommentedMessage = async (event: types.OnJiraIssueEvent
 export const prepareStateChangeMessage = async (event: types.OnJiraIssueEvent.JiraIssue): Promise<slack.SlackMessage> => {
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
     const issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self);
-    const userDetail = await getJiraDetails<jiraTypes.User>(event.user.self);
+    const userDetail = await getJiraDetails<jiraTypes.User>(event.user.self, true);
 
     const fields: slack.Field[] = [];
     event.changelog.items.forEach(c => {
@@ -98,7 +98,7 @@ export const prepareStateChangeMessage = async (event: types.OnJiraIssueEvent.Ji
 };
 
 export const prepareIssueDeletedMessage = async (event: types.OnJiraIssueEvent.JiraIssue): Promise<slack.SlackMessage> => {
-    const userDetail = await getJiraDetails<jiraTypes.User>(event.user.self);
+    const userDetail = await getJiraDetails<jiraTypes.User>(event.user.self, true);
 
     return {
         attachments: [{

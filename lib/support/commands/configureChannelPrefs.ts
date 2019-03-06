@@ -12,7 +12,7 @@ import {
 import { CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs } from "@atomist/sdm";
 import { SlackMessage } from "@atomist/slack-messages";
 import * as types from "../../typings/types";
-import {cachedJiraMappingLookup} from "../helpers/channelLookup";
+import {cachedJiraMappingLookup} from "../shared";
 
 @Parameters()
 class JiraChannelPrefsBase {
