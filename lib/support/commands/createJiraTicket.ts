@@ -7,7 +7,6 @@ import {
     Parameter,
     Parameters, SelectOption,
 } from "@atomist/automation-client";
-import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata";
 import {
     CommandHandlerRegistration,
     CommandListenerInvocation,

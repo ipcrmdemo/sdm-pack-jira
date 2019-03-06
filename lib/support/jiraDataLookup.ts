@@ -30,7 +30,7 @@ export async function getJiraDetails<T>(jiraSelfUrl: string, cache: boolean = fa
             logger.debug(`JIRA getJiraDetails => ${jiraSelfUrl}: Cache hit, re-using value...`);
             resolve(cacheResult);
         } else {
-            logger.debug(`JIRA getJiraDetails => ${jiraSelfUrl}): Cache ${cache ? "miss" : "disabled"}, querying...`);
+            logger.debug(`JIRA getJiraDetails => ${jiraSelfUrl}: Cache ${cache ? "miss" : "disabled"}, querying...`);
 
             await httpClient.exchange(
                 jiraSelfUrl,

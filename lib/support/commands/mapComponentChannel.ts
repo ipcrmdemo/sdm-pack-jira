@@ -18,9 +18,9 @@ import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
 import { getMappedComponentsbyChannel, JiraProjectComponentMap } from "../helpers/channelLookup";
 import { getJiraDetails } from "../jiraDataLookup";
-import { findRequiredProjects, lookupJiraProjectDetails } from "./getCurrentChannelMappings";
-import { createProjectChannelMappingOptions, JiraProjectMappingParams } from "./mapProjectChannel";
 import { JiraProject } from "../shared";
+import { findRequiredProjects, lookupJiraProjectDetails } from "./getCurrentChannelMappings";
+import {createProjectChannelMappingOptions, createProjectChannelMappingProjectInput, JiraProjectMappingParams} from "./mapProjectChannel";
 
 @Parameters()
 export class JiraComponentMappingParams {
@@ -49,7 +49,10 @@ class JiraComponentMappingOptionsParams {
     @MappedParameter(MappedParameters.SlackChannelName)
     public slackChannelName: string;
 
-    @Parameter()
+    @Parameter({
+        required: false,
+        displayable: false,
+    })
     public cmd: string = "CreateComponentChannelOptionsMapping";
 
     @Parameter({
@@ -58,6 +61,12 @@ class JiraComponentMappingOptionsParams {
         type: "boolean",
     })
     public enabled: boolean = true;
+
+    @Parameter({
+        displayName: `Search string`,
+        description: "Please enter a search term to find your project",
+    })
+    public projectSearch: string;
 }
 
 @Parameters()
@@ -199,7 +208,7 @@ export const startComponentChannelMappingOptionsReg: CommandHandlerRegistration<
     description: "Enable JIRA notifications for a component",
     intent: "jira map component",
     paramsMaker: JiraComponentMappingOptionsParams,
-    listener: createProjectChannelMappingOptions,
+    listener: createProjectChannelMappingProjectInput,
 };
 
 export function removeComponentChannelMapping(ci: CommandListenerInvocation<JiraComponentDisableMappingParams>): Promise<HandlerResult> {

@@ -45,7 +45,7 @@ export async function cachedJiraMappingLookup<Q, V>(
             logger.debug(`JIRA cachedJiraMappingLookup => ${hashKey}: Cache hit, re-using value...`);
             resolve(result);
         } else {
-            logger.debug(`JIRA cachedJiraMappingLookup => ${hashKey}): Cache miss, querying...`);
+            logger.debug(`JIRA cachedJiraMappingLookup => ${hashKey}: Cache miss, querying...`);
             ctx.graphClient.query<Q, V>({
                 name: queryName,
                 variables,

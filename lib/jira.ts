@@ -12,7 +12,12 @@ import {
   removeComponentChannelMappingReg,
   startComponentChannelMappingOptionsReg,
 } from "./support/commands/mapComponentChannel";
-import { createProjectChannelMappingReg, produceProjectChannelMappingOptions, removeProjectMappingReg } from "./support/commands/mapProjectChannel";
+import {
+    createProjectChannelMappingProjectInputReg,
+    createProjectChannelMappingReg,
+    produceProjectChannelMappingOptions,
+    removeProjectMappingReg
+} from "./support/commands/mapProjectChannel";
 import {commentOnIssue} from "./support/helpers/issueActions";
 
 export const jiraSupport = (): ExtensionPack => {
@@ -37,6 +42,7 @@ export const jiraSupport = (): ExtensionPack => {
             sdm.addCommand(removeComponentChannelMappingReg);
             sdm.addCommand(setJiraChannelPrefsReg);
             sdm.addCommand(getJiraChannelPrefsReg);
+            sdm.addCommand(createProjectChannelMappingProjectInputReg);
             sdm.addCommand(h1createJiraTicketReg);
             sdm.addCommand(h2createJiraTicketReg);
             sdm.addCommand(h3createJiraTicketReg);

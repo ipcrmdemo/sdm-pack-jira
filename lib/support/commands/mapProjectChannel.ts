@@ -1,16 +1,16 @@
 import {
-  addressEvent,
-  configurationValue,
-  HandlerResult,
-  logger,
-  MappedParameter,
-  MappedParameters,
-  menuForCommand,
-  MenuSpecification,
-  Parameter,
-  Parameters,
+    addressEvent, buttonForCommand,
+    configurationValue,
+    HandlerResult,
+    logger,
+    MappedParameter,
+    MappedParameters,
+    menuForCommand,
+    MenuSpecification,
+    Parameter,
+    Parameters,
 } from "@atomist/automation-client";
-import {CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs} from "@atomist/sdm";
+import {CommandHandlerRegistration, CommandListenerInvocation, slackErrorMessage, slackSuccessMessage, slackTs} from "@atomist/sdm";
 import { SelectOption, SlackMessage } from "@atomist/slack-messages";
 import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
@@ -67,6 +67,25 @@ class JiraProjectMappingOptionsParams {
         type: "boolean",
     })
     public enabled: boolean = true;
+
+    @Parameter({
+        required: false,
+        displayable: false,
+        description: "Please enter a search term to find your project",
+    })
+    public projectSearch: string;
+}
+
+@Parameters()
+class JiraProjectSearchParams {
+    @Parameter({
+        displayName: `Search string`,
+        description: "Please enter a search term to find your project",
+    })
+    public projectSearch: string;
+
+    @MappedParameter(MappedParameters.SlackChannelName)
+    public slackChannelName: string;
 }
 
 export function createProjectChannelMapping(
@@ -114,6 +133,39 @@ export const createProjectChannelMappingReg: CommandHandlerRegistration<JiraProj
     listener: createProjectChannelMapping,
 };
 
+export function createProjectChannelMappingProjectInput(ci: CommandListenerInvocation<JiraProjectSearchParams>): Promise<HandlerResult> {
+    return new Promise<HandlerResult>(async (resolve, reject) => {
+        const msg: SlackMessage = {
+            attachments: [{
+                text: "Search for project",
+                fallback: "Search for project",
+                actions: [buttonForCommand(
+                    { text: "Search"},
+                    "CreateProjectChannelMappingOptions",
+                    {...ci.parameters}),
+                ],
+            }],
+        };
+
+        await ci.addressChannels(msg,
+        {
+            ttl: 15000,
+            id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
+        });
+
+        resolve({code: 0});
+    });
+}
+
+export const createProjectChannelMappingProjectInputReg: CommandHandlerRegistration<JiraProjectSearchParams> = {
+    name: "CreateProjectChannelMappingProjectInput",
+    description: "Enable JIRA notifications for a project",
+    intent: "jira map project",
+    listener: createProjectChannelMappingProjectInput,
+    paramsMaker: JiraProjectSearchParams,
+    autoSubmit: true,
+};
+
 export function createProjectChannelMappingOptions(ci: CommandListenerInvocation<JiraProjectMappingOptionsParams>): Promise<HandlerResult> {
     return new Promise<HandlerResult>(async (resolve, reject) => {
         const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
@@ -125,27 +177,38 @@ export function createProjectChannelMappingOptions(ci: CommandListenerInvocation
         const result = await getJiraDetails<JiraProject[]>(lookupUrl, true);
 
         result.forEach(p => {
-            projectValues.push({text: p.name, value: p.id});
+            if (ci.parameters.projectSearch.toLowerCase().includes(p.name.toLowerCase())) {
+                projectValues.push({text: p.name, value: p.id});
+            }
         });
 
-        const menuSpec: MenuSpecification = {
-            text: "Select Project",
-            options: projectValues,
-        };
+        let message: SlackMessage;
+        if (projectValues) {
+            const menuSpec: MenuSpecification = {
+                text: "Select Project",
+                options: projectValues,
+            };
 
-        const message: SlackMessage = {
-            attachments: [{
-                pretext: `Create a new JIRA Project Mapping`,
-                color: "#45B254",
-                fallback: `Create a new project mapping`,
-                ts: slackTs(),
-                actions: [
-                    menuForCommand(menuSpec, ci.parameters.cmd, "projectId", {
-                        enabled: ci.parameters.enabled,
-                    }),
-                ],
-            }],
-        };
+            message = {
+                attachments: [{
+                    pretext: `Create a new JIRA Project Mapping`,
+                    color: "#45B254",
+                    fallback: `Create a new project mapping`,
+                    ts: slackTs(),
+                    actions: [
+                        menuForCommand(menuSpec, ci.parameters.cmd, "projectId", {
+                            enabled: ci.parameters.enabled,
+                        }),
+                    ],
+                }],
+            };
+        } else {
+            message = slackErrorMessage(
+                `Failed to find any projects matching your terms!`,
+                `Query of JIRA returned 0 results for projects matching ${ci.parameters.projectSearch}`,
+                ci.context,
+            );
+        }
 
         await ci.addressChannels(message,
             {
@@ -159,7 +222,6 @@ export function createProjectChannelMappingOptions(ci: CommandListenerInvocation
 export const produceProjectChannelMappingOptions: CommandHandlerRegistration<JiraProjectMappingOptionsParams> = {
     name: "CreateProjectChannelMappingOptions",
     description: "Enable JIRA notifications for a project",
-    intent: "jira map project",
     listener: createProjectChannelMappingOptions,
     paramsMaker: JiraProjectMappingOptionsParams,
 };
