@@ -7,12 +7,11 @@ import {
     MappedParameters,
     Parameter,
     Parameters,
-    QueryNoCacheOptions,
 } from "@atomist/automation-client";
 import { CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs } from "@atomist/sdm";
 import { SlackMessage } from "@atomist/slack-messages";
 import * as types from "../../typings/types";
-import {cachedJiraMappingLookup} from "../shared";
+import {cachedJiraMappingLookup} from "../cache/lookup";
 
 @Parameters()
 class JiraChannelPrefsBase {
@@ -93,7 +92,8 @@ export const queryJiraChannelPrefs = async (
     channel: string,
 ): Promise<types.GetJiraChannelPrefs.JiraChannelPrefs> => {
     const result =
-        await cachedJiraMappingLookup<types.GetJiraChannelPrefs.Query, types.GetJiraChannelPrefs.Variables>(ctx, "GetJiraChannelPrefs", {channel: [channel]});
+        await cachedJiraMappingLookup<types.GetJiraChannelPrefs.Query, types.GetJiraChannelPrefs.Variables>(
+            ctx, "GetJiraChannelPrefs", {channel: [channel]});
 
     let setPrefs: types.GetJiraChannelPrefs.JiraChannelPrefs;
     if (result.JiraChannelPrefs.length > 0) {

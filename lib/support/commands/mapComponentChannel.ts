@@ -20,12 +20,15 @@ import { getMappedComponentsbyChannel, JiraProjectComponentMap } from "../helper
 import { getJiraDetails } from "../jiraDataLookup";
 import { JiraProject } from "../shared";
 import { findRequiredProjects, lookupJiraProjectDetails } from "./getCurrentChannelMappings";
-import {createProjectChannelMappingOptions, createProjectChannelMappingProjectInput, JiraProjectMappingParams} from "./mapProjectChannel";
+import {createProjectChannelMappingProjectInput, JiraProjectMappingParams} from "./mapProjectChannel";
 
 @Parameters()
 export class JiraComponentMappingParams {
     @MappedParameter(MappedParameters.SlackChannelName)
     public slackChannelName: string;
+
+    @MappedParameter(MappedParameters.SlackChannel)
+    public slackKnownAs: string;
 
     @Parameter({
         description: "JIRA Project ID to link",
@@ -48,6 +51,9 @@ export class JiraComponentMappingParams {
 class JiraComponentMappingOptionsParams {
     @MappedParameter(MappedParameters.SlackChannelName)
     public slackChannelName: string;
+
+    @MappedParameter(MappedParameters.SlackChannel)
+    public slackChannel: string;
 
     @Parameter({
         required: false,
@@ -132,7 +138,11 @@ export function createComponentChannelMappingOptions(ci: CommandListenerInvocati
         try {
             const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
             const lookupUrl = `${jiraConfig.url}/rest/api/2/project/${ci.parameters.projectId}`;
-            const projectDetails = await getJiraDetails<JiraProject>(lookupUrl, true);
+
+            // Explicitly disable cache for lookup that we use to pull component details
+            // There is no event on component changes, which makes it not possible to expire our project cache
+            // anytime we are creating a component map, get fresh data
+            const projectDetails = await getJiraDetails<JiraProject>(lookupUrl, false);
             const componentValues: SelectOption[] = [];
 
             projectDetails.components.forEach(c => {
@@ -209,6 +219,7 @@ export const startComponentChannelMappingOptionsReg: CommandHandlerRegistration<
     intent: "jira map component",
     paramsMaker: JiraComponentMappingOptionsParams,
     listener: createProjectChannelMappingProjectInput,
+    autoSubmit: true,
 };
 
 export function removeComponentChannelMapping(ci: CommandListenerInvocation<JiraComponentDisableMappingParams>): Promise<HandlerResult> {

@@ -21,16 +21,17 @@ import { JiraConfig } from "../jira";
  */
 export async function getJiraDetails<T>(jiraSelfUrl: string, cache: boolean = false, ttl: number = 3600): Promise<T> {
     return new Promise<T>( async (resolve, reject) => {
+        const useCache = configurationValue<boolean>("sdm.jira.useCache", false) && cache ? true : false;
         const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create();
         const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
         const jiraCache = configurationValue<NodeCache>("sdm.jiraCache");
         const cacheResult = jiraCache.get<T>(jiraSelfUrl);
 
-        if (cache && cacheResult !== undefined) {
+        if (useCache && cacheResult !== undefined) {
             logger.debug(`JIRA getJiraDetails => ${jiraSelfUrl}: Cache hit, re-using value...`);
             resolve(cacheResult);
         } else {
-            logger.debug(`JIRA getJiraDetails => ${jiraSelfUrl}: Cache ${cache ? "miss" : "disabled"}, querying...`);
+            logger.debug(`JIRA getJiraDetails => ${jiraSelfUrl}: Cache ${useCache ? "miss" : "disabled"}, querying...`);
 
             await httpClient.exchange(
                 jiraSelfUrl,

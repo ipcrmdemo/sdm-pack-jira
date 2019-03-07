@@ -114,4 +114,5 @@ export const commentOnIssue: CommandHandlerRegistration<CommentOnIssueParams> = 
     name: "JiraCommentOnIssue",
     paramsMaker: CommentOnIssueParams,
     listener: commentOnIssueHandler,
+    autoSubmit: true,
 };

@@ -95,8 +95,6 @@ export async function h1createJiraTicket(cli: CommandListenerInvocation<CreateJi
             message: e,
         };
     }
-
-    return {code: 0};
 }
 
 export const h1createJiraTicketReg: CommandHandlerRegistration<CreateJiraTicketParamsBase> = {
@@ -158,8 +156,6 @@ export async function h2createJiraTicket(cli: CommandListenerInvocation<CreateJi
     } catch (e) {
         return { code: 1, message: e };
     }
-
-    return {code: 0};
 }
 
 export const h2createJiraTicketReg: CommandHandlerRegistration<CreateJiraIssueParamsIssueType> = {
@@ -268,8 +264,6 @@ export async function h3createJiraTicket(cli: CommandListenerInvocation<CreateJi
             message: e,
         };
     }
-
-    return {code: 0};
 }
 
 export const h3createJiraTicketReg: CommandHandlerRegistration<CreateJiraIssueParamsSubIssue> = {

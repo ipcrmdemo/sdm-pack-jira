@@ -1,9 +1,9 @@
 import { configurationValue, HandlerContext, logger } from "@atomist/automation-client";
 import _ = require("lodash");
 import * as types from "../../typings/types";
+import {cachedJiraMappingLookup} from "../cache/lookup";
 import { queryJiraChannelPrefs } from "../commands/configureChannelPrefs";
 import { getJiraIssueRepos } from "../jiraDataLookup";
-import {cachedJiraMappingLookup} from "../shared";
 
 const getProjectChannels = async (ctx: HandlerContext, projectId: string, onlyActive: boolean = true): Promise<string[]> => {
     const projectChannels =
@@ -11,17 +11,12 @@ const getProjectChannels = async (ctx: HandlerContext, projectId: string, onlyAc
             ctx, "GetChannelByProject", {projectid: [projectId]});
     const returnChannels: string[] = [];
     projectChannels.JiraProjectMap.forEach(c => {
-        switch (onlyActive) {
-            case(true): {
-                if (c.active === true) {
-                    returnChannels.push(c.channel);
-                }
-                break;
-            }
-            case(false): {
+        if (onlyActive) {
+            if (c.active === true) {
                 returnChannels.push(c.channel);
-                break;
             }
+        } else {
+            returnChannels.push(c.channel);
         }
     });
 
@@ -74,17 +69,12 @@ const getComponentChannels = async (
                 ctx, "GetChannelByComponent", {projectId, componentId: c});
 
         if (result.JiraComponentMap && result.JiraComponentMap && result.JiraComponentMap.length > 0) {
-            switch (onlyActive) {
-                case(true): {
-                    if (result.JiraComponentMap[0].active === true) {
-                        componentChannels.push(result.JiraComponentMap[0].channel);
-                    }
-                    break;
-                }
-                case(false): {
+            if (onlyActive) {
+                if (result.JiraComponentMap[0].active === true) {
                     componentChannels.push(result.JiraComponentMap[0].channel);
-                    break;
                 }
+            } else {
+                    componentChannels.push(result.JiraComponentMap[0].channel);
             }
         }
     }));

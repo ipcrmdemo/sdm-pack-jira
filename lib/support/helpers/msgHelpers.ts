@@ -145,8 +145,8 @@ export const prepareNewIssueMessage = async (event: types.OnJiraIssueEvent.JiraI
                 {
                     title: "Assignee",
                     value: issueDetail.fields.assignee !== null ?
-                        `${slack.emoji("bust_in_silhouette")} ${issueDetail.fields.assignee.name}` :
-                        `${slack.emoji("bust_in_silhouette")} Unassigned`,
+                        `\u{1F464} ${issueDetail.fields.assignee.name}` :
+                        `\u{1F464} Unassigned`,
                     short: true,
                 },
                 {
@@ -195,7 +195,7 @@ export function jiraSlackFooter(projectName: string, projectKey: string, labels:
     logger.debug(`JIRA jiraSlackFooter: Labels found => ${JSON.stringify(labels)}`);
     if (labels !== undefined && labels.length > 0) {
         footer += " - "
-            + labels.map(l => `${slack.emoji("label")} ${l}`).join(" ");
+            + labels.map(l => `\u{1F3F7} ${l}`).join(" ");
     }
     if (author) {
         footer += " - " + `${slack.emoji("bust_in_silhouette")} ${author}`;

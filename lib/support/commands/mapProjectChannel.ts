@@ -86,6 +86,10 @@ class JiraProjectSearchParams {
 
     @MappedParameter(MappedParameters.SlackChannelName)
     public slackChannelName: string;
+
+    @MappedParameter(MappedParameters.SlackChannel)
+    public slackChannel: string;
+
 }
 
 export function createProjectChannelMapping(
@@ -135,23 +139,32 @@ export const createProjectChannelMappingReg: CommandHandlerRegistration<JiraProj
 
 export function createProjectChannelMappingProjectInput(ci: CommandListenerInvocation<JiraProjectSearchParams>): Promise<HandlerResult> {
     return new Promise<HandlerResult>(async (resolve, reject) => {
-        const msg: SlackMessage = {
-            attachments: [{
-                text: "Search for project",
-                fallback: "Search for project",
-                actions: [buttonForCommand(
-                    { text: "Search"},
-                    "CreateProjectChannelMappingOptions",
-                    {...ci.parameters}),
-                ],
-            }],
-        };
 
-        await ci.addressChannels(msg,
-        {
-            ttl: 15000,
-            id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
-        });
+        if (ci.parameters.slackChannel === ci.parameters.slackChannelName) {
+            await ci.addressChannels(slackErrorMessage(
+                `Cannot Setup Mapping to Individual Account`,
+                `You cannot setup a jira mapping to your own user, must setup mappings to channels only.`,
+                ci.context,
+            ));
+        } else {
+            const msg: SlackMessage = {
+                attachments: [{
+                    text: "Search for project",
+                    fallback: "Search for project",
+                    actions: [buttonForCommand(
+                        { text: "Search"},
+                        "CreateProjectChannelMappingOptions",
+                        {...ci.parameters}),
+                    ],
+                }],
+            };
+
+            await ci.addressChannels(msg,
+                {
+                    ttl: 15000,
+                    id: `component_or_project_mapping-${ci.parameters.slackChannelName}`,
+                });
+        }
 
         resolve({code: 0});
     });
