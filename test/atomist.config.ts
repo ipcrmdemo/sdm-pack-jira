@@ -40,9 +40,10 @@ import {
     MvnPackage,
     MvnVersion,
 } from "@atomist/sdm-pack-spring";
-import { onJiraIssueEventApproval } from "../lib/event/onJiraIssueEvent";
+import { onJiraIssueEventApproval } from "../lib/event/onJiraIssueEventApproval";
 import { JiraApproval } from "../lib/goals/JiraApproval";
 import { jiraSupport } from "../lib/jira";
+import {getJiraStats} from "../lib/support/cache/manage";
 
 export function machineMaker(config: SoftwareDeliveryMachineConfiguration): SoftwareDeliveryMachine {
 
@@ -80,6 +81,8 @@ export function machineMaker(config: SoftwareDeliveryMachineConfiguration): Soft
         onAnyPush()
             .setGoals(myGoals),
     );
+
+    sdm.addCommand(getJiraStats);
 
     return sdm;
 }
