@@ -31,7 +31,7 @@ export const jiraSupport = (): ExtensionPack => {
             sdm.addIngester(GraphQL.ingester({ name: "jiraComponentMap" }));
             sdm.addIngester(GraphQL.ingester({ name: "jiraProjectMap" }));
             sdm.addIngester(GraphQL.ingester({ name: "jiraChannelPrefs" }));
-            sdm.addEvent(onJiraIssueEvent());
+            sdm.addEvent(onJiraIssueEvent);
             sdm.addEvent(onJiraIssueEventCache);
             sdm.addCommand(createProjectChannelMappingReg);
             sdm.addCommand(produceProjectChannelMappingOptions);

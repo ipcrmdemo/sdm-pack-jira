@@ -12,11 +12,8 @@ function onJiraIssueEventHandler():
     };
 }
 
-export const onJiraIssueEvent = ():
-   EventHandlerRegistration<types.OnJiraIssueEvent.Subscription> => {
-   return {
-       name: "OnJiraIssueEvent",
-       subscription: GraphQL.subscription("OnJiraIssueEvent"),
-       listener: onJiraIssueEventHandler(),
-   };
+export const onJiraIssueEvent: EventHandlerRegistration<types.OnJiraIssueEvent.Subscription> = {
+   name: "OnJiraIssueEvent",
+   subscription: GraphQL.subscription("OnJiraIssueEvent"),
+   listener: onJiraIssueEventHandler(),
 };
