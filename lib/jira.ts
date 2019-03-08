@@ -2,6 +2,7 @@ import { GraphQL } from "@atomist/automation-client";
 import { ExtensionPack, metadata } from "@atomist/sdm";
 import * as NodeCache from "node-cache";
 import { onJiraIssueEvent } from "./event/onJiraIssueEvent";
+import {onJiraIssueEventCache} from "./event/onJiraIssueEventCache";
 import { getJiraChannelPrefsReg, setJiraChannelPrefsReg } from "./support/commands/configureChannelPrefs";
 import {h1createJiraTicketReg, h2createJiraTicketReg, h3createJiraTicketReg} from "./support/commands/createJiraTicket";
 import { getCurrentChannelMappingsReg } from "./support/commands/getCurrentChannelMappings";
@@ -31,6 +32,7 @@ export const jiraSupport = (): ExtensionPack => {
             sdm.addIngester(GraphQL.ingester({ name: "jiraProjectMap" }));
             sdm.addIngester(GraphQL.ingester({ name: "jiraChannelPrefs" }));
             sdm.addEvent(onJiraIssueEvent());
+            sdm.addEvent(onJiraIssueEventCache);
             sdm.addCommand(createProjectChannelMappingReg);
             sdm.addCommand(produceProjectChannelMappingOptions);
             sdm.addCommand(createComponentChannelMappingOptionsReg);

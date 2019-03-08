@@ -14,8 +14,10 @@ import {
 } from "@atomist/automation-client";
 import { CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs } from "@atomist/sdm";
 import { SlackMessage } from "@atomist/slack-messages";
+import * as objectHash from "object-hash";
 import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
+import {purgeCacheEntry} from "../cache/manage";
 import { getMappedComponentsbyChannel, JiraProjectComponentMap } from "../helpers/channelLookup";
 import { getJiraDetails } from "../jiraDataLookup";
 import { JiraProject } from "../shared";
@@ -105,8 +107,13 @@ export function createComponentChannelMapping(ci: CommandListenerInvocation<Jira
                 active: true,
             };
             await ci.context.messageClient.send(payload, addressEvent("JiraComponentMap"));
+            // Purge cache of entry
+            await purgeCacheEntry(
+                `${ci.context.workspaceId}-GetAllComponentMappingsforChannel-${objectHash({channel: [ci.parameters.slackChannelName]})}`);
+
             const componentDetails =
                 await getJiraDetails<types.OnJiraIssueEvent.Components>(`${jiraConfig.url}/rest/api/2/component/${ci.parameters.componentId}`, true);
+
             await ci.addressChannels(slackSuccessMessage(
                 `New JIRA Component mapping created successfully!`,
                 `Added new mapping from Component *${componentDetails.name}* to *${ci.parameters.slackChannelName}*`,
@@ -237,6 +244,10 @@ export function removeComponentChannelMapping(ci: CommandListenerInvocation<Jira
                 projectId: paramDetails.projectId,
                 active: false,
             };
+
+            // Purge cache here
+            await purgeCacheEntry(
+                `${ci.context.workspaceId}-GetAllComponentMappingsforChannel-${objectHash({channel: [ci.parameters.slackChannelName]})}`);
 
             await ci.context.messageClient.send(payload, addressEvent("JiraComponentMap"));
             const componentDetails =

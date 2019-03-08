@@ -12,8 +12,10 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandlerRegistration, CommandListenerInvocation, slackErrorMessage, slackSuccessMessage, slackTs} from "@atomist/sdm";
 import { SelectOption, SlackMessage } from "@atomist/slack-messages";
+import * as objectHash from "object-hash";
 import { JiraConfig } from "../../jira";
 import * as types from "../../typings/types";
+import {purgeCacheEntry} from "../cache/manage";
 import { getMappedProjectsbyChannel } from "../helpers/channelLookup";
 import { getJiraDetails } from "../jiraDataLookup";
 import { JiraProject } from "../shared";
@@ -108,6 +110,10 @@ export function createProjectChannelMapping(
             await ci.context.messageClient.send(payload, addressEvent("JiraProjectMap"));
             const projectDetails =
                 await getJiraDetails<types.OnJiraIssueEvent.Project>(`${jiraConfig.url}/rest/api/2/project/${ci.parameters.projectId}`, true);
+
+            // Purge cache of entry
+            await purgeCacheEntry(
+                `${ci.context.workspaceId}-GetAllProjectMappingsforChannel-${objectHash({channel: [ci.parameters.slackChannelName]})}`);
 
             const subject = ci.parameters.enabled ? `New JIRA Project mapping created successfully!` : `JIRA Project mapping removed successfully!`;
             const message = ci.parameters.enabled ?

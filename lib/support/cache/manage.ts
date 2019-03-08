@@ -20,8 +20,8 @@ export async function purgeCacheEntry(key: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         try {
             const cache = configurationValue<NodeCache>("sdm.jiraCache");
-            cache.del(key);
-            logger.info(`JIRA purgeCacheEntry: Successfully purged key ${key} from JIRA cache.`);
+            const deleted = cache.del(key);
+            logger.info(`JIRA purgeCacheEntry: Successfully purged key ${key} from JIRA cache. Deleted ${deleted} entries`);
             resolve();
         } catch (e) {
             logger.error(`JIRA purgeCacheEntry: Failed to purge entry ${key}.  Error => ${e}`);
