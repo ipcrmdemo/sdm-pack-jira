@@ -44,6 +44,7 @@ import { onJiraIssueEventApproval } from "../lib/event/onJiraIssueEventApproval"
 import { JiraApproval } from "../lib/goals/JiraApproval";
 import { jiraSupport } from "../lib/jira";
 import {getJiraStats} from "../lib/support/cache/manage";
+import {jiraCacheProcessor} from "../lib/support/cache/postProcessor";
 
 export function machineMaker(config: SoftwareDeliveryMachineConfiguration): SoftwareDeliveryMachine {
 
@@ -90,5 +91,6 @@ export function machineMaker(config: SoftwareDeliveryMachineConfiguration): Soft
 export const configuration: Configuration = {
     postProcessors: [
         configureSdm(machineMaker),
+        jiraCacheProcessor,
     ],
 };
