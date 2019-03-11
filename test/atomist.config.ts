@@ -45,6 +45,9 @@ import { JiraApproval } from "../lib/goals/JiraApproval";
 import { jiraSupport } from "../lib/jira";
 import {getJiraStats} from "../lib/support/cache/manage";
 import {jiraCacheProcessor} from "../lib/support/cache/postProcessor";
+import {mapComponentToChannelReg} from "../lib/support/commands/promptFor/mapComponent";
+import {mapProjectToChannelReg} from "../lib/support/commands/promptFor/mapProject";
+import {removeProjectMapFromChannelReg} from "../lib/support/commands/promptFor/removeProjectMap";
 
 export function machineMaker(config: SoftwareDeliveryMachineConfiguration): SoftwareDeliveryMachine {
 
@@ -84,6 +87,9 @@ export function machineMaker(config: SoftwareDeliveryMachineConfiguration): Soft
     );
 
     sdm.addCommand(getJiraStats);
+    sdm.addCommand(mapProjectToChannelReg);
+    sdm.addCommand(removeProjectMapFromChannelReg);
+    sdm.addCommand(mapComponentToChannelReg);
 
     return sdm;
 }

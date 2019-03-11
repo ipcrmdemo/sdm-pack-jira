@@ -17,7 +17,7 @@ import {
     createProjectChannelMappingProjectInputReg,
     createProjectChannelMappingReg,
     produceProjectChannelMappingOptions,
-    removeProjectMappingReg
+    removeProjectMappingReg,
 } from "./support/commands/mapProjectChannel";
 import {commentOnIssue} from "./support/helpers/issueActions";
 
