@@ -128,6 +128,6 @@ export function mapComponentToChannel(ci: CommandListenerInvocation<MapComponent
 export const mapComponentToChannelReg: CommandHandlerRegistration<MapComponentToChannelParams> = {
     name: "mapComponentToChannel",
     paramsMaker: MapComponentToChannelParams,
-    intent: "jcp",
+    intent: "jira map component prompt",
     listener: mapComponentToChannel,
 };
