@@ -4,7 +4,6 @@ import {CommandHandlerRegistration, CommandListenerInvocation, slackErrorMessage
 import objectHash = require("object-hash");
 import {JiraConfig} from "../../../jira";
 import * as types from "../../../typings/types";
-import {purgeCacheEntry} from "../../cache/manage";
 import {getJiraDetails} from "../../jiraDataLookup";
 import {JiraProject} from "../../shared";
 import {JiraHandlerParam, submitMappingPayload} from "./shared";
@@ -18,7 +17,7 @@ class MapProjectToChannelParams extends JiraHandlerParam {
     public projectSearch: string;
 }
 
-export function mapProjectToChannel(ci: CommandListenerInvocation<MapProjectToChannelParams>): Promise<HandlerResult> {
+function mapProjectToChannel(ci: CommandListenerInvocation<MapProjectToChannelParams>): Promise<HandlerResult> {
     return new Promise<HandlerResult>(async (resolve, reject) => {
         const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
 
@@ -66,14 +65,16 @@ export function mapProjectToChannel(ci: CommandListenerInvocation<MapProjectToCh
         }
 
         try {
-            const payload = {
-                channel: ci.parameters.slackChannelName,
-                projectId: project.project,
-                active: true,
-            };
-            await submitMappingPayload(ci, payload);
-            await purgeCacheEntry(
-                `${ci.context.workspaceId}-GetAllProjectMappingsforChannel-${objectHash({channel: [ci.parameters.slackChannelName]})}`);
+            await submitMappingPayload(
+                ci,
+                {
+                    channel: ci.parameters.slackChannelName,
+                    projectId: project.project,
+                    active: true,
+                },
+                "JiraProjectMap",
+                `${ci.context.workspaceId}-GetAllProjectMappingsforChannel-${objectHash({channel: [ci.parameters.slackChannelName]})}`,
+            );
 
             const projectDetails =
                 await getJiraDetails<types.OnJiraIssueEvent.Project>(`${jiraConfig.url}/rest/api/2/project/${project.project}`, true);
@@ -99,7 +100,7 @@ export function mapProjectToChannel(ci: CommandListenerInvocation<MapProjectToCh
 }
 
 export const mapProjectToChannelReg: CommandHandlerRegistration<MapProjectToChannelParams> = {
-    name: "MapProjectToChannel",
+    name: "MapProjectToChannelPrompt",
     paramsMaker: MapProjectToChannelParams,
     intent: "jira map project prompt",
     listener: mapProjectToChannel,

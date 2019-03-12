@@ -7,18 +7,12 @@ import { getJiraChannelPrefsReg, setJiraChannelPrefsReg } from "./support/comman
 import {h1createJiraTicketReg, h2createJiraTicketReg, h3createJiraTicketReg} from "./support/commands/createJiraTicket";
 import { getCurrentChannelMappingsReg } from "./support/commands/getCurrentChannelMappings";
 import {
-  createComponentChannelMappingOptionsReg,
-  createComponentChannelMappingReg,
-  disableComponentChannelMappingOptionsReg,
-  removeComponentChannelMappingReg,
-  startComponentChannelMappingOptionsReg,
+    createComponentChannelMappingOptionsReg,
+    createComponentChannelMappingReg,
+    disableComponentChannelMappingOptionsReg,
+    removeComponentChannelMappingReg, startComponentChannelMappingOptionsReg
 } from "./support/commands/mapComponentChannel";
-import {
-    createProjectChannelMappingProjectInputReg,
-    createProjectChannelMappingReg,
-    produceProjectChannelMappingOptions,
-    removeProjectMappingReg,
-} from "./support/commands/mapProjectChannel";
+import {createProjectChannelMappingReg, produceProjectChannelMappingOptions, removeProjectMappingReg} from "./support/commands/mapProjectChannel";
 import {commentOnIssue} from "./support/helpers/issueActions";
 
 export const jiraSupport = (): ExtensionPack => {
@@ -39,12 +33,14 @@ export const jiraSupport = (): ExtensionPack => {
             sdm.addCommand(createComponentChannelMappingReg);
             sdm.addCommand(startComponentChannelMappingOptionsReg);
             sdm.addCommand(disableComponentChannelMappingOptionsReg);
-            sdm.addCommand(getCurrentChannelMappingsReg);
             sdm.addCommand(removeProjectMappingReg);
             sdm.addCommand(removeComponentChannelMappingReg);
+
+            sdm.addCommand(getCurrentChannelMappingsReg);
+
             sdm.addCommand(setJiraChannelPrefsReg);
             sdm.addCommand(getJiraChannelPrefsReg);
-            sdm.addCommand(createProjectChannelMappingProjectInputReg);
+
             sdm.addCommand(h1createJiraTicketReg);
             sdm.addCommand(h2createJiraTicketReg);
             sdm.addCommand(h3createJiraTicketReg);

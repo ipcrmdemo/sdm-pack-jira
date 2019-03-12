@@ -4,7 +4,6 @@ import {CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessa
 import objectHash = require("object-hash");
 import {JiraConfig} from "../../../jira";
 import * as types from "../../../typings/types";
-import {purgeCacheEntry} from "../../cache/manage";
 import {getMappedProjectsbyChannel} from "../../helpers/channelLookup";
 import {getJiraDetails} from "../../jiraDataLookup";
 import {lookupJiraProjectDetails} from "../getCurrentChannelMappings";
@@ -34,14 +33,16 @@ export function removeProjectMapFromChannel(ci: CommandListenerInvocation<JiraHa
         });
 
         try {
-            const payload = {
-                channel: ci.parameters.slackChannelName,
-                projectId: project.project,
-                active: false,
-            };
-            await submitMappingPayload(ci, payload);
-            await purgeCacheEntry(
-                `${ci.context.workspaceId}-GetAllProjectMappingsforChannel-${objectHash({channel: [ci.parameters.slackChannelName]})}`);
+            await submitMappingPayload(
+                ci,
+                {
+                    channel: ci.parameters.slackChannelName,
+                    projectId: project.project,
+                    active: false,
+                },
+                "JiraProjectMap",
+                `${ci.context.workspaceId}-GetAllProjectMappingsforChannel-${objectHash({channel: [ci.parameters.slackChannelName]})}`,
+            );
 
             const projectDetail =
                 await getJiraDetails<types.OnJiraIssueEvent.Project>(`${jiraConfig.url}/rest/api/2/project/${project.project}`, true);

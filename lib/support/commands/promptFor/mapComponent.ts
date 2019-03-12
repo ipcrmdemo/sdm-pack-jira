@@ -4,7 +4,6 @@ import {CommandHandlerRegistration, CommandListenerInvocation, slackErrorMessage
 import * as objectHash from "object-hash";
 import {JiraConfig} from "../../../jira";
 import * as types from "../../../typings/types";
-import {purgeCacheEntry} from "../../cache/manage";
 import {getJiraDetails} from "../../jiraDataLookup";
 import {JiraProject} from "../../shared";
 import {JiraHandlerParam, submitMappingPayload} from "./shared";
@@ -92,16 +91,17 @@ export function mapComponentToChannel(ci: CommandListenerInvocation<MapComponent
         }
 
         try {
-            const payload = {
-                channel: ci.parameters.slackChannelName,
-                projectId: project.project,
-                componentId: component.component,
-                active: true,
-            };
-
-            await submitMappingPayload(ci, payload);
-            await purgeCacheEntry(
-                `${ci.context.workspaceId}-GetAllComponentMappingsforChannel-${objectHash({channel: [ci.parameters.slackChannelName]})}`);
+            await submitMappingPayload(
+                ci,
+               {
+                    channel: ci.parameters.slackChannelName,
+                    projectId: project.project,
+                    componentId: component.component,
+                    active: true,
+                },
+               "JiraComponentMap",
+               `${ci.context.workspaceId}-GetAllComponentMappingsforChannel-${objectHash({channel: [ci.parameters.slackChannelName]})}`,
+            );
 
             const componentDetails =
                 await getJiraDetails<types.OnJiraIssueEvent.Components>(`${jiraConfig.url}/rest/api/2/component/${component.component}`, true);
@@ -128,6 +128,6 @@ export function mapComponentToChannel(ci: CommandListenerInvocation<MapComponent
 export const mapComponentToChannelReg: CommandHandlerRegistration<MapComponentToChannelParams> = {
     name: "mapComponentToChannel",
     paramsMaker: MapComponentToChannelParams,
-    intent: "jira map component prompt",
+    intent: "jcp",
     listener: mapComponentToChannel,
 };

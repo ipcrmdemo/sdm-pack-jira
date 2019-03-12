@@ -26,10 +26,17 @@ interface ComponentMapPayload {
 }
 
 export function submitMappingPayload(
-    ci: CommandListenerInvocation<JiraHandlerParam>, payload: ProjectMapPayload | ComponentMapPayload): Promise<void> {
+    ci: CommandListenerInvocation<JiraHandlerParam>,
+    payload: ProjectMapPayload | ComponentMapPayload,
+    eventRootType: string,
+    cacheEntry?: string,
+): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
         try {
-            await ci.context.messageClient.send(payload, addressEvent("JiraProjectMap"));
+            await ci.context.messageClient.send(payload, addressEvent(eventRootType));
+            if (cacheEntry) {
+                await purgeCacheEntry(cacheEntry);
+            }
             resolve();
         } catch (e) {
             logger.error(`JIRA submitMappingPayload: Error found => ${e}`);

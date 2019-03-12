@@ -16,7 +16,6 @@
 
 import {
     Configuration,
-    GraphQL,
 } from "@atomist/automation-client";
 import {
     allSatisfied,
@@ -47,6 +46,7 @@ import {getJiraStats} from "../lib/support/cache/manage";
 import {jiraCacheProcessor} from "../lib/support/cache/postProcessor";
 import {mapComponentToChannelReg} from "../lib/support/commands/promptFor/mapComponent";
 import {mapProjectToChannelReg} from "../lib/support/commands/promptFor/mapProject";
+import {removeComponentMapFromChannelReg} from "../lib/support/commands/promptFor/removeComponentMap";
 import {removeProjectMapFromChannelReg} from "../lib/support/commands/promptFor/removeProjectMap";
 
 export function machineMaker(config: SoftwareDeliveryMachineConfiguration): SoftwareDeliveryMachine {
@@ -87,9 +87,11 @@ export function machineMaker(config: SoftwareDeliveryMachineConfiguration): Soft
     );
 
     sdm.addCommand(getJiraStats);
+
     sdm.addCommand(mapProjectToChannelReg);
     sdm.addCommand(removeProjectMapFromChannelReg);
     sdm.addCommand(mapComponentToChannelReg);
+    sdm.addCommand(removeComponentMapFromChannelReg);
 
     return sdm;
 }
