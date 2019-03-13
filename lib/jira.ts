@@ -13,6 +13,11 @@ import {
     removeComponentChannelMappingReg, startComponentChannelMappingOptionsReg
 } from "./support/commands/mapComponentChannel";
 import {createProjectChannelMappingReg, produceProjectChannelMappingOptions, removeProjectMappingReg} from "./support/commands/mapProjectChannel";
+import {createIssueReg} from "./support/commands/promptFor/createIssue";
+import {mapComponentToChannelReg} from "./support/commands/promptFor/mapComponent";
+import {mapProjectToChannelReg} from "./support/commands/promptFor/mapProject";
+import {removeComponentMapFromChannelReg} from "./support/commands/promptFor/removeComponentMap";
+import {removeProjectMapFromChannelReg} from "./support/commands/promptFor/removeProjectMap";
 import {commentOnIssue} from "./support/helpers/issueActions";
 
 export const jiraSupport = (): ExtensionPack => {
@@ -27,24 +32,15 @@ export const jiraSupport = (): ExtensionPack => {
             sdm.addIngester(GraphQL.ingester({ name: "jiraChannelPrefs" }));
             sdm.addEvent(onJiraIssueEvent);
             sdm.addEvent(onJiraIssueEventCache);
-            sdm.addCommand(createProjectChannelMappingReg);
-            sdm.addCommand(produceProjectChannelMappingOptions);
-            sdm.addCommand(createComponentChannelMappingOptionsReg);
-            sdm.addCommand(createComponentChannelMappingReg);
-            sdm.addCommand(startComponentChannelMappingOptionsReg);
-            sdm.addCommand(disableComponentChannelMappingOptionsReg);
-            sdm.addCommand(removeProjectMappingReg);
-            sdm.addCommand(removeComponentChannelMappingReg);
-
             sdm.addCommand(getCurrentChannelMappingsReg);
-
             sdm.addCommand(setJiraChannelPrefsReg);
             sdm.addCommand(getJiraChannelPrefsReg);
-
-            sdm.addCommand(h1createJiraTicketReg);
-            sdm.addCommand(h2createJiraTicketReg);
-            sdm.addCommand(h3createJiraTicketReg);
             sdm.addCommand(commentOnIssue);
+            sdm.addCommand(mapProjectToChannelReg);
+            sdm.addCommand(removeProjectMapFromChannelReg);
+            sdm.addCommand(mapComponentToChannelReg);
+            sdm.addCommand(removeComponentMapFromChannelReg);
+            sdm.addCommand(createIssueReg);
 
             sdm.configuration.sdm.jiraCache = new NodeCache({
                 stdTTL: 3600,

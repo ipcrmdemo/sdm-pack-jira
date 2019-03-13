@@ -14,8 +14,8 @@ import * as slack from "@atomist/slack-messages";
 @Parameters()
 class JiraProjectLookup extends JiraHandlerParam {
     @Parameter({
-        displayName: `Search string`,
-        description: "Please enter a search term to find your project",
+        displayName: `Please enter a search term to find your project`,
+        description: `Please enter a search term to find your project`,
     })
     public projectSearch: string;
 
@@ -54,6 +54,8 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
         if (projectValues.length > 0) {
             project = await ci.promptFor<{ project: string }>({
                 project: {
+                    displayName: `Please select a project`,
+                    description: `Please select a project`,
                     type: {
                         kind: "single",
                         options: projectValues,
@@ -84,6 +86,8 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
         if (projectValues.length > 0) {
             issueType = await ci.promptFor<{ issueType: string }>({
                 issueType: {
+                    displayName: `Please select an issue type`,
+                    description: `Please select an issue type`,
                     type: {
                         kind: "single",
                         options: issueOptions,
@@ -105,6 +109,7 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
             parentIssue = await ci.promptFor<{ parent: string }>({
                 parent: {
                     description: "Enter the parent issue ID",
+                    displayName: "Enter the parent issue ID",
                 },
             });
         }
@@ -113,11 +118,13 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
         const details = await ci.promptFor<{ description: string, summary: string }>({
             summary: {
                 description: "Please enter Issue Summary",
+                displayName: "Please enter Issue Summary",
                 pattern: /[\s\S]*/,
                 order: 1,
             },
             description: {
                 description: "Please enter Issue Description",
+                displayName: "Please enter Issue Description",
                 pattern: /[\s\S]*/,
                 order: 2,
             },
