@@ -86,6 +86,6 @@ export function removeComponentMapFromChannel(ci: CommandListenerInvocation<Jira
 export const removeComponentMapFromChannelReg: CommandHandlerRegistration<JiraHandlerParam> = {
     name: "removeComponentMapFromChannel",
     paramsMaker: JiraHandlerParam,
-    intent: "jira disable component map prompt",
+    intent: "jira disable component map",
     listener: removeComponentMapFromChannel,
 };

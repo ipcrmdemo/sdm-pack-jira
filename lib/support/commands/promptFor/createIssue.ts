@@ -232,6 +232,6 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
 export const createIssueReg: CommandHandlerRegistration<JiraProjectLookup> = {
     name: "CreateIssue",
     paramsMaker: JiraProjectLookup,
-    intent: "jira create issue prompt",
+    intent: "jira create issue",
     listener: createIssue,
 };

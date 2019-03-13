@@ -102,6 +102,6 @@ function mapProjectToChannel(ci: CommandListenerInvocation<MapProjectToChannelPa
 export const mapProjectToChannelReg: CommandHandlerRegistration<MapProjectToChannelParams> = {
     name: "MapProjectToChannelPrompt",
     paramsMaker: MapProjectToChannelParams,
-    intent: "jira map project prompt",
+    intent: "jira map project",
     listener: mapProjectToChannel,
 };

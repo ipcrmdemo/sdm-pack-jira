@@ -68,6 +68,6 @@ export function removeProjectMapFromChannel(ci: CommandListenerInvocation<JiraHa
 export const removeProjectMapFromChannelReg: CommandHandlerRegistration<JiraHandlerParam> = {
     name: "removeProjectMapFromChannel",
     paramsMaker: JiraHandlerParam,
-    intent: "jira disable project map prompt",
+    intent: "jira disable project map",
     listener: removeProjectMapFromChannel,
 };
