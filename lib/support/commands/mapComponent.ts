@@ -1,17 +1,15 @@
-import {configurationValue, HandlerResult, logger, Parameter, Parameters, SelectOption} from "@atomist/automation-client";
-import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata";
+import {configurationValue, HandlerResult, logger, Parameter, Parameters} from "@atomist/automation-client";
 import {CommandHandlerRegistration, CommandListenerInvocation, slackErrorMessage, slackSuccessMessage} from "@atomist/sdm";
 import * as objectHash from "object-hash";
-import {JiraConfig} from "../../../jira";
-import * as types from "../../../typings/types";
-import {getJiraDetails} from "../../jiraDataLookup";
-import {JiraProject} from "../../shared";
-import {JiraHandlerParam, submitMappingPayload} from "./shared";
+import {JiraConfig} from "../../jira";
+import * as types from "../../typings/types";
+import {getJiraDetails} from "../jiraDataLookup";
+import {JiraHandlerParam, prepComponentSelect, prepProjectSelect, submitMappingPayload} from "./shared";
 
 @Parameters()
 class MapComponentToChannelParams extends JiraHandlerParam {
     @Parameter({
-        displayName: `Search string`,
+        displayName: "Please enter a search term to find your project",
         description: "Please enter a search term to find your project",
     })
     public projectSearch: string;
@@ -29,25 +27,14 @@ export function mapComponentToChannel(ci: CommandListenerInvocation<MapComponent
             resolve({code: 0});
         }
 
-        // Get Search pattern for project lookup
-        const lookupUrl = `${jiraConfig.url}/rest/api/2/project`;
-
-        // Find projects that match project search string
-        const projectValues: Option[] = [];
-        const result = await getJiraDetails<JiraProject[]>(lookupUrl, true);
-
-        result.forEach(p => {
-            if (p.name.toLowerCase().includes(ci.parameters.projectSearch.toLowerCase())) {
-                logger.debug(`JIRA mapComponentToChannel: Found project match ${p.name}!`);
-                projectValues.push({description: p.name, value: p.id});
-            }
-        });
-
         // Present list of projects
+        const projectValues = await prepProjectSelect(ci, ci.parameters.projectSearch);
         let project: { project: string };
-        if (projectValues.length > 0) {
+        if (projectValues) {
             project = await ci.promptFor<{ project: string }>({
                 project: {
+                    displayName: `Please select a project`,
+                    description: `Please select a project`,
                     type: {
                         kind: "single",
                         options: projectValues,
@@ -63,18 +50,14 @@ export function mapComponentToChannel(ci: CommandListenerInvocation<MapComponent
             resolve({code: 0});
         }
 
-        const componentLookupUrl = `${jiraConfig.url}/rest/api/2/project/${project.project}`;
-        const projectDetails = await getJiraDetails<JiraProject>(componentLookupUrl, false);
-        const componentValues: Option[] = [];
-
-        projectDetails.components.forEach(c => {
-            componentValues.push({description: c.name, value: c.id});
-        });
-
+        // Present list of components
+        const componentValues = await prepComponentSelect(ci, project.project);
         let component: {component: string};
-        if (componentValues.length > 0) {
+        if (componentValues) {
            component = await ci.promptFor<{component: string}>({
                component: {
+                   description: `Please select a component`,
+                   displayName: `Please select a component`,
                    type: {
                        kind: "single",
                        options: componentValues,

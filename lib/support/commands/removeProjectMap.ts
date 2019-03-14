@@ -2,11 +2,11 @@ import {configurationValue, HandlerResult, logger} from "@atomist/automation-cli
 import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata";
 import {CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage} from "@atomist/sdm";
 import objectHash = require("object-hash");
-import {JiraConfig} from "../../../jira";
-import * as types from "../../../typings/types";
-import {getMappedProjectsbyChannel} from "../../helpers/channelLookup";
-import {getJiraDetails} from "../../jiraDataLookup";
-import {lookupJiraProjectDetails} from "../getCurrentChannelMappings";
+import {JiraConfig} from "../../jira";
+import * as types from "../../typings/types";
+import {getMappedProjectsbyChannel} from "../helpers/channelLookup";
+import {getJiraDetails} from "../jiraDataLookup";
+import {lookupJiraProjectDetails} from "./getCurrentChannelMappings";
 import {JiraHandlerParam, submitMappingPayload} from "./shared";
 
 export function removeProjectMapFromChannel(ci: CommandListenerInvocation<JiraHandlerParam>): Promise<HandlerResult> {
@@ -25,6 +25,8 @@ export function removeProjectMapFromChannel(ci: CommandListenerInvocation<JiraHa
 
         const project = await ci.promptFor<{ project: string }>({
             project: {
+                displayName: `Please select a project`,
+                description: `Please select a project`,
                 type: {
                     kind: "single",
                     options: projectValues,

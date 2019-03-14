@@ -2,11 +2,11 @@ import {configurationValue, HandlerResult, logger} from "@atomist/automation-cli
 import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata";
 import {CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage} from "@atomist/sdm";
 import * as objectHash from "object-hash";
-import {JiraConfig} from "../../../jira";
-import * as types from "../../../typings/types";
-import {getMappedComponentsbyChannel} from "../../helpers/channelLookup";
-import {getJiraDetails} from "../../jiraDataLookup";
-import {findRequiredProjects, lookupJiraProjectDetails} from "../getCurrentChannelMappings";
+import {JiraConfig} from "../../jira";
+import * as types from "../../typings/types";
+import {getMappedComponentsbyChannel} from "../helpers/channelLookup";
+import {getJiraDetails} from "../jiraDataLookup";
+import {findRequiredProjects, lookupJiraProjectDetails} from "./getCurrentChannelMappings";
 import {JiraHandlerParam, submitMappingPayload} from "./shared";
 
 export function removeComponentMapFromChannel(ci: CommandListenerInvocation<JiraHandlerParam>): Promise<HandlerResult> {
@@ -81,7 +81,6 @@ export function removeComponentMapFromChannel(ci: CommandListenerInvocation<Jira
         }
     });
 }
-
 
 export const removeComponentMapFromChannelReg: CommandHandlerRegistration<JiraHandlerParam> = {
     name: "removeComponentMapFromChannel",

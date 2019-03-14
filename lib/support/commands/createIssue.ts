@@ -1,15 +1,14 @@
 import {configurationValue, HandlerResult, logger, MappedParameter, MappedParameters, Parameter, Parameters} from "@atomist/automation-client";
 import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata";
 import {CommandHandlerRegistration, CommandListenerInvocation, slackErrorMessage} from "@atomist/sdm";
-import * as jira2slack from "jira2slack";
-import {JiraConfig} from "../../../jira";
-import * as types from "../../../typings/types";
-import {getJiraDetails} from "../../jiraDataLookup";
-import * as jiraTypes from "../../jiraDefs";
-import {convertEmailtoJiraUser, JiraProject} from "../../shared";
-import {createJiraTicket} from "../createJiraTicket";
-import {JiraHandlerParam} from "./shared";
 import * as slack from "@atomist/slack-messages";
+import * as jira2slack from "jira2slack";
+import {JiraConfig} from "../../jira";
+import * as types from "../../typings/types";
+import {getJiraDetails} from "../jiraDataLookup";
+import * as jiraTypes from "../jiraDefs";
+import {convertEmailtoJiraUser} from "../shared";
+import {createJiraTicket, JiraHandlerParam, prepProjectSelect} from "./shared";
 
 @Parameters()
 class JiraProjectLookup extends JiraHandlerParam {
@@ -35,23 +34,10 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
             resolve({code: 0});
         }
 
-        // Get Search pattern for project lookup
-        const lookupUrl = `${jiraConfig.url}/rest/api/2/project`;
-
-        // Find projects that match project search string
-        const projectValues: Option[] = [];
-        const result = await getJiraDetails<JiraProject[]>(lookupUrl, true);
-
-        result.forEach(p => {
-            if (p.name.toLowerCase().includes(ci.parameters.projectSearch.toLowerCase())) {
-                logger.debug(`JIRA mapComponentToChannel: Found project match ${p.name}!`);
-                projectValues.push({description: p.name, value: p.id});
-            }
-        });
-
         // Present list of projects
         let project: { project: string };
-        if (projectValues.length > 0) {
+        const projectValues = await prepProjectSelect(ci, ci.parameters.projectSearch);
+        if (projectValues) {
             project = await ci.promptFor<{ project: string }>({
                 project: {
                     displayName: `Please select a project`,
@@ -82,26 +68,16 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
             });
         });
 
-        let issueType: { issueType: string };
-        if (projectValues.length > 0) {
-            issueType = await ci.promptFor<{ issueType: string }>({
-                issueType: {
-                    displayName: `Please select an issue type`,
-                    description: `Please select an issue type`,
-                    type: {
-                        kind: "single",
-                        options: issueOptions,
-                    },
+        const issueType = await ci.promptFor<{ issueType: string }>({
+            issueType: {
+                displayName: `Please select an issue type`,
+                description: `Please select an issue type`,
+                type: {
+                    kind: "single",
+                    options: issueOptions,
                 },
-            });
-        } else {
-            await ci.addressChannels(slackErrorMessage(
-                `Error: No projects found with search term [${ci.parameters.projectSearch}]`,
-                `Please try this command again`,
-                ci.context,
-            ));
-            resolve({code: 0});
-        }
+            },
+        });
 
         // Is this a subtask?  great.  Get the parent
         let parentIssue: { parent: string };
@@ -199,7 +175,7 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
                     ttl: 60 * 1000,
                     id: `createJiraIssue-${ci.parameters.screenName}`,
                 });
-            return { code: 1, message: e };
+            reject({ code: 1, message: e });
         }
 
         // Submit new issue
@@ -209,7 +185,7 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
                 ttl: 60 * 1000,
                 id: `createJiraIssue-${ci.parameters.screenName}`,
             });
-            return {code: 0};
+            resolve({code: 0});
         } catch (e) {
             logger.error(e);
             await ci.addressChannels(
@@ -221,10 +197,10 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
                     ttl: 60 * 1000,
                     id: `createJiraIssue-${ci.parameters.screenName}`,
                 });
-            return {
+            resolve({
                 code: 1,
                 message: e,
-            };
+            });
         }
     });
 }

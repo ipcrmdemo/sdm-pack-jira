@@ -135,8 +135,8 @@ export function getCurrentChannelMappings(ci: CommandListenerInvocation<JiraGetC
                         text: `All projects/components listed above are currently displaying notices in this channel.`,
                         color: "#45B254",
                         actions: [
-                            buttonForCommand({ text: "Disable Component"}, "DisableComponentChannelMapping"),
-                            buttonForCommand( { text: "Disable Project"}, "RemoveChannelProjectMapping", { enabled: "false"}),
+                            buttonForCommand({ text: "Disable Component"}, "removeComponentMapFromChannel"),
+                            buttonForCommand( { text: "Disable Project"}, "removeProjectMapFromChannel", { enabled: "false"}),
                         ],
                         ts: slackTs(),
                     },

@@ -1,17 +1,15 @@
 import {configurationValue, HandlerResult, logger, Parameter, Parameters} from "@atomist/automation-client";
-import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata";
 import {CommandHandlerRegistration, CommandListenerInvocation, slackErrorMessage, slackSuccessMessage} from "@atomist/sdm";
 import objectHash = require("object-hash");
-import {JiraConfig} from "../../../jira";
-import * as types from "../../../typings/types";
-import {getJiraDetails} from "../../jiraDataLookup";
-import {JiraProject} from "../../shared";
-import {JiraHandlerParam, submitMappingPayload} from "./shared";
+import {JiraConfig} from "../../jira";
+import * as types from "../../typings/types";
+import {getJiraDetails} from "../jiraDataLookup";
+import {JiraHandlerParam, prepProjectSelect, submitMappingPayload} from "./shared";
 
 @Parameters()
 class MapProjectToChannelParams extends JiraHandlerParam {
     @Parameter({
-        displayName: `Search string`,
+        displayName: "Please enter a search term to find your project",
         description: "Please enter a search term to find your project",
     })
     public projectSearch: string;
@@ -30,25 +28,14 @@ function mapProjectToChannel(ci: CommandListenerInvocation<MapProjectToChannelPa
             resolve({code: 0});
         }
 
-        // Get Search pattern for project lookup
-        const lookupUrl = `${jiraConfig.url}/rest/api/2/project`;
-
-        // Find projects that match project search string
-        const projectValues: Option[] = [];
-        const result = await getJiraDetails<JiraProject[]>(lookupUrl, true);
-
-        result.forEach(p => {
-            if (p.name.toLowerCase().includes(ci.parameters.projectSearch.toLowerCase())) {
-                logger.debug(`JIRA mapProjectToChannel: Found project match ${p.name}!`);
-                projectValues.push({description: p.name, value: p.id});
-            }
-        });
-
         // Present list of projects
         let project: { project: string };
-        if (projectValues.length > 0) {
+        const projectValues = await prepProjectSelect(ci, ci.parameters.projectSearch);
+        if (projectValues) {
              project = await ci.promptFor<{ project: string }>({
                 project: {
+                    displayName: `Please select a project`,
+                    description: `Please select a project`,
                     type: {
                         kind: "single",
                         options: projectValues,
