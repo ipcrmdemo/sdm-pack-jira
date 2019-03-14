@@ -11,6 +11,7 @@ subscription OnJiraIssueEvent {
                 environment
                 issueType {
                     subtask
+                    name
                 }
                 parent {
                     id

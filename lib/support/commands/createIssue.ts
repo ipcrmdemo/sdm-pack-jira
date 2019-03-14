@@ -202,6 +202,8 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
                 message: e,
             });
         }
+
+        resolve({code: 0});
     });
 }
 

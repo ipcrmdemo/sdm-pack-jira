@@ -79,6 +79,8 @@ export function removeComponentMapFromChannel(ci: CommandListenerInvocation<Jira
                 message: e,
             });
         }
+
+        resolve({code: 0});
     });
 }
 

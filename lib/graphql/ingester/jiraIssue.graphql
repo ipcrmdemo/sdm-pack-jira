@@ -68,6 +68,7 @@ type JiraProject {
 }
 type JiraIssueType {
     subtask: Boolean!
+    name: String!
 }
 type JiraIssueComponent {
     self: String!

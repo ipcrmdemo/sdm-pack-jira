@@ -1,6 +1,6 @@
 import { HandlerContext, logger } from "@atomist/automation-client";
 import * as types from "../typings/types";
-import { jiraDetermineNotifyChannels } from "./helpers/channelLookup";
+import {jiraDetermineNotifyChannels, jiraParseChannels} from "./helpers/channelLookup";
 import { issueCommented, issueCreated, issueDeleted, issueStateChange } from "./issueHandlers";
 
 // tslint:disable-next-line:cyclomatic-complexity
@@ -16,7 +16,7 @@ export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEv
     ) {
         logger.info(`JIRA routeEvent: New issue comment detected`);
         const channels = await jiraDetermineNotifyChannels(ctx, event);
-        const notifyChannels = channels.filter(c => c.issueComment === true);
+        const notifyChannels = await jiraParseChannels(channels, event, `issueComment`);
         await issueCommented(ctx, notifyChannels.map(c => c.channel), event);
     }
 
@@ -31,14 +31,14 @@ export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEv
             // Transitions
             case("issue_generic"): {
                 const channels = await jiraDetermineNotifyChannels(ctx, event);
-                notifyChannels = channels.filter(c => c.issueStatus === true);
+                notifyChannels = await jiraParseChannels(channels, event, `issueStatus`);
                 break;
             }
             // Other Issue definition changes
             case("issue_assigned"):
             case("issue_updated"): {
                 const channels = await jiraDetermineNotifyChannels(ctx, event);
-                notifyChannels = channels.filter(c => c.issueState === true);
+                notifyChannels = await jiraParseChannels(channels, event, `issueState`);
                 break;
             }
         }
@@ -48,7 +48,7 @@ export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEv
     if (event.webhookEvent === "jira:issue_created" && event.issue_event_type_name === "issue_created") {
         logger.info(`JIRA routeEvent: New Issue was created`);
         const channels = await jiraDetermineNotifyChannels(ctx, event);
-        const notifyChannels = channels.filter(c => c.issueCreated === true);
+        const notifyChannels = await jiraParseChannels(channels, event, `issueCreated`);
         await issueCreated(ctx, notifyChannels.map(c => c.channel), event);
     }
 

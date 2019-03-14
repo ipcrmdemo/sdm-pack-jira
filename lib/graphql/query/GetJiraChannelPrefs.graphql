@@ -6,5 +6,10 @@ query GetJiraChannelPrefs($channel: [String!]!){
     issueComment
     issueCreated
     issueDeleted
+    bug
+    task
+    epic
+    story
+    subtask
   }
 }

@@ -105,6 +105,8 @@ export function mapComponentToChannel(ci: CommandListenerInvocation<MapComponent
                 message: e,
             });
         }
+
+        resolve({code: 0});
     });
 }
 

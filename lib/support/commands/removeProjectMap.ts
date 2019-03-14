@@ -64,6 +64,8 @@ export function removeProjectMapFromChannel(ci: CommandListenerInvocation<JiraHa
                 message: error,
             });
         }
+
+        resolve({code: 0});
     });
 }
 

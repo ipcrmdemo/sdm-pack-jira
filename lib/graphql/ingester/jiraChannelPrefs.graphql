@@ -5,4 +5,9 @@ type JiraChannelPrefs @rootType {
     issueComment: Boolean
     issueStatus: Boolean
     issueState: Boolean
+    bug: Boolean,
+    task: Boolean,
+    epic: Boolean,
+    story: Boolean,
+    subtask: Boolean,
 }

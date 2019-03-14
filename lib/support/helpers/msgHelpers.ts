@@ -13,8 +13,8 @@ export const upperCaseFirstLetter = (word: string): string => {
 
 export const prepareIssueCommentedMessage = async (event: types.OnJiraIssueEvent.JiraIssue): Promise<slack.SlackMessage> => {
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
-    const issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self);
-    const authorDetail = await getJiraDetails<jiraTypes.Comment>(event.comment.self);
+    const issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self, true, 30);
+    const authorDetail = await getJiraDetails<jiraTypes.Comment>(event.comment.self, true, 30);
 
     return {
         attachments: [{
@@ -45,7 +45,7 @@ export const prepareIssueCommentedMessage = async (event: types.OnJiraIssueEvent
 
 export const prepareStateChangeMessage = async (event: types.OnJiraIssueEvent.JiraIssue): Promise<slack.SlackMessage> => {
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
-    const issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self);
+    const issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self, true, 30);
     const userDetail = await getJiraDetails<jiraTypes.User>(event.user.self, true);
 
     const fields: slack.Field[] = [];
@@ -122,7 +122,7 @@ export const prepareIssueDeletedMessage = async (event: types.OnJiraIssueEvent.J
 
 export const prepareNewIssueMessage = async (event: types.OnJiraIssueEvent.JiraIssue): Promise<slack.SlackMessage> => {
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
-    const issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self);
+    const issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self, true, 30);
 
     return {
         attachments: [{

@@ -10,8 +10,10 @@ import {
 } from "@atomist/automation-client";
 import { CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs } from "@atomist/sdm";
 import { SlackMessage } from "@atomist/slack-messages";
+import * as objectHash from "object-hash";
 import * as types from "../../typings/types";
 import {cachedJiraMappingLookup} from "../cache/lookup";
+import {purgeCacheEntry} from "../cache/manage";
 
 @Parameters()
 class JiraChannelPrefsBase {
@@ -23,38 +25,83 @@ class JiraChannelPrefsBase {
 class JiraChannelPrefs extends JiraChannelPrefsBase {
     @Parameter({
         pattern: /^(true|false)$/,
-        description: "Recieve Notifications from JIRA when Issues are created?",
+        description: "Receive Notifications from JIRA when Issues are created?",
+        displayName: "Receive Notifications from JIRA when Issues are created?",
         type: "boolean",
     })
     public issueCreated: boolean;
 
     @Parameter({
         pattern: /^(true|false)$/,
-        description: "Recieve Notifications from JIRA when Issues are deleted?",
+        description: "Receive Notifications from JIRA when Issues are deleted?",
+        displayName: "Receive Notifications from JIRA when Issues are deleted?",
         type: "boolean",
     })
     public issueDeleted: boolean;
 
     @Parameter({
         pattern: /^(true|false)$/,
-        description: "Recieve Notifications from JIRA when comments are added to Issues?",
+        description: "Receive Notifications from JIRA when comments are added",
+        displayName: "Receive Notifications from JIRA when comments are added",
         type: "boolean",
     })
     public issueCommented: boolean;
 
     @Parameter({
         pattern: /^(true|false)$/,
-        description: "Recieve Notifications from JIRA when Issue status changes? (Things like issue type changes, worklog, etc)",
+        description: "Receive Notifications from JIRA when Issue status changes?",
+        displayName: "Receive Notifications from JIRA when Issue status changes?",
         type: "boolean",
     })
     public issueStatus: boolean;
 
     @Parameter({
         pattern: /^(true|false)$/,
-        description: "Recieve Notifications from JIRA when Issue tranitions happen?",
+        description: "Receive Notifications from JIRA on Issue transitions?",
+        displayName: "Receive Notifications from JIRA on Issue transitions?",
         type: "boolean",
     })
     public issueState: boolean;
+
+    @Parameter({
+        pattern: /^(true|false)$/,
+        description: "Receive Notifications from Bug Issue Type?",
+        displayName: "Receive Notifications from Bug Issue Type?",
+        type: "boolean",
+    })
+    public bug: boolean;
+
+    @Parameter({
+        pattern: /^(true|false)$/,
+        description: "Receive Notifications from Task Issue Type?",
+        displayName: "Receive Notifications from Task Issue Type?",
+        type: "boolean",
+    })
+    public task: boolean;
+
+    @Parameter({
+        pattern: /^(true|false)$/,
+        description: "Receive Notifications from Epic Issue Type?",
+        displayName: "Receive Notifications from Epic Issue Type?",
+        type: "boolean",
+    })
+    public epic: boolean;
+
+    @Parameter({
+        pattern: /^(true|false)$/,
+        description: "Receive Notifications from Sub-task Issue Type?",
+        displayName: "Receive Notifications from Sub-task Issue Type?",
+        type: "boolean",
+    })
+    public subtask: boolean;
+
+    @Parameter({
+        pattern: /^(true|false)$/,
+        description: "Receive Notifications from Story Issue Type?",
+        displayName: "Receive Notifications from Story Issue Type?",
+        type: "boolean",
+    })
+    public story: boolean;
 }
 
 export async function setJiraChannelPrefs(
@@ -68,8 +115,16 @@ export async function setJiraChannelPrefs(
         issueDeleted: ci.parameters.issueDeleted,
         issueStatus: ci.parameters.issueStatus,
         issueState: ci.parameters.issueState,
+        bug: ci.parameters.bug,
+        task: ci.parameters.task,
+        epic: ci.parameters.epic,
+        story: ci.parameters.story,
+        subtask: ci.parameters.subtask,
     };
     await ci.context.messageClient.send(payload, addressEvent("JiraChannelPrefs"));
+
+    await purgeCacheEntry(
+        `${ci.context.workspaceId}-GetJiraChannelPrefs-${objectHash({channel: [ci.parameters.slackChannelName]})}`);
 
     await ci.addressChannels(slackSuccessMessage(
         `Updated JIRA notification preferences for channel ${ci.parameters.slackChannelName}`,
@@ -106,6 +161,11 @@ export const queryJiraChannelPrefs = async (
             issueCreated: true,
             issueState: true,
             issueStatus: true,
+            bug: true,
+            task: true,
+            epic: true,
+            story: true,
+            subtask: true,
         };
     }
     return setPrefs;
@@ -128,29 +188,44 @@ export function getJiraChannelPrefs(
                         fallback: `JIRA Preferences`,
                         fields: [
                             {
-                                short: true,
-                                title: "Issue Comments",
+                                title: "Issue Created?",
+                                value: prefs.issueCreated.toString(),
+                            },
+                            {
+                                title: "Issue Deleted?",
+                                value: prefs.issueDeleted.toString(),
+                            },
+                            {
+                                title: "New Comments?",
                                 value: prefs.issueComment.toString(),
                             },
                             {
-                                short: true,
-                                title: "Issue Created",
-                                value: prefs.issueDeleted.toString(),
+                                title: "Issue Status Change?",
+                                value: prefs.issueStatus.toString(),
                             },
                             {
-                                short: true,
-                                title: "Issue Deleted",
-                                value: prefs.issueDeleted.toString(),
-                            },
-                            {
-                                short: true,
-                                title: "Issue State Changes",
+                                title: "Issue Transitions?",
                                 value: prefs.issueState.toString(),
                             },
                             {
-                                short: true,
-                                title: "Issue Status Changes",
-                                value: prefs.issueState.toString(),
+                                title: "Bug Issue Type?",
+                                value: prefs.bug.toString(),
+                            },
+                            {
+                                title: "Task Issue Type?",
+                                value: prefs.task.toString(),
+                            },
+                            {
+                                title: "Epic Issue Type?",
+                                value: prefs.epic.toString(),
+                            },
+                            {
+                                title: "Story Issue Type?",
+                                value: prefs.story.toString(),
+                            },
+                            {
+                                title: "Sub-task Issue Type?",
+                                value: prefs.subtask.toString(),
                             },
                         ],
                         actions: [

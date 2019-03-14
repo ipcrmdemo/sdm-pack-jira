@@ -3,7 +3,8 @@ import _ = require("lodash");
 import * as types from "../../typings/types";
 import {cachedJiraMappingLookup} from "../cache/lookup";
 import { queryJiraChannelPrefs } from "../commands/configureChannelPrefs";
-import { getJiraIssueRepos } from "../jiraDataLookup";
+import {getJiraDetails, getJiraIssueRepos} from "../jiraDataLookup";
+import * as jiraTypes from "../jiraDefs";
 
 const getProjectChannels = async (ctx: HandlerContext, projectId: string, onlyActive: boolean = true): Promise<string[]> => {
     const projectChannels =
@@ -123,6 +124,29 @@ export const jiraChannelLookup = async (
 
     logger.debug(`JIRA jiraChannelLookup => found these unique channels: ${JSON.stringify(channels)}`);
     return channels;
+};
+
+export const jiraParseChannels = async (
+    channels: types.GetJiraChannelPrefs.JiraChannelPrefs[],
+    event: types.OnJiraIssueEvent.JiraIssue,
+    check: string,
+): Promise<types.GetJiraChannelPrefs.JiraChannelPrefs[]> => {
+    const issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self, true, 30);
+    const notify = channels.map(c => {
+        if (
+            _.get(c, check, undefined) === true &&
+            _.get(c, issueDetail.fields.issuetype.name.toLowerCase(), undefined) === true
+        ) {
+            return c;
+        } else {
+            logger.debug(
+                `JIRA jiraParseChannels: Not including notify for channel ${c.channel},` +
+                ` it does not have ${check} and ${issueDetail.fields.issuetype.name} enabled`);
+        }
+        return undefined;
+    });
+
+    return notify.filter(n => n !== undefined);
 };
 
 export const jiraDetermineNotifyChannels = async (
