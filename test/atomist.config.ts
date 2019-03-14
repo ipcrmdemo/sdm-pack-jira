@@ -44,6 +44,7 @@ import { JiraApproval } from "../lib/goals/JiraApproval";
 import { jiraSupport } from "../lib/jira";
 import {getJiraStats} from "../lib/support/cache/manage";
 import {jiraCacheProcessor} from "../lib/support/cache/postProcessor";
+import {createBugIssueReg} from "../lib/support/commands/createBugIssue";
 
 export function machineMaker(config: SoftwareDeliveryMachineConfiguration): SoftwareDeliveryMachine {
 
@@ -83,6 +84,7 @@ export function machineMaker(config: SoftwareDeliveryMachineConfiguration): Soft
     );
 
     sdm.addCommand(getJiraStats);
+    sdm.addCommand(createBugIssueReg);
 
     return sdm;
 }
