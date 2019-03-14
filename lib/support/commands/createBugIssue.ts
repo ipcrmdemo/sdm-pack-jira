@@ -77,11 +77,11 @@ export function createBugIssue(ci: CommandListenerInvocation<JiraProjectLookup>)
                 data = {
                     description: jira2slack.toJira(details.description),
                     project: {
-                        id: scomp.component.split(":")[0],
+                        id: scomp.component.split(":")[1],
                     },
                     components: [
                         {
-                            id: scomp.component.split(":")[1],
+                            id: scomp.component.split(":")[0],
                         },
                     ],
                     summary: details.summary,
