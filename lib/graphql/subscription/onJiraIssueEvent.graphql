@@ -8,24 +8,19 @@ subscription OnJiraIssueEvent {
             self
             key
             fields {
-                environment
                 issueType {
                     subtask
-                    name
                 }
                 parent {
                     id
                     key
                     self
                     fields {
-                        summary
                         status {
                             self
-                            name
                         }
                         priority {
                             self
-                            name
                         }
                         issueType {
                            subtask 
@@ -34,44 +29,35 @@ subscription OnJiraIssueEvent {
                 }
                 components {
                     self
-                    name
                     id
                 }
                 timespent
                 timeoriginalestimate
                 project {
                     self
-                    name
                     id
                     key
                     projectTypeKey
                 }
                 aggregatetimespent
-                resolution
-                summary
                 creator {
                     self
-                    name
                     key
                 }
                 reporter {
                     self
-                    name
                     key
                 }
                 priority {
                     self
-                    name
                 }
                 labels
                 assignee {
                     self
-                    name
                     key
                 }
                 status {
                     self
-                    name
                 }
                 created
                 updated
@@ -79,7 +65,6 @@ subscription OnJiraIssueEvent {
         }
         user {
             self
-            name
             key
         }
         changelog {
@@ -98,13 +83,10 @@ subscription OnJiraIssueEvent {
             id
             author {
                 self
-                name
                 key
             }
-            body
             updateAuthor {
                 self
-                name
                 key
             }
             created

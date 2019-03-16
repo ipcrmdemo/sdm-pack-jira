@@ -29,14 +29,12 @@ type JiraIssueComment {
     self: String!
     id: String!
     author: JiraIssueUser!
-    body: String!
     updateAuthor: JiraIssueUser
     created: String!
     updated: String
 }
 type JiraIssueUser {
     self: String!
-    name: String!
     key: String!
 }
 type JiraIssueFields {
@@ -47,8 +45,6 @@ type JiraIssueFields {
     timeoriginalestimate: Int
     project: JiraProject
     aggregatetimespent: Int
-    resolution: String
-    summary: String!
     creator: JiraIssueUser!
     reporter: JiraIssueUser!
     priority: JiraIssuePriority!
@@ -57,24 +53,19 @@ type JiraIssueFields {
     status: JiraIssueStatus!
     created: String!
     updated: String!
-    environment: String
 }
 type JiraProject {
     self: String!
     id: String!
-    name: String!
     key: String!
     projectTypeKey: String!
 }
 type JiraIssueType {
     subtask: Boolean!
-    name: String!
 }
 type JiraIssueComponent {
     self: String!
     id: String!
-    name: String!
-    description: String!
 }
 type JiraIssueParent {
     id: String
@@ -83,15 +74,12 @@ type JiraIssueParent {
     fields: JiraSubTaskFields
 }
 type JiraSubTaskFields {
-    summary: String!
     status: JiraIssueStatus!
     priority: JiraIssuePriority!
     issueType: JiraIssueType!
 }
 type JiraIssueStatus {
     self: String!
-    description: String!
-    name: String!
     id: String!
     statusCategory: JiraIssueStatusCategory!
 }

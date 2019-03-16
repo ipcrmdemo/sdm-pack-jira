@@ -32,13 +32,32 @@ export interface Issuetype {
     subtask: boolean;
 }
 export interface Project {
+    expand: string;
     self: string;
     id: string;
     key: string;
     name: string;
+    lead: Lead;
+    description: string;
+    components: Component[];
     projectTypeKey: string;
     avatarUrls: AvatarUrls;
     issueTypes: Issuetype[];
+    assigneeType: string;
+    versions: FixVersion[];
+    roles: Roles;
+    archived: boolean;
+}
+interface Roles {
+    [key: string]: string;
+}
+interface Lead {
+    self: string;
+    name: string;
+    key: string;
+    avatarUrls: AvatarUrls;
+    displayName: string;
+    active: boolean;
 }
 export interface FixVersion {
     self: string;
@@ -90,7 +109,7 @@ export interface Priority {
 }
 export interface SubTaskFields {
     summary: string;
-    status: Status
+    status: Status;
     priority: Priority;
     issuetype: Issuetype;
 }
@@ -173,7 +192,7 @@ export interface IssueParent {
 export interface Fields {
     issuetype: Issuetype;
     parent: IssueParent;
-    components: any[];
+    components: Component[];
     timespent?: any;
     timeoriginalestimate?: any;
     description?: any;
@@ -220,6 +239,13 @@ export interface Issue {
     self: string;
     key: string;
     fields: Fields;
+}
+
+export interface Component {
+    id: string;
+    self: string;
+    name: string;
+    isAssignedTypeValid: boolean;
 }
 
 export interface ChangelogItem {

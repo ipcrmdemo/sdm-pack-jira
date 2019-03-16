@@ -6,6 +6,7 @@ import {JiraConfig} from "../../jira";
 import * as types from "../../typings/types";
 import {getMappedProjectsbyChannel} from "../helpers/channelLookup";
 import {getJiraDetails} from "../jiraDataLookup";
+import {Project} from "../jiraDefs";
 import {lookupJiraProjectDetails} from "./getCurrentChannelMappings";
 import {JiraHandlerParam, submitMappingPayload} from "./shared";
 
@@ -47,7 +48,7 @@ export function removeProjectMapFromChannel(ci: CommandListenerInvocation<JiraHa
             );
 
             const projectDetail =
-                await getJiraDetails<types.OnJiraIssueEvent.Project>(`${jiraConfig.url}/rest/api/2/project/${project.project}`, true);
+                await getJiraDetails<Project>(`${jiraConfig.url}/rest/api/2/project/${project.project}`, true);
             const subject = `JIRA Project mapping removed successfully!`;
             const message = `Removed mapping from Project *${projectDetail.name}* to *${ci.parameters.slackChannelName}*`;
 

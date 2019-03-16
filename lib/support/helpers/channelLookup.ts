@@ -86,8 +86,20 @@ export const jiraChannelLookup = async (
     ctx: HandlerContext,
     event: types.OnJiraIssueEvent.JiraIssue,
     ): Promise<string[]> => {
-    const projectChannels = await getProjectChannels(ctx, event.issue.fields.project.id);
-    logger.debug(`JIRA jiraChannelLookup => project channels ${JSON.stringify(projectChannels)}`);
+
+    let projectChannels: string[];
+    if (
+        event &&
+        event.hasOwnProperty("issue") &&
+        event.issue &&
+        event.issue.hasOwnProperty("fields")
+    ) {
+        projectChannels = await getProjectChannels(ctx, event.issue.fields.project.id);
+        logger.debug(`JIRA jiraChannelLookup => project channels ${JSON.stringify(projectChannels)}`);
+    } else {
+        logger.debug(`JIRA jiraChannelLookup => project id could not be determined`);
+        return [];
+    }
 
     let componentChannels: string[];
     if (event.issue.fields.components.length > 0) {
@@ -134,6 +146,8 @@ export const jiraParseChannels = async (
     const issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self, true, 30);
     const notify = channels.map(c => {
         if (
+            issueDetail &&
+            issueDetail.hasOwnProperty("fields") &&
             _.get(c, check, undefined) === true &&
             _.get(c, issueDetail.fields.issuetype.name.toLowerCase(), undefined) === true
         ) {

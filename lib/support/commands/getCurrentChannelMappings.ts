@@ -12,7 +12,7 @@ import * as slack from "@atomist/slack-messages";
 import { JiraConfig } from "../../jira";
 import { getMappedComponentsbyChannel, getMappedProjectsbyChannel, JiraProjectComponentMap } from "../helpers/channelLookup";
 import { getJiraDetails } from "../jiraDataLookup";
-import { JiraProject } from "../shared";
+import {Project} from "../jiraDefs";
 
 @Parameters()
 class JiraGetCurrentChannelMappingsParams {
@@ -44,20 +44,20 @@ export const findRequiredProjects = async (components: JiraProjectComponentMap[]
     return projects;
 };
 
-export const lookupJiraProjectDetails = async (projectsToLookup: string[]): Promise<JiraProject[]> => {
+export const lookupJiraProjectDetails = async (projectsToLookup: string[]): Promise<Project[]> => {
     // Lookup JIRA details
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
-    const projectDetails: JiraProject[] = [];
+    const projectDetails: Project[] = [];
     await Promise.all(projectsToLookup.map(async p => {
             const lookupUrl = `${jiraConfig.url}/rest/api/2/project/${p}`;
-            const localProjectDetails = await getJiraDetails<JiraProject>(lookupUrl, true);
+            const localProjectDetails = await getJiraDetails<Project>(lookupUrl, true);
             projectDetails.push(localProjectDetails);
     }));
 
     return projectDetails;
 };
 
-export const prepareFriendlyComponentNames = async (components: JiraProjectComponentMap[], projectDetails: JiraProject[]): Promise<string[]> => {
+export const prepareFriendlyComponentNames = async (components: JiraProjectComponentMap[], projectDetails: Project[]): Promise<string[]> => {
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
     const returnComponents: string[] = [];
     const baseComponentUrl = `${jiraConfig.url}/projects`;
@@ -82,7 +82,7 @@ export const prepareFriendlyComponentNames = async (components: JiraProjectCompo
     return returnComponents;
 };
 
-export const prepareFriendProjectNames = async (projects: JiraProject[]): Promise<string[]> => {
+export const prepareFriendProjectNames = async (projects: Project[]): Promise<string[]> => {
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
     const returnProjects: string[] =  [];
     const baseComponentUrl = `${jiraConfig.url}/projects`;

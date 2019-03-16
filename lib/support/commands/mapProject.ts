@@ -2,8 +2,8 @@ import {configurationValue, HandlerResult, logger, Parameter, Parameters} from "
 import {CommandHandlerRegistration, CommandListenerInvocation, slackErrorMessage, slackSuccessMessage} from "@atomist/sdm";
 import objectHash = require("object-hash");
 import {JiraConfig} from "../../jira";
-import * as types from "../../typings/types";
 import {getJiraDetails} from "../jiraDataLookup";
+import {Project} from "../jiraDefs";
 import {JiraHandlerParam, prepProjectSelect, submitMappingPayload} from "./shared";
 
 @Parameters()
@@ -64,7 +64,7 @@ function mapProjectToChannel(ci: CommandListenerInvocation<MapProjectToChannelPa
             );
 
             const projectDetails =
-                await getJiraDetails<types.OnJiraIssueEvent.Project>(`${jiraConfig.url}/rest/api/2/project/${project.project}`, true);
+                await getJiraDetails<Project>(`${jiraConfig.url}/rest/api/2/project/${project.project}`, true);
             const subject = `New JIRA Project mapping created successfully!`;
             const message = `Added new mapping from Project *${projectDetails.name}* to *${ci.parameters.slackChannelName}*`;
 

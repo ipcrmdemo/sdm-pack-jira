@@ -13,7 +13,7 @@ import {CommandListenerInvocation} from "@atomist/sdm";
 import {JiraConfig} from "../../jira";
 import {purgeCacheEntry} from "../cache/manage";
 import {getJiraDetails} from "../jiraDataLookup";
-import {JiraProject} from "../shared";
+import {Project} from "../jiraDefs";
 
 @Parameters()
 export class JiraHandlerParam {
@@ -104,7 +104,7 @@ export async function prepProjectSelect(ci: CommandListenerInvocation<JiraHandle
 
     // Find projects that match project search string
     const projectValues: Option[] = [];
-    const result = await getJiraDetails<JiraProject[]>(lookupUrl, true);
+    const result = await getJiraDetails<Project[]>(lookupUrl, true);
 
     result.forEach(p => {
         if (p.name.toLowerCase().includes(search.toLowerCase())) {
@@ -126,7 +126,7 @@ export async function prepComponentSelect(
 ): Promise<Option[] | undefined> {
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
     const componentLookupUrl = `${jiraConfig.url}/rest/api/2/project/${project}`;
-    const projectDetails = await getJiraDetails<JiraProject>(componentLookupUrl, false);
+    const projectDetails = await getJiraDetails<Project>(componentLookupUrl, false);
     const componentValues: Option[] = [];
 
     projectDetails.components.forEach(c => {

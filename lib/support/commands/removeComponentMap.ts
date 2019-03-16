@@ -3,9 +3,9 @@ import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata
 import {CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage} from "@atomist/sdm";
 import * as objectHash from "object-hash";
 import {JiraConfig} from "../../jira";
-import * as types from "../../typings/types";
 import {getMappedComponentsbyChannel} from "../helpers/channelLookup";
 import {getJiraDetails} from "../jiraDataLookup";
+import {Component} from "../jiraDefs";
 import {findRequiredProjects, lookupJiraProjectDetails} from "./getCurrentChannelMappings";
 import {JiraHandlerParam, submitMappingPayload} from "./shared";
 
@@ -63,7 +63,7 @@ export function removeComponentMapFromChannel(ci: CommandListenerInvocation<Jira
             );
 
             const compInfo =
-                await getJiraDetails<types.OnJiraIssueEvent.Components>(
+                await getJiraDetails<Component>(
                     `${jiraConfig.url}/rest/api/2/component/${component.component.split(":")[1]}`);
 
             await ci.addressChannels(slackSuccessMessage(

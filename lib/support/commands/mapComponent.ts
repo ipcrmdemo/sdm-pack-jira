@@ -2,8 +2,8 @@ import {configurationValue, HandlerResult, logger, Parameter, Parameters} from "
 import {CommandHandlerRegistration, CommandListenerInvocation, slackErrorMessage, slackSuccessMessage} from "@atomist/sdm";
 import * as objectHash from "object-hash";
 import {JiraConfig} from "../../jira";
-import * as types from "../../typings/types";
 import {getJiraDetails} from "../jiraDataLookup";
+import {Component} from "../jiraDefs";
 import {JiraHandlerParam, prepComponentSelect, prepProjectSelect, submitMappingPayload} from "./shared";
 
 @Parameters()
@@ -87,7 +87,7 @@ export function mapComponentToChannel(ci: CommandListenerInvocation<MapComponent
             );
 
             const componentDetails =
-                await getJiraDetails<types.OnJiraIssueEvent.Components>(`${jiraConfig.url}/rest/api/2/component/${component.component}`, true);
+                await getJiraDetails<Component>(`${jiraConfig.url}/rest/api/2/component/${component.component}`, true);
 
             await ci.addressChannels(slackSuccessMessage(
                 `New JIRA Component mapping created successfully!`,

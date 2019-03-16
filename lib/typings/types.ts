@@ -1190,8 +1190,6 @@ export namespace OnJiraIssueEvent {
   export type Fields = {
     __typename?: "JiraIssueFields";
 
-    environment?: string | null;
-
     issueType: IssueType;
 
     parent?: Parent | null;
@@ -1205,10 +1203,6 @@ export namespace OnJiraIssueEvent {
     project?: Project | null;
 
     aggregatetimespent?: number | null;
-
-    resolution?: string | null;
-
-    summary: string;
 
     creator: Creator;
 
@@ -1231,8 +1225,6 @@ export namespace OnJiraIssueEvent {
     __typename?: "JiraIssueType";
 
     subtask: boolean;
-
-    name: string;
   };
 
   export type Parent = {
@@ -1250,8 +1242,6 @@ export namespace OnJiraIssueEvent {
   export type _Fields = {
     __typename?: "JiraSubTaskFields";
 
-    summary: string;
-
     status: Status;
 
     priority: Priority;
@@ -1263,16 +1253,12 @@ export namespace OnJiraIssueEvent {
     __typename?: "JiraIssueStatus";
 
     self: string;
-
-    name: string;
   };
 
   export type Priority = {
     __typename?: "JiraIssuePriority";
 
     self: string;
-
-    name: string;
   };
 
   export type _IssueType = {
@@ -1286,8 +1272,6 @@ export namespace OnJiraIssueEvent {
 
     self: string;
 
-    name: string;
-
     id: string;
   };
 
@@ -1295,8 +1279,6 @@ export namespace OnJiraIssueEvent {
     __typename?: "JiraProject";
 
     self: string;
-
-    name: string;
 
     id: string;
 
@@ -1310,8 +1292,6 @@ export namespace OnJiraIssueEvent {
 
     self: string;
 
-    name: string;
-
     key: string;
   };
 
@@ -1320,8 +1300,6 @@ export namespace OnJiraIssueEvent {
 
     self: string;
 
-    name: string;
-
     key: string;
   };
 
@@ -1329,16 +1307,12 @@ export namespace OnJiraIssueEvent {
     __typename?: "JiraIssuePriority";
 
     self: string;
-
-    name: string;
   };
 
   export type Assignee = {
     __typename?: "JiraIssueUser";
 
     self: string;
-
-    name: string;
 
     key: string;
   };
@@ -1347,16 +1321,12 @@ export namespace OnJiraIssueEvent {
     __typename?: "JiraIssueStatus";
 
     self: string;
-
-    name: string;
   };
 
   export type User = {
     __typename?: "JiraIssueUser";
 
     self: string;
-
-    name: string;
 
     key: string;
   };
@@ -1394,8 +1364,6 @@ export namespace OnJiraIssueEvent {
 
     author: Author;
 
-    body: string;
-
     updateAuthor?: UpdateAuthor | null;
 
     created: string;
@@ -1408,8 +1376,6 @@ export namespace OnJiraIssueEvent {
 
     self: string;
 
-    name: string;
-
     key: string;
   };
 
@@ -1417,8 +1383,6 @@ export namespace OnJiraIssueEvent {
     __typename?: "JiraIssueUser";
 
     self: string;
-
-    name: string;
 
     key: string;
   };

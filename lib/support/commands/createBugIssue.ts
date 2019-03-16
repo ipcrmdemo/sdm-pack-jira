@@ -7,7 +7,8 @@ import {JiraConfig} from "../../jira";
 import * as types from "../../typings/types";
 import {getMappedComponentsbyChannel} from "../helpers/channelLookup";
 import {getJiraDetails} from "../jiraDataLookup";
-import {convertEmailtoJiraUser, JiraProject} from "../shared";
+import {Project} from "../jiraDefs";
+import {convertEmailtoJiraUser} from "../shared";
 import {createJiraTicket, JiraHandlerParam} from "./shared";
 
 @Parameters()
@@ -26,7 +27,7 @@ export function createBugIssue(ci: CommandListenerInvocation<JiraProjectLookup>)
             components.map(async c => {
             // Get Search pattern for project lookup
             const lookupUrl = `${jiraConfig.url}/rest/api/2/project/${c.projectId}`;
-            const project = await getJiraDetails<JiraProject>(lookupUrl, true, 30);
+            const project = await getJiraDetails<Project>(lookupUrl, true, 30);
             const comp = project.components.filter(nc => nc.id === c.componentId)[0];
             componentOptions.push({description: `${project.name}/${comp.name}`, value: `${comp.id}:${project.id}`});
              }),
@@ -138,7 +139,8 @@ export function createBugIssue(ci: CommandListenerInvocation<JiraProjectLookup>)
             // Submit new issue
             try {
                 const res = await createJiraTicket({fields: data});
-                await ci.addressChannels(`Created new JIRA Bug issue successfully! Link: ${slack.url(jiraConfig.url + `/browse/` + res.key, res.key)}`, {
+                await ci.addressChannels(`Created new JIRA Bug issue successfully!` +
+                    `Link: ${slack.url(jiraConfig.url + `/browse/` + res.key, res.key)}`, {
                     ttl: 60 * 1000,
                     id: `createJiraIssue-${ci.parameters.screenName}`,
                 });
