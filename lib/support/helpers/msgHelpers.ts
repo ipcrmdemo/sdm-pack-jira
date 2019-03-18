@@ -41,20 +41,34 @@ export const prepareStateChangeMessage = async (event: types.OnJiraIssueEvent.Ji
     if (event.hasOwnProperty("changelog") && event.changelog !== null) {
         const fields: slack.Field[] = [];
         event.changelog.items.forEach(c => {
-            if (c.field !== "description") {
-                fields.push(
-                    {
-                        title: `${upperCaseFirstLetter(c.field)} Change`,
-                        value: `${c.fromString} => ${c.toString}`,
-                        short: true,
-                    },
-                );
-            } else {
+            if (c.field === "description") {
                 fields.push(
                     {
                         title: `Description Updated`,
                         value: jira2slack.toSlack(c.toString),
                         short: false,
+                    },
+                );
+            } else if (c.field === "Component") {
+                if (c.toString === null) {
+                    fields.push({
+                        title: `Component: [${c.fromString}]`,
+                        value: `\u{274C} Removed`,
+                        short: true,
+                    });
+                } else {
+                    fields.push({
+                        title: `Component: [${c.toString}]`,
+                        value: `\u{2705} Added`,
+                        short: true,
+                    });
+                }
+            } else {
+                fields.push(
+                    {
+                        title: `${upperCaseFirstLetter(c.field)} Change`,
+                        value: `${c.fromString} => ${c.toString}`,
+                        short: true,
                     },
                 );
             }

@@ -27,7 +27,6 @@ export const jiraSupport = (): ExtensionPack => {
             sdm.addCommand(getCurrentChannelMappingsReg);
             sdm.addCommand(setJiraChannelPrefsReg);
             sdm.addCommand(getJiraChannelPrefsReg);
-
             sdm.addCommand(commentOnIssue);
             sdm.addCommand(mapProjectToChannelReg);
             sdm.addCommand(removeProjectMapFromChannelReg);
