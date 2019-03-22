@@ -6,7 +6,7 @@ import {JiraConfig} from "../jira";
 import * as types from "../typings/types";
 import {jiraDetermineNotifyChannels, jiraParseChannels} from "./helpers/channelLookup";
 import {
-    jiraSlackFooter,
+    buildJiraFooter,
     prepareIssueCommentedMessage,
     prepareIssueDeletedMessage,
     prepareNewIssueMessage,
@@ -15,7 +15,6 @@ import {
 import {getJiraDetails} from "./jiraDataLookup";
 import * as jiraTypes from "./jiraDefs";
 
-// tslint:disable-next-line:cyclomatic-complexity
 export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEvent.JiraIssue): Promise<void> => {
     // Build one object with all the stuff that we'll convert into a slack message
     const message: slack.Attachment[] = [];
@@ -117,12 +116,7 @@ export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEv
                 ...message,
                 {
                     fallback: `Footer`,
-                    footer: jiraSlackFooter(
-                        issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.project.name : undefined,
-                        issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.project.key : undefined,
-                        issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.labels : undefined,
-                        undefined,
-                    ),
+                    footer: buildJiraFooter(issueDetail),
                     footer_icon: "https://images.atomist.com/rug/issue-open.png",
                     ts: slackTs(),
                 },

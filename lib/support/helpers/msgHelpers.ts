@@ -155,17 +155,48 @@ export const prepareNewIssueMessage = async (event: types.OnJiraIssueEvent.JiraI
     }
 };
 
-export function jiraSlackFooter(projectName: string, projectKey: string, labels: string[], author?: string): string {
-    const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
-    let footer = slack.url(`${jiraConfig.url}/projects/${projectKey}`, `Jira Project/${projectName}`);
+export function buildJiraFooter(issueDetail: jiraTypes.Issue): string {
+    return jiraSlackFooter(
+    issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.project.name : undefined,
+    issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.project.key : undefined,
+    issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.labels : undefined,
+    issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.issuetype.name : undefined,
+    issueDetail
+        && issueDetail.hasOwnProperty("fields")
+        && issueDetail.fields.hasOwnProperty("assignee")
+        && issueDetail.fields.assignee ? issueDetail.fields.assignee.name : "Unassigned",
+    issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.priority.name : undefined,
+    issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.status.name : undefined,
+    );
+}
 
+function jiraSlackFooter(
+    projectName: string,
+    projectKey: string,
+    labels: string[],
+    type?: string,
+    assignee?: string,
+    priority?: string,
+    status?: string,
+): string {
+    const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
+    let footer = slack.url(`${jiraConfig.url}/projects/${projectKey}`, `JIRA/${projectName.toUpperCase()}`);
+    if (type) {
+        footer += ` - ${type}`;
+    }
+    if (priority) {
+        footer += ` - ${priority}`;
+    }
+    if (status) {
+        footer += ` - ${status}`;
+    }
+    if (assignee) {
+        footer += " - " + `\u{1F464} ${assignee}`;
+    }
     logger.debug(`JIRA jiraSlackFooter: Labels found => ${JSON.stringify(labels)}`);
     if (labels !== undefined && labels.length > 0) {
-        footer += " - "
+        footer += " | "
             + labels.map(l => `\u{1F3F7} ${l}`).join(" ");
-    }
-    if (author) {
-        footer += " - " + `${slack.emoji("bust_in_silhouette")} ${author}`;
     }
     return footer;
 }
