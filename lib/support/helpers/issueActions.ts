@@ -82,7 +82,7 @@ export async function commentOnIssueHandler(cli: CommandListenerInvocation<Comme
     }
 
     logger.debug(`JIRA commentOnIssueHandler: Data payload => ${JSON.stringify(data)}`);
-    const result = await httpClient.exchange(
+    await httpClient.exchange(
         issueUrl,
         {
             method: HttpMethod.Put,

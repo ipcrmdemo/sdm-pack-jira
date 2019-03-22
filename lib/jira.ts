@@ -43,8 +43,24 @@ export const jiraSupport = (): ExtensionPack => {
 };
 
 export interface JiraConfig {
+    /**
+     * Base URL to your JIRA Server instance
+     */
     url: string;
+
+    /**
+     * If using dynamic channels (or the built-in JIRA approval goal), must supply this value to lookup
+     * VCS repo details in JIRA.
+     */
     vcstype: string;
+
+    /**
+     * Username for connecting to your JIRA Server
+     */
     user: string;
+
+    /**
+     * Password for connecting to your JIRA Server
+     */
     password: string;
 }

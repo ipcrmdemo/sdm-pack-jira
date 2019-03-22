@@ -1,12 +1,15 @@
+import {configurationValue} from "@atomist/automation-client";
 import { GoalWithFulfillment, IndependentOfEnvironment, SdmGoalState, slackErrorMessage } from "@atomist/sdm";
 import { readSdmVersion } from "@atomist/sdm-core";
+import {JiraConfig} from "../jira";
 import {createJiraTicket} from "../support/commands/shared";
+import {convertEmailtoJiraUser} from "../support/shared";
 
 export const JiraApproval = new GoalWithFulfillment({
     uniqueName: "jiraApprovalGoal",
     displayName: "Approval Goal",
     environment: IndependentOfEnvironment,
-    inProcessDescription: "Awaiting ticket sign-off",
+    workingDescription: "Awaiting ticket sign-off",
     successDescription: "Approved",
 }).with({
     name: "jiraApprovalGoalFulfillment",
@@ -46,8 +49,16 @@ export const JiraApproval = new GoalWithFulfillment({
             gi.context,
         );
 
-        // TODO: Add lookup for the reporter from the committer id
-        const data = {
+        // Try to find requester
+        let realRequester: string;
+        await Promise.all(gi.goalEvent.push.after.committer.person.emails.map(async e => {
+            const res = await convertEmailtoJiraUser(e.address);
+            if (res) {
+                realRequester = res;
+            }
+        }));
+
+        let data = {
             fields: {
                 description: `[${gi.id.repo}] Requesting approval to deploy version ${newVersion} (${gi.id.sha})` +
                     `\n\n\n${enviornmentData.join("\n")}`,
@@ -63,6 +74,18 @@ export const JiraApproval = new GoalWithFulfillment({
                 },
             },
         };
+
+        if (realRequester) {
+            data = {
+                ...data,
+                ...{
+                    reporter: {
+                        name: realRequester,
+                    },
+                },
+            };
+        }
+
         // Open JIRA Subtask for approval
         // In body
         // [atomist:sha:]
@@ -71,10 +94,14 @@ export const JiraApproval = new GoalWithFulfillment({
         // [atomist:branch:]
         const result = await createJiraTicket(data);
 
+        const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
         return {
             state: SdmGoalState.in_process,
             description: gi.goal.inProcessDescription,
             data: result.id,
+            externalUrls: [
+                {label: result.key, url: `${jiraConfig.url}/browse/${result.key}`},
+            ],
         };
     },
 });

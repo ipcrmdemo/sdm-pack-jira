@@ -149,7 +149,7 @@ export const jiraParseChannels = async (
             issueDetail &&
             issueDetail.hasOwnProperty("fields") &&
             _.get(c, check, undefined) === true &&
-            _.get(c, issueDetail.fields.issuetype.name.toLowerCase(), undefined) === true
+            _.get(c, issueDetail.fields.issuetype.name.toLowerCase().replace("-", ""), undefined) === true
         ) {
             return c;
         } else {

@@ -9,11 +9,12 @@ import {
     Parameters,
 } from "@atomist/automation-client";
 import { CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage, slackTs } from "@atomist/sdm";
-import { SlackMessage } from "@atomist/slack-messages";
+import {SlackMessage} from "@atomist/slack-messages";
 import * as objectHash from "object-hash";
 import * as types from "../../typings/types";
 import {cachedJiraMappingLookup} from "../cache/lookup";
 import {purgeCacheEntry} from "../cache/manage";
+import * as _ from "lodash";
 
 @Parameters()
 class JiraChannelPrefsBase {
@@ -142,6 +143,23 @@ export const setJiraChannelPrefsReg: CommandHandlerRegistration<JiraChannelPrefs
     listener: setJiraChannelPrefs,
 };
 
+export function mungeJiraPrefs(prefs: types.GetJiraChannelPrefs.JiraChannelPrefs): types.GetJiraChannelPrefs.JiraChannelPrefs {
+    const a = (b: null | boolean) => b !== null ? b : true;
+    return {
+        channel: prefs.channel,
+        issueComment: a(prefs.issueComment),
+        issueDeleted: a(prefs.issueDeleted),
+        issueCreated: a(prefs.issueCreated),
+        issueState: a(prefs.issueState),
+        issueStatus: a(prefs.issueStatus),
+        bug: a(prefs.bug),
+        task: a(prefs.task),
+        epic: a(prefs.epic),
+        story: a(prefs.story),
+        subtask: a(prefs.subtask),
+    };
+}
+
 export const queryJiraChannelPrefs = async (
     ctx: HandlerContext,
     channel: string,
@@ -152,7 +170,7 @@ export const queryJiraChannelPrefs = async (
 
     let setPrefs: types.GetJiraChannelPrefs.JiraChannelPrefs;
     if (result.JiraChannelPrefs.length > 0) {
-        setPrefs = result.JiraChannelPrefs[0];
+        setPrefs = mungeJiraPrefs(result.JiraChannelPrefs[0]);
     } else {
         setPrefs = {
             channel,

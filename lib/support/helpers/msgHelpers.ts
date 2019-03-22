@@ -180,18 +180,19 @@ function jiraSlackFooter(
     status?: string,
 ): string {
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
-    let footer = slack.url(`${jiraConfig.url}/projects/${projectKey}`, `JIRA/${projectName.toUpperCase()}`);
+    let footer = "JIRA ";
+    footer += slack.url(`${jiraConfig.url}/projects/${projectKey}`, ` / ${projectName.toUpperCase()}`);
     if (type) {
-        footer += ` - ${type}`;
+        footer += ` / ${type}`;
     }
     if (priority) {
-        footer += ` - ${priority}`;
+        footer += ` / ${priority}`;
     }
     if (status) {
-        footer += ` - ${status}`;
+        footer += ` / ${status}`;
     }
     if (assignee) {
-        footer += " - " + `\u{1F464} ${assignee}`;
+        footer += " / " + `\u{1F464} ${assignee}`;
     }
     logger.debug(`JIRA jiraSlackFooter: Labels found => ${JSON.stringify(labels)}`);
     if (labels !== undefined && labels.length > 0) {
