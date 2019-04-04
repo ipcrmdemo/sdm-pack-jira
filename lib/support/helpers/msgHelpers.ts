@@ -171,7 +171,6 @@ export function buildJiraFooter(issueDetail: jiraTypes.Issue): string {
         && issueDetail.fields.assignee ? issueDetail.fields.assignee.name : "Unassigned",
     issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.priority.name : undefined,
     issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.status.name : undefined,
-    issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.components.map(c => c.name) : undefined,
     );
 }
 
@@ -183,7 +182,6 @@ function jiraSlackFooter(
     assignee?: string,
     priority?: string,
     status?: string,
-    components?: string[],
 ): string {
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
     let footer = "JIRA ";
@@ -204,14 +202,7 @@ function jiraSlackFooter(
     // Labels
     logger.debug(`JIRA jiraSlackFooter: Labels found => ${JSON.stringify(labels)}`);
     if (labels !== undefined && labels.length > 0) {
-        footer += "\n "
-            + labels.map(l => `\u{1F3F7} ${l}`).join(" ");
+        footer += " - " + labels.map(l => `\u{1F3F7} ${l}`).join(" ");
     }
-    // Components
-    // logger.debug(`JIRA jiraSlackFooter: Components found => ${JSON.stringify(components)}`);
-    // if (components !== undefined && components.length > 0) {
-    //     footer += "\n "
-    //         + components.map(c => `\u{1F4E6} ${c}`).join(" ");
-    // }
     return footer;
 }

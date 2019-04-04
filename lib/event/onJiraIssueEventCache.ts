@@ -1,4 +1,4 @@
-import {configurationValue, GraphQL, logger, NoParameters, OnEvent, Success} from "@atomist/automation-client";
+import {configurationValue, GraphQL, logger, OnEvent, Success} from "@atomist/automation-client";
 import { EventHandlerRegistration } from "@atomist/sdm";
 import {JiraConfig} from "../jira";
 import {purgeCacheEntry} from "../support/cache/manage";
@@ -6,7 +6,7 @@ import * as types from "../typings/types";
 
 function onJiraIssueEventCacheHandler():
     OnEvent<types.OnJiraIssueEvent.Subscription> {
-    return async (e, ctx) => {
+    return async e => {
         if (["project_created", "project_updated", "project_deleted"].includes(e.data.JiraIssue[0].webhookEvent)) {
             const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
             logger.info(`JIRA onJiraIssueEventCacheHandler Flushing JIRA project cache, configuration changes have been made`);
@@ -21,4 +21,4 @@ export const onJiraIssueEventCache: EventHandlerRegistration<types.OnJiraIssueEv
     name: "OnJiraIssueEventCache",
     subscription: GraphQL.subscription("OnJiraIssueEvent"),
     listener: onJiraIssueEventCacheHandler(),
-}
+};

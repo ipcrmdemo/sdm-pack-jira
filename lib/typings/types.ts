@@ -8,17 +8,6 @@
 // InputTypes
 // ====================================================
 
-/** TODO - remove this I think... */
-export interface DockerRegistryProviderInput {
-  name?: string | null;
-
-  url?: string | null;
-
-  username?: string | null;
-
-  password?: string | null;
-}
-
 export interface ScmResourceProviderInput {
   orgs: string[];
 
@@ -365,7 +354,8 @@ export enum PullRequestAction {
   closed = "closed",
   reopened = "reopened",
   synchronize = "synchronize",
-  submitted = "submitted"
+  submitted = "submitted",
+  ready_for_review = "ready_for_review"
 }
 /** Enum for BuildStatus */
 export enum BuildStatus {
@@ -374,7 +364,9 @@ export enum BuildStatus {
   failed = "failed",
   started = "started",
   canceled = "canceled",
-  pending = "pending"
+  pending = "pending",
+  error = "error",
+  queued = "queued"
 }
 /** Enum for BuildTrigger */
 export enum BuildTrigger {
@@ -472,6 +464,11 @@ export enum SdmGoalState {
   in_process = "in_process",
   skipped = "skipped",
   canceled = "canceled"
+}
+
+export enum SdmGoalDisplayFormat {
+  compact = "compact",
+  full = "full"
 }
 
 export enum SdmGoalDisplayState {
@@ -852,6 +849,11 @@ export enum DockerRegistryType {
   JFrog = "JFrog",
   DockerHub = "DockerHub"
 }
+
+export enum BinaryRepositoryType {
+  maven2 = "maven2",
+  npm = "npm"
+}
 /** Ordering Enum for UserJoinedChannel */
 export enum _UserJoinedChannelOrdering {
   atmTeamId_asc = "atmTeamId_asc",
@@ -1145,6 +1147,284 @@ export namespace GetJiraChannelPrefs {
     story?: boolean | null;
 
     subtask?: boolean | null;
+  };
+}
+
+export namespace GetJiraIssueByKey {
+  export type Variables = {
+    key: string;
+  };
+
+  export type Query = {
+    __typename?: "Query";
+
+    JiraIssue?: (JiraIssue | null)[] | null;
+  };
+
+  export type JiraIssue = {
+    __typename?: "JiraIssue";
+
+    timestamp: string;
+
+    webhookEvent: string;
+
+    issue_event_type_name: string;
+
+    issue: Issue;
+
+    user?: User | null;
+
+    changelog?: Changelog | null;
+
+    comment?: Comment | null;
+  };
+
+  export type Issue = {
+    __typename?: "JiraIssueDetail";
+
+    id: string;
+
+    self: string;
+
+    key: string;
+
+    fields: Fields;
+  };
+
+  export type Fields = {
+    __typename?: "JiraIssueFields";
+
+    aggregatetimespent?: number | null;
+
+    assignee?: Assignee | null;
+
+    components?: (Components | null)[] | null;
+
+    created: string;
+
+    creator: Creator;
+
+    issueType: IssueType;
+
+    labels?: (string | null)[] | null;
+
+    parent?: Parent | null;
+
+    priority: _Priority;
+
+    project?: Project | null;
+
+    reporter: Reporter;
+
+    status: _Status;
+
+    timeoriginalestimate?: number | null;
+
+    timespent?: number | null;
+
+    updated: string;
+  };
+
+  export type Assignee = {
+    __typename?: "JiraIssueUser";
+
+    key: string;
+
+    self: string;
+  };
+
+  export type Components = {
+    __typename?: "JiraIssueComponent";
+
+    id: string;
+
+    self: string;
+  };
+
+  export type Creator = {
+    __typename?: "JiraIssueUser";
+
+    key: string;
+
+    self: string;
+  };
+
+  export type IssueType = {
+    __typename?: "JiraIssueType";
+
+    subtask: boolean;
+  };
+
+  export type Parent = {
+    __typename?: "JiraIssueParent";
+
+    self?: string | null;
+
+    id?: string | null;
+
+    key?: string | null;
+
+    fields?: _Fields | null;
+  };
+
+  export type _Fields = {
+    __typename?: "JiraSubTaskFields";
+
+    issueType: _IssueType;
+
+    priority: Priority;
+
+    status: Status;
+  };
+
+  export type _IssueType = {
+    __typename?: "JiraIssueType";
+
+    subtask: boolean;
+  };
+
+  export type Priority = {
+    __typename?: "JiraIssuePriority";
+
+    self: string;
+
+    name: string;
+
+    id: string;
+  };
+
+  export type Status = {
+    __typename?: "JiraIssueStatus";
+
+    self: string;
+
+    statusCategory: StatusCategory;
+
+    id: string;
+  };
+
+  export type StatusCategory = {
+    __typename?: "JiraIssueStatusCategory";
+
+    id: number;
+  };
+
+  export type _Priority = {
+    __typename?: "JiraIssuePriority";
+
+    id: string;
+
+    name: string;
+
+    self: string;
+  };
+
+  export type Project = {
+    __typename?: "JiraProject";
+
+    id: string;
+
+    key: string;
+
+    projectTypeKey: string;
+
+    self: string;
+  };
+
+  export type Reporter = {
+    __typename?: "JiraIssueUser";
+
+    key: string;
+
+    self: string;
+  };
+
+  export type _Status = {
+    __typename?: "JiraIssueStatus";
+
+    statusCategory: _StatusCategory;
+
+    self: string;
+
+    id: string;
+  };
+
+  export type _StatusCategory = {
+    __typename?: "JiraIssueStatusCategory";
+
+    colorName: string;
+
+    id: number;
+
+    key: string;
+
+    name: string;
+
+    self: string;
+  };
+
+  export type User = {
+    __typename?: "JiraIssueUser";
+
+    key: string;
+
+    self: string;
+  };
+
+  export type Changelog = {
+    __typename?: "JiraIssueChangelog";
+
+    id: string;
+
+    items: (Items | null)[];
+  };
+
+  export type Items = {
+    __typename?: "JiraIssueChangelogItem";
+
+    field: string;
+
+    fieldtype: string;
+
+    fromString: string;
+
+    from: string;
+
+    toString: string;
+
+    to: string;
+  };
+
+  export type Comment = {
+    __typename?: "JiraIssueComment";
+
+    author: Author;
+
+    created: string;
+
+    id: string;
+
+    self: string;
+
+    updateAuthor?: UpdateAuthor | null;
+
+    updated?: string | null;
+  };
+
+  export type Author = {
+    __typename?: "JiraIssueUser";
+
+    self: string;
+
+    key: string;
+  };
+
+  export type UpdateAuthor = {
+    __typename?: "JiraIssueUser";
+
+    self: string;
+
+    key: string;
   };
 }
 
