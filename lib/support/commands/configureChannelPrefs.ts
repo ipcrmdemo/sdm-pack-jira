@@ -14,7 +14,6 @@ import * as objectHash from "object-hash";
 import * as types from "../../typings/types";
 import {cachedJiraMappingLookup} from "../cache/lookup";
 import {purgeCacheEntry} from "../cache/manage";
-import * as _ from "lodash";
 
 @Parameters()
 class JiraChannelPrefsBase {

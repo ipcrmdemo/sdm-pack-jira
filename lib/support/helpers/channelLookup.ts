@@ -169,12 +169,12 @@ export const jiraDetermineNotifyChannels = async (
 ): Promise<types.GetJiraChannelPrefs.JiraChannelPrefs[]> => {
     const notifyChannels: types.GetJiraChannelPrefs.JiraChannelPrefs[] = [];
     const channels = await jiraChannelLookup(ctx, event);
-    logger.debug(`JIRA jiraDetermineNotifyChannels: channels found for event => ${JSON.stringify(channels)}`);
+    logger.debug(`JIRA jiraDetermineNotifyChannels => channels found for event => ${JSON.stringify(channels)}`);
 
     await Promise.all(
         channels.map(async c => {
             const prefs = await queryJiraChannelPrefs(ctx, c);
-            logger.debug(`JIRA jiraDetermineNotifyChannels: prefs found for channel ${c} => ${JSON.stringify(prefs)}`);
+            logger.debug(`JIRA jiraDetermineNotifyChannels => prefs found for channel ${c} => ${JSON.stringify(prefs)}`);
             notifyChannels.push(prefs);
         }),
     );

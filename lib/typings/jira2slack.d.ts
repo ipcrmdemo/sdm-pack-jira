@@ -12,5 +12,5 @@ declare module "jira2slack" {
    * @param {string} slackMD The Slack markdown
    * @return {string} The JIRA markdown
    */
-   export function toJira(slackMD: string): string;
+  export function toJira(slackMD: string): string;
 }

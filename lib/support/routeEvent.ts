@@ -1,9 +1,10 @@
-import {buttonForCommand, configurationValue, HandlerContext, MessageOptions} from "@atomist/automation-client";
+import {buttonForCommand, configurationValue, HandlerContext, logger, MessageOptions} from "@atomist/automation-client";
 import {slackTs} from "@atomist/sdm";
 import * as slack from "@atomist/slack-messages";
 import _ = require("lodash");
 import {JiraConfig} from "../jira";
 import * as types from "../typings/types";
+import {purgeCacheEntry} from "./cache/manage";
 import {jiraDetermineNotifyChannels, jiraParseChannels} from "./helpers/channelLookup";
 import {
     buildJiraFooter,
@@ -22,9 +23,17 @@ export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEv
     let issueDetail: jiraTypes.Issue;
     let msgOptions: MessageOptions;
 
+    /**
+     * Flush cache, if exists, for this Issue If there are quick subsequent changes on an issue we need
+     * to make sure we retrieve the latest data per event.  Once we've retrieved the data for THIS event
+     * we'll use the cached version
+     */
+    await purgeCacheEntry(event.issue.self);
+
     // Set a description
     let description: string;
     switch (event.webhookEvent) {
+        case("comment_created"):
         case("jira:issue_updated"): {
             issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self, true, 30);
             description = `JIRA Issue updated ` + slack.url(
@@ -37,7 +46,7 @@ export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEv
             }
             msgOptions = {
                 id: `jira/issue_updated/${event.issue.key}/${commentId}`,
-                ttl: 60000 * 60,
+                ttl: 300000,
             };
             break;
         }
@@ -50,7 +59,7 @@ export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEv
             );
             msgOptions = {
                 id: `jira/issue_created/${event.issue.key}/${event.issue_event_type_name}`,
-                ttl: 60000 * 60,
+                ttl: 300000,
             };
             break;
         }
@@ -59,7 +68,7 @@ export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEv
             description = slack.url(`${jiraConfig.url}/browse/${event.issue.key}`, `JIRA Issue ${event.issue.key} deleted`);
             msgOptions = {
                 id: `jira/issue_deleted/${event.issue.key}/${event.issue_event_type_name}`,
-                ttl: 60000 * 60,
+                ttl: 300000,
             };
             break;
         }
@@ -70,7 +79,10 @@ export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEv
     const newChannels = await jiraDetermineNotifyChannels(ctx, event);
 
     // Apply channel preferences to filter out who to alert
-    if (event.issue_event_type_name !== null && event.issue_event_type_name.match(/^(issue_comment_edited|issue_commented)$/)) {
+    if (
+        event.issue_event_type_name !== null && event.issue_event_type_name.match(/^(issue_comment_edited|issue_commented)$/) ||
+        event.webhookEvent === "comment_created"
+    ) {
         channels.push(...(await jiraParseChannels(newChannels, event, `issueComment`)));
     }
 
@@ -117,7 +129,7 @@ export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEv
                 {
                     fallback: `Footer`,
                     footer: buildJiraFooter(issueDetail),
-                    footer_icon: "https://images.atomist.com/rug/issue-open.png",
+                    // footer_icon: "https://images.atomist.com/rug/issue-open.png",
                     ts: slackTs(),
                 },
                 {
@@ -131,7 +143,16 @@ export const routeEvent = async (ctx: HandlerContext, event: types.OnJiraIssueEv
         };
 
         if (notifyChannels.length > 0) {
+            logger.debug(`JIRA routeEvent: Final list of channels => ${JSON.stringify(notifyChannels, undefined, 2)}`);
             await ctx.messageClient.addressChannels(finalMessage, notifyChannels.map(c => c.channel), msgOptions);
+        }
+    } else {
+        if (!(message.length > 0)) {
+            logger.debug(`JIRA routeEvent: Message is empty, not sending message`);
+        }
+
+        if (!(channels.length > 0)) {
+            logger.debug(`JIRA routeEvent: No channels found, not sending message`);
         }
     }
 };

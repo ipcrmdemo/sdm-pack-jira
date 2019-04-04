@@ -38,7 +38,11 @@ export const prepareIssueCommentedMessage = async (event: types.OnJiraIssueEvent
 };
 
 export const prepareStateChangeMessage = async (event: types.OnJiraIssueEvent.JiraIssue): Promise<slack.Attachment[]> => {
-    if (event.hasOwnProperty("changelog") && event.changelog !== null) {
+    if (
+        event.hasOwnProperty("changelog") &&
+        event.changelog !== null &&
+        event.webhookEvent !== "jira:issue_created"
+    ) {
         const fields: slack.Field[] = [];
         event.changelog.items.forEach(c => {
             if (c.field === "description") {
@@ -67,7 +71,7 @@ export const prepareStateChangeMessage = async (event: types.OnJiraIssueEvent.Ji
                 fields.push(
                     {
                         title: `${upperCaseFirstLetter(c.field)} Change`,
-                        value: `${c.fromString} => ${c.toString}`,
+                        value: `${c.fromString !== null ? c.fromString : "Not set"} => ${c.toString !== null ? c.toString : "Not set"}`,
                         short: true,
                     },
                 );
@@ -167,6 +171,7 @@ export function buildJiraFooter(issueDetail: jiraTypes.Issue): string {
         && issueDetail.fields.assignee ? issueDetail.fields.assignee.name : "Unassigned",
     issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.priority.name : undefined,
     issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.status.name : undefined,
+    issueDetail && issueDetail.hasOwnProperty("fields") ? issueDetail.fields.components.map(c => c.name) : undefined,
     );
 }
 
@@ -178,6 +183,7 @@ function jiraSlackFooter(
     assignee?: string,
     priority?: string,
     status?: string,
+    components?: string[],
 ): string {
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
     let footer = "JIRA ";
@@ -194,10 +200,18 @@ function jiraSlackFooter(
     if (assignee) {
         footer += " / " + `\u{1F464} ${assignee}`;
     }
+
+    // Labels
     logger.debug(`JIRA jiraSlackFooter: Labels found => ${JSON.stringify(labels)}`);
     if (labels !== undefined && labels.length > 0) {
-        footer += " | "
+        footer += "\n "
             + labels.map(l => `\u{1F3F7} ${l}`).join(" ");
     }
+    // Components
+    // logger.debug(`JIRA jiraSlackFooter: Components found => ${JSON.stringify(components)}`);
+    // if (components !== undefined && components.length > 0) {
+    //     footer += "\n "
+    //         + components.map(c => `\u{1F4E6} ${c}`).join(" ");
+    // }
     return footer;
 }
