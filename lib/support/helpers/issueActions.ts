@@ -82,6 +82,7 @@ export async function commentOnIssueHandler(cli: CommandListenerInvocation<Comme
     }
 
     logger.debug(`JIRA commentOnIssueHandler: Data payload => ${JSON.stringify(data)}`);
+    // TODO: Change auth here to use token
     await httpClient.exchange(
         issueUrl,
         {

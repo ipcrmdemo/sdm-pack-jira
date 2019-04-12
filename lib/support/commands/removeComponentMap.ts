@@ -12,6 +12,7 @@ import {JiraHandlerParam, submitMappingPayload} from "./shared";
 export function removeComponentMapFromChannel(ci: CommandListenerInvocation<JiraHandlerParam>): Promise<HandlerResult> {
     return new Promise(async (resolve, reject) => {
         const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
+        ci.context.source.slack.user.id
 
         // Get linked component ids, project ids
         // Resolve ids to names

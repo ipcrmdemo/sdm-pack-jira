@@ -5,7 +5,7 @@ import {
     HttpMethod,
     logger,
     MappedParameter,
-    MappedParameters,
+    MappedParameters, NoParameters,
     Parameters,
 } from "@atomist/automation-client";
 import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata";
@@ -37,7 +37,7 @@ interface ComponentMapPayload {
     active: boolean;
 }
 
-export interface JiraIssueCreated {
+export interface JiraItemCreated {
     id: string;
     key: string;
     self: string;
@@ -63,15 +63,67 @@ export function submitMappingPayload(
     });
 }
 
-export const createJiraTicket = async (data: any): Promise<JiraIssueCreated> => {
+export const createJiraTicket = async (data: any): Promise<JiraItemCreated> => {
+    const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
+    return createJiraResource(`${jiraConfig.url}/rest/api/2/issue`, data);
+};
+
+export interface JiraProjectDefinition {
+    key: string;
+    name: string;
+    lead: string;
+    description: string;
+    projectTypeKey: string;
+    projectTemplateKey: string;
+    assigneeType: string;
+    extraData?: any;
+}
+
+export async function createJiraProject(
+    data: JiraProjectDefinition,
+): Promise<JiraItemCreated> {
+    const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
+    return createJiraResource(`${jiraConfig.url}/rest/api/2/project`, {
+        key: data.key,
+        name: data.name,
+        lead: data.lead,
+        description: data.description,
+        projectTypeKey: data.projectTypeKey,
+        projectTemplateKey: data.projectTemplateKey,
+        assigneeType: data.assigneeType,
+        ...data.extraData,
+    });
+}
+
+export interface JiraComponentDefinition {
+    name: string;
+    description: string;
+    project: string;
+    assigneeType: "PROJECT_LEAD" | "COMPONENT_LEAD" | "UNASSIGNED" | "PROJECT_DEFAULT";
+    extraData?: any;
+}
+
+export async function createJiraComponent(
+    data: JiraComponentDefinition,
+): Promise<JiraItemCreated> {
+    const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
+    return createJiraResource(`${jiraConfig.url}/rest/api/2/component`, {
+        name: data.name,
+        description: data.description,
+        project: data.project,
+        assigneeType: data.assigneeType,
+        ...data.extraData,
+    });
+}
+
+export const createJiraResource = async (apiUrl: string, data: any): Promise<JiraItemCreated> => {
     const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create();
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
-    const issueUrl = `${jiraConfig.url}/rest/api/2/issue`;
 
-    logger.warn(`JIRA createJiraTicket: Data payload => ${JSON.stringify(data)}`);
+    logger.warn(`JIRA createJiraResource: Data payload => ${JSON.stringify(data)}`);
 
     const result = await httpClient.exchange(
-        issueUrl,
+        apiUrl,
         {
             method: HttpMethod.Post,
             headers: {
@@ -87,13 +139,13 @@ export const createJiraTicket = async (data: any): Promise<JiraIssueCreated> => 
         },
     ).catch(e => {
         logger.error(
-            "JIRA createJiraTicket: Failed to create ticket with error - " +
+            "JIRA createJiraResource: Failed to create resource with error - " +
             `(${JSON.stringify(e.response.status)}) ${JSON.stringify(e.response.data)}`,
         );
         throw new Error(JSON.stringify(e.response.data));
     });
 
-    return result.body as JiraIssueCreated;
+    return result.body as JiraItemCreated;
 };
 
 export async function prepProjectSelect(ci: CommandListenerInvocation<JiraHandlerParam>, search: string): Promise<Option[] | undefined> {
