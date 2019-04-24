@@ -1,4 +1,12 @@
-import {buttonForCommand, configurationValue, HandlerContext, logger, MessageOptions} from "@atomist/automation-client";
+import {
+    buttonForCommand,
+    configurationValue,
+    HandlerContext,
+    logger,
+    menuForCommand,
+    MenuSpecification,
+    MessageOptions,
+} from "@atomist/automation-client";
 import * as slack from "@atomist/slack-messages";
 import _ = require("lodash");
 import {JiraConfig} from "../jira";
@@ -23,6 +31,7 @@ export const routeEvent = async (
     const message: slack.Attachment[] = [];
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
     let issueDetail: jiraTypes.Issue;
+    let issueTransitions: jiraTypes.JiraIssueTransitions;
     let msgOptions: MessageOptions;
 
     // Set a description
@@ -31,6 +40,7 @@ export const routeEvent = async (
         case("comment_created"):
         case("jira:issue_updated"): {
             issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self, true, 30);
+            issueTransitions = await getJiraDetails<jiraTypes.JiraIssueTransitions>(event.issue.self + "/transitions", true, 5);
             description = `JIRA Issue updated ` + slack.url(
                 `${jiraConfig.url}/browse/${event.issue.key}`,
                 `${event.issue.key}: ${issueDetail.fields.summary}`,
@@ -44,6 +54,7 @@ export const routeEvent = async (
 
         case("jira:issue_created"): {
             issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self, true, 30);
+            issueTransitions = await getJiraDetails<jiraTypes.JiraIssueTransitions>(event.issue.self + "/transitions", true, 5);
             description = `JIRA Issue created ` + slack.url(
                 `${jiraConfig.url}/browse/${event.issue.key}`,
                 `${event.issue.key}: ${issueDetail.fields.summary}`,
@@ -107,6 +118,14 @@ export const routeEvent = async (
     message.push(...(await prepareStateChangeMessage(event)));
     message.push(...(await prepareIssueCommentedMessage(event)));
 
+    // Create menu spec for issue transitions
+    const transitionOptions: MenuSpecification = {
+        text: "Set Status",
+        options: issueTransitions.transitions.map(t => {
+            return {text: t.name, value: t.id};
+        }),
+    };
+
     // Dedupe channels and send message
     if (message.length > 0 && channels.length > 0) {
         const notifyChannels = _.uniqBy(channels, "channel");
@@ -123,6 +142,12 @@ export const routeEvent = async (
                     actions: [
                         event.webhookEvent !== "jira:issue_deleted" ?
                             buttonForCommand({text: "Comment"}, "JiraCommentOnIssue", {issueId: event.issue.id}) : undefined,
+                        issueTransitions.transitions.length > 0 ?
+                            menuForCommand(
+                                transitionOptions,
+                                "SetIssueStatus",
+                                "transitionId",
+                                {selfUrl: `${issueDetail.self}/transitions`}) : undefined,
                     ],
                 },
             ],

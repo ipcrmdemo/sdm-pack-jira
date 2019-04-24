@@ -1,0 +1,10 @@
+query GetPersonByChatId($chatId: ID!) {
+    Person {
+        scmId {
+            login
+        }
+        chatId(id: $chatId) @required {
+            id
+        }
+    }
+}

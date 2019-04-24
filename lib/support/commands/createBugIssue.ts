@@ -43,7 +43,6 @@ export function createBugIssue(ci: CommandListenerInvocation<JiraProjectLookup>)
             );
             resolve({code: 1, message: `No linked channels!`});
         } else {
-
             // Get current channel projects
             const scomp = await ci.promptFor<{ component: string }>({
                 component: {
@@ -172,4 +171,5 @@ export const createBugIssueReg: CommandHandlerRegistration<JiraProjectLookup> = 
     paramsMaker: JiraProjectLookup,
     intent: "jira file bug",
     listener: createBugIssue,
+    autoSubmit: true,
 };

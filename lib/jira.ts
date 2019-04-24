@@ -10,7 +10,7 @@ import {mapComponentToChannelReg} from "./support/commands/mapComponent";
 import {mapProjectToChannelReg} from "./support/commands/mapProject";
 import {removeComponentMapFromChannelReg} from "./support/commands/removeComponentMap";
 import {removeProjectMapFromChannelReg} from "./support/commands/removeProjectMap";
-import {commentOnIssue} from "./support/helpers/issueActions";
+import {commentOnIssue, setIssueStatus} from "./support/helpers/issueActions";
 
 export const jiraSupport = (): ExtensionPack => {
     return {
@@ -33,6 +33,7 @@ export const jiraSupport = (): ExtensionPack => {
             sdm.addCommand(mapComponentToChannelReg);
             sdm.addCommand(removeComponentMapFromChannelReg);
             sdm.addCommand(createIssueReg);
+            sdm.addCommand(setIssueStatus);
             sdm.configuration.sdm.jiraCache = new NodeCache({
                 stdTTL: 3600,
                 checkperiod: 30,

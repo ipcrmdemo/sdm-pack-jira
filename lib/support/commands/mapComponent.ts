@@ -28,7 +28,7 @@ export function mapComponentToChannel(ci: CommandListenerInvocation<MapComponent
         }
 
         // Present list of projects
-        const projectValues = await prepProjectSelect(ci, ci.parameters.projectSearch);
+        const projectValues = await prepProjectSelect(ci.parameters.projectSearch);
         let project: { project: string };
         if (projectValues) {
             project = await ci.promptFor<{ project: string }>({
@@ -51,7 +51,7 @@ export function mapComponentToChannel(ci: CommandListenerInvocation<MapComponent
         }
 
         // Present list of components
-        const componentValues = await prepComponentSelect(ci, project.project);
+        const componentValues = await prepComponentSelect(project.project);
         let component: {component: string};
         if (componentValues) {
            component = await ci.promptFor<{component: string}>({
