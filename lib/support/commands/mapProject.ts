@@ -91,4 +91,5 @@ export const mapProjectToChannelReg: CommandHandlerRegistration<MapProjectToChan
     paramsMaker: MapProjectToChannelParams,
     intent: "jira map project",
     listener: mapProjectToChannel,
+    autoSubmit: true,
 };

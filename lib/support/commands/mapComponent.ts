@@ -115,4 +115,5 @@ export const mapComponentToChannelReg: CommandHandlerRegistration<MapComponentTo
     paramsMaker: MapComponentToChannelParams,
     intent: "jira map component",
     listener: mapComponentToChannel,
+    autoSubmit: true,
 };
