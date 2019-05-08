@@ -8,9 +8,10 @@ import {
     Parameter,
     Parameters,
 } from "@atomist/automation-client";
-import {CommandHandlerRegistration, CommandListenerInvocation, slackErrorMessage} from "@atomist/sdm";
+import {CommandHandlerRegistration, CommandListenerInvocation, ParametersDefinition, slackErrorMessage} from "@atomist/sdm";
 import {JiraConfig} from "../../jira";
 import * as types from "../../typings/types";
+import {createJiraResource} from "../commands/shared";
 import {convertEmailtoJiraUser} from "../shared";
 
 @Parameters()
@@ -115,5 +116,31 @@ export const commentOnIssue: CommandHandlerRegistration<CommentOnIssueParams> = 
     name: "JiraCommentOnIssue",
     paramsMaker: CommentOnIssueParams,
     listener: commentOnIssueHandler,
+    autoSubmit: true,
+};
+
+export async function setIssueStatusHandler(cli: CommandListenerInvocation<{transitionId: string, selfUrl: string}>): Promise<HandlerResult> {
+    const data = {transition: {id: cli.parameters.transitionId}};
+    await createJiraResource(cli.parameters.selfUrl, data);
+    return { code: 0};
+}
+
+const setIssueStatusParams: ParametersDefinition = {
+    transitionId: {
+        description: "Id of the transition to move this issue to",
+        displayName: "Id of the transition to move this issue to",
+        required: true,
+    },
+    selfUrl: {
+        description: "API Self URL of the issue to update",
+        displayName: "API Self URL of the issue to update",
+        required: true,
+    },
+};
+
+export const setIssueStatus: CommandHandlerRegistration<{transitionId: string, selfUrl: string}> = {
+    name: "SetIssueStatus",
+    parameters: setIssueStatusParams,
+    listener: setIssueStatusHandler,
     autoSubmit: true,
 };

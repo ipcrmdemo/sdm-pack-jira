@@ -1,0 +1,19 @@
+query GetRepoByOwnerName ($name:String!, $owner:String!){
+    Repo(name:$name, owner:$owner) {
+        owner
+        name
+        org {
+            ownerType
+            provider {
+                apiUrl
+                url
+                gitUrl
+                providerType
+            }
+            scmProvider {
+                providerId
+                providerType
+            }
+        }
+    }
+}

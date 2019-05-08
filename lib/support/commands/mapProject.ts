@@ -30,7 +30,7 @@ function mapProjectToChannel(ci: CommandListenerInvocation<MapProjectToChannelPa
 
         // Present list of projects
         let project: { project: string };
-        const projectValues = await prepProjectSelect(ci, ci.parameters.projectSearch);
+        const projectValues = await prepProjectSelect(ci.parameters.projectSearch);
         if (projectValues) {
              project = await ci.promptFor<{ project: string }>({
                 project: {
@@ -91,4 +91,5 @@ export const mapProjectToChannelReg: CommandHandlerRegistration<MapProjectToChan
     paramsMaker: MapProjectToChannelParams,
     intent: "jira map project",
     listener: mapProjectToChannel,
+    autoSubmit: true,
 };

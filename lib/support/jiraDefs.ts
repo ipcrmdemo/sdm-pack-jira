@@ -201,8 +201,6 @@ export interface Fields {
     aggregatetimespent?: any;
     resolution?: any;
     timetracking: Timetracking;
-    customfield_10005: string;
-    customfield_10006: number;
     attachment: any[];
     aggregatetimeestimate?: any;
     resolutiondate?: any;
@@ -214,12 +212,9 @@ export interface Fields {
     subtasks: Subtask[];
     created: Date;
     reporter: Reporter;
-    customfield_10000?: any;
     aggregateprogress: Aggregateprogress;
     priority: Priority;
-    customfield_10100: string;
     labels: any[];
-    customfield_10004: string[];
     environment?: any;
     timeestimate?: any;
     aggregatetimeoriginalestimate?: any;
@@ -260,4 +255,13 @@ export interface ChangelogItem {
 export interface JiraChangelog {
     id: string;
     items: ChangelogItem[];
+}
+
+export interface JiraIssueTransitions {
+    transitions: JiraIssueTransition[];
+}
+export interface JiraIssueTransition {
+   id: string;
+   name: string;
+   self: string;
 }

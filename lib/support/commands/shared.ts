@@ -5,7 +5,7 @@ import {
     HttpMethod,
     logger,
     MappedParameter,
-    MappedParameters, NoParameters,
+    MappedParameters,
     Parameters,
 } from "@atomist/automation-client";
 import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata";
@@ -13,7 +13,7 @@ import {CommandListenerInvocation} from "@atomist/sdm";
 import {JiraConfig} from "../../jira";
 import {purgeCacheEntry} from "../cache/manage";
 import {getJiraDetails} from "../jiraDataLookup";
-import {Project} from "../jiraDefs";
+import {Issue, Project} from "../jiraDefs";
 
 @Parameters()
 export class JiraHandlerParam {
@@ -116,7 +116,7 @@ export async function createJiraComponent(
     });
 }
 
-export const createJiraResource = async (apiUrl: string, data: any): Promise<JiraItemCreated> => {
+export const createJiraResource = async (apiUrl: string, data: any, update: boolean = false): Promise<JiraItemCreated> => {
     const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create();
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
 
@@ -125,7 +125,7 @@ export const createJiraResource = async (apiUrl: string, data: any): Promise<Jir
     const result = await httpClient.exchange(
         apiUrl,
         {
-            method: HttpMethod.Post,
+            method: update ? HttpMethod.Put : HttpMethod.Post,
             headers: {
                 "Content-Type": "application/json",
             },
@@ -148,7 +148,7 @@ export const createJiraResource = async (apiUrl: string, data: any): Promise<Jir
     return result.body as JiraItemCreated;
 };
 
-export async function prepProjectSelect(ci: CommandListenerInvocation<JiraHandlerParam>, search: string): Promise<Option[] | undefined> {
+export async function prepProjectSelect(search: string): Promise<Option[] | undefined> {
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
 
     // Get Search pattern for project lookup
@@ -173,7 +173,6 @@ export async function prepProjectSelect(ci: CommandListenerInvocation<JiraHandle
 }
 
 export async function prepComponentSelect(
-    ci: CommandListenerInvocation<JiraHandlerParam>,
     project: string,
 ): Promise<Option[] | undefined> {
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
@@ -190,4 +189,38 @@ export async function prepComponentSelect(
     } else {
         return undefined;
     }
+}
+
+export interface JiraQueryLanguageIssueResults {
+    issues: Issue[];
+    startAt: number;
+    maxResults: number;
+    total: number;
+}
+
+/**
+ * Simple helper to retrieve issues via JQL query
+ *
+ * Notice - Pagination is NOT handled here, needs to be handled in the calling function.  There are helper startAt/maxResults parameters so you do not
+ * have to include these items in your query string
+ *
+ * @param {String} jql: JQL syntax only
+ * @param {String} startAt?: The index to start retrieving from (for pagination)
+ * @param {String} maxResults?: The max number of issues to retrieve
+ * @returns {JiraQueryLanguageIssueResults}
+ */
+export async function searchIssues(
+    jql: string,
+    startAt?: string,
+    maxResults?: string,
+): Promise<JiraQueryLanguageIssueResults> {
+    const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
+    let issueLookup = `${jiraConfig.url}/rest/api/2/search?jql=${jql}`;
+    if (startAt) {
+        issueLookup = issueLookup + `&startAt=${startAt}`;
+    }
+    if (maxResults) {
+        issueLookup = issueLookup + `&maxResults=${maxResults}`;
+    }
+    return getJiraDetails<JiraQueryLanguageIssueResults>(issueLookup, false);
 }

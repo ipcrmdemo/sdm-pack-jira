@@ -25,6 +25,7 @@ import {
     SoftwareDeliveryMachineConfiguration,
 } from "@atomist/sdm";
 import {
+    ConfigurationBasedBasicCredentialsResolver,
     configureSdm,
     createSoftwareDeliveryMachine,
     Version,
@@ -45,6 +46,7 @@ import { jiraSupport } from "../lib/jira";
 import {getJiraStats} from "../lib/support/cache/manage";
 import {jiraCacheProcessor} from "../lib/support/cache/postProcessor";
 import {createBugIssueReg} from "../lib/support/commands/createBugIssue";
+import {jiraCreateProjectBranchReg, jiraFindAndAssignReg} from "../lib/support/commands/findAndAssign";
 
 export function machineMaker(config: SoftwareDeliveryMachineConfiguration): SoftwareDeliveryMachine {
 
@@ -85,11 +87,16 @@ export function machineMaker(config: SoftwareDeliveryMachineConfiguration): Soft
 
     sdm.addCommand(getJiraStats);
     sdm.addCommand(createBugIssueReg);
+    sdm.addCommand(jiraFindAndAssignReg);
+    sdm.addCommand(jiraCreateProjectBranchReg);
 
     return sdm;
 }
 
 export const configuration: Configuration = {
+    sdm: {
+      // credentialsResolver: new ConfigurationBasedBasicCredentialsResolver(),
+    },
     postProcessors: [
         configureSdm(machineMaker),
         jiraCacheProcessor,

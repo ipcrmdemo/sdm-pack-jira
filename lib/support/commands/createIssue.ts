@@ -36,7 +36,7 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
 
         // Present list of projects
         let project: { project: string };
-        const projectValues = await prepProjectSelect(ci, ci.parameters.projectSearch);
+        const projectValues = await prepProjectSelect(ci.parameters.projectSearch);
         if (projectValues) {
             project = await ci.promptFor<{ project: string }>({
                 project: {

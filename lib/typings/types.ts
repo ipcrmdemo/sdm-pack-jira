@@ -1,12 +1,6 @@
 /* tslint:disable */
 
-// ====================================================
-// START: Typescript template
-// ====================================================
-
-// ====================================================
-// InputTypes
-// ====================================================
+export type Maybe<T> = T | null;
 
 export interface ScmResourceProviderInput {
   orgs: string[];
@@ -23,21 +17,21 @@ export interface ScmResourceProviderRepoInput {
 export interface ResourceProviderStateInput {
   state: ResourceProviderStateName;
 
-  error?: string | null;
+  error?: Maybe<string>;
 }
 
 export interface ScmProviderStateInput {
   state: ScmProviderStateName;
 
-  error?: string | null;
+  error?: Maybe<string>;
 }
 
 export interface CredentialInput {
   type: CredentialType;
 
-  oauth?: OAuthInput | null;
+  oauth?: Maybe<OAuthInput>;
 
-  password?: PasswordInput | null;
+  password?: Maybe<PasswordInput>;
 }
 
 export interface OAuthInput {
@@ -57,18 +51,18 @@ export interface WebhookInput {
 
   authType: WebhookAuthType;
 
-  hmacSha1?: HmacSha1AuthInput | null;
+  hmacSha1?: Maybe<HmacSha1AuthInput>;
 
-  tags?: (TagInput | null)[] | null;
+  tags?: Maybe<(Maybe<TagInput>)[]>;
 
-  state?: WebhookState | null;
+  state?: Maybe<WebhookState>;
 }
 
 export interface HmacSha1AuthInput {
   /** shared secret */
   secret: string;
   /** http header in which to find the hash */
-  header?: string | null;
+  header?: Maybe<string>;
 }
 
 export interface TagInput {
@@ -76,11 +70,6 @@ export interface TagInput {
 
   value: string;
 }
-
-// ====================================================
-// Enums
-// ====================================================
-
 /** Enum for IssueState */
 export enum IssueState {
   open = "open",
@@ -896,10 +885,6 @@ export enum ResourceUserType {
 }
 
 // ====================================================
-// END: Typescript template
-// ====================================================
-
-// ====================================================
 // Documents
 // ====================================================
 
@@ -911,27 +896,27 @@ export namespace ChatIdByEmail {
   export type Query = {
     __typename?: "Query";
 
-    ChatId?: (ChatId | null)[] | null;
+    ChatId?: Maybe<(Maybe<ChatId>)[]>;
   };
 
   export type ChatId = {
     __typename?: "ChatId";
 
-    person?: Person | null;
+    person?: Maybe<Person>;
 
-    screenName?: string | null;
+    screenName?: Maybe<string>;
   };
 
   export type Person = {
     __typename?: "Person";
 
-    emails?: (Emails | null)[] | null;
+    emails?: Maybe<(Maybe<Emails>)[]>;
   };
 
   export type Emails = {
     __typename?: "Email";
 
-    address?: string | null;
+    address?: Maybe<string>;
   };
 }
 
@@ -943,71 +928,71 @@ export namespace GetEmailByChatId {
   export type Query = {
     __typename?: "Query";
 
-    ChatId?: (ChatId | null)[] | null;
+    ChatId?: Maybe<(Maybe<ChatId>)[]>;
   };
 
   export type ChatId = {
     __typename?: "ChatId";
 
-    person?: Person | null;
+    person?: Maybe<Person>;
 
-    screenName?: string | null;
+    screenName?: Maybe<string>;
   };
 
   export type Person = {
     __typename?: "Person";
 
-    emails?: (Emails | null)[] | null;
+    emails?: Maybe<(Maybe<Emails>)[]>;
   };
 
   export type Emails = {
     __typename?: "Email";
 
-    address?: string | null;
+    address?: Maybe<string>;
   };
 }
 
 export namespace GetAllComponentMappingsforChannel {
   export type Variables = {
-    channel?: string[] | null;
+    channel?: Maybe<string[]>;
   };
 
   export type Query = {
     __typename?: "Query";
 
-    JiraComponentMap?: (JiraComponentMap | null)[] | null;
+    JiraComponentMap?: Maybe<(Maybe<JiraComponentMap>)[]>;
   };
 
   export type JiraComponentMap = {
     __typename?: "JiraComponentMap";
 
-    projectId?: string | null;
+    projectId?: Maybe<string>;
 
-    componentId?: string | null;
+    componentId?: Maybe<string>;
 
-    active?: boolean | null;
+    active?: Maybe<boolean>;
   };
 }
 
 export namespace GetAllProjectMappingsforChannel {
   export type Variables = {
-    channel?: string[] | null;
+    channel?: Maybe<string[]>;
   };
 
   export type Query = {
     __typename?: "Query";
 
-    JiraProjectMap?: (JiraProjectMap | null)[] | null;
+    JiraProjectMap?: Maybe<(Maybe<JiraProjectMap>)[]>;
   };
 
   export type JiraProjectMap = {
     __typename?: "JiraProjectMap";
 
-    channel?: string | null;
+    channel?: Maybe<string>;
 
-    projectId?: string | null;
+    projectId?: Maybe<string>;
 
-    active?: boolean | null;
+    active?: Maybe<boolean>;
   };
 }
 
@@ -1020,41 +1005,41 @@ export namespace GetChannelByComponent {
   export type Query = {
     __typename?: "Query";
 
-    JiraComponentMap?: (JiraComponentMap | null)[] | null;
+    JiraComponentMap?: Maybe<(Maybe<JiraComponentMap>)[]>;
   };
 
   export type JiraComponentMap = {
     __typename?: "JiraComponentMap";
 
-    channel?: string | null;
+    channel?: Maybe<string>;
 
-    projectId?: string | null;
+    projectId?: Maybe<string>;
 
-    componentId?: string | null;
+    componentId?: Maybe<string>;
 
-    active?: boolean | null;
+    active?: Maybe<boolean>;
   };
 }
 
 export namespace GetChannelByProject {
   export type Variables = {
-    projectid: (string | null)[];
+    projectid: (Maybe<string>)[];
   };
 
   export type Query = {
     __typename?: "Query";
 
-    JiraProjectMap?: (JiraProjectMap | null)[] | null;
+    JiraProjectMap?: Maybe<(Maybe<JiraProjectMap>)[]>;
   };
 
   export type JiraProjectMap = {
     __typename?: "JiraProjectMap";
 
-    channel?: string | null;
+    channel?: Maybe<string>;
 
-    projectId?: string | null;
+    projectId?: Maybe<string>;
 
-    active?: boolean | null;
+    active?: Maybe<boolean>;
   };
 }
 
@@ -1066,19 +1051,19 @@ export namespace GetChannelByRepo {
   export type Query = {
     __typename?: "Query";
 
-    Repo?: (Repo | null)[] | null;
+    Repo?: Maybe<(Maybe<Repo>)[]>;
   };
 
   export type Repo = {
     __typename?: "Repo";
 
-    channels?: (Channels | null)[] | null;
+    channels?: Maybe<(Maybe<Channels>)[]>;
   };
 
   export type Channels = {
     __typename?: "ChatChannel";
 
-    name?: string | null;
+    name?: Maybe<string>;
   };
 }
 
@@ -1090,25 +1075,25 @@ export namespace GetGoalByJiraIssueId {
   export type Query = {
     __typename?: "Query";
 
-    SdmGoal?: (SdmGoal | null)[] | null;
+    SdmGoal?: Maybe<(Maybe<SdmGoal>)[]>;
   };
 
   export type SdmGoal = {
     __typename?: "SdmGoal";
 
-    data?: string | null;
+    data?: Maybe<string>;
 
-    repo?: Repo | null;
+    repo?: Maybe<Repo>;
   };
 
   export type Repo = {
     __typename?: "SdmRepository";
 
-    name?: string | null;
+    name?: Maybe<string>;
 
-    owner?: string | null;
+    owner?: Maybe<string>;
 
-    providerId?: string | null;
+    providerId?: Maybe<string>;
   };
 }
 
@@ -1120,33 +1105,33 @@ export namespace GetJiraChannelPrefs {
   export type Query = {
     __typename?: "Query";
 
-    JiraChannelPrefs?: (JiraChannelPrefs | null)[] | null;
+    JiraChannelPrefs?: Maybe<(Maybe<JiraChannelPrefs>)[]>;
   };
 
   export type JiraChannelPrefs = {
     __typename?: "JiraChannelPrefs";
 
-    channel?: string | null;
+    channel?: Maybe<string>;
 
-    issueState?: boolean | null;
+    issueState?: Maybe<boolean>;
 
-    issueStatus?: boolean | null;
+    issueStatus?: Maybe<boolean>;
 
-    issueComment?: boolean | null;
+    issueComment?: Maybe<boolean>;
 
-    issueCreated?: boolean | null;
+    issueCreated?: Maybe<boolean>;
 
-    issueDeleted?: boolean | null;
+    issueDeleted?: Maybe<boolean>;
 
-    bug?: boolean | null;
+    bug?: Maybe<boolean>;
 
-    task?: boolean | null;
+    task?: Maybe<boolean>;
 
-    epic?: boolean | null;
+    epic?: Maybe<boolean>;
 
-    story?: boolean | null;
+    story?: Maybe<boolean>;
 
-    subtask?: boolean | null;
+    subtask?: Maybe<boolean>;
   };
 }
 
@@ -1158,273 +1143,358 @@ export namespace GetJiraIssueByKey {
   export type Query = {
     __typename?: "Query";
 
-    JiraIssue?: (JiraIssue | null)[] | null;
+    JiraIssue?: Maybe<(Maybe<JiraIssue>)[]>;
   };
 
   export type JiraIssue = {
     __typename?: "JiraIssue";
 
-    timestamp: string;
+    timestamp?: string;
 
-    webhookEvent: string;
+    webhookEvent?: string;
 
-    issue_event_type_name: string;
+    issue_event_type_name?: string;
 
-    issue: Issue;
+    issue?: Issue;
 
-    user?: User | null;
+    user?: Maybe<User>;
 
-    changelog?: Changelog | null;
+    changelog?: Maybe<Changelog>;
 
-    comment?: Comment | null;
+    comment?: Maybe<Comment>;
   };
 
   export type Issue = {
     __typename?: "JiraIssueDetail";
 
-    id: string;
+    id?: string;
 
-    self: string;
+    self?: string;
 
-    key: string;
+    key?: string;
 
-    fields: Fields;
+    fields?: Fields;
   };
 
   export type Fields = {
     __typename?: "JiraIssueFields";
 
-    aggregatetimespent?: number | null;
+    aggregatetimespent?: Maybe<number>;
 
-    assignee?: Assignee | null;
+    assignee?: Maybe<Assignee>;
 
-    components?: (Components | null)[] | null;
+    components?: Maybe<(Maybe<Components>)[]>;
 
-    created: string;
+    created?: string;
 
-    creator: Creator;
+    creator?: Creator;
 
-    issueType: IssueType;
+    issueType?: IssueType;
 
-    labels?: (string | null)[] | null;
+    labels?: Maybe<(Maybe<string>)[]>;
 
-    parent?: Parent | null;
+    parent?: Maybe<Parent>;
 
-    priority: _Priority;
+    priority?: _Priority;
 
-    project?: Project | null;
+    project?: Maybe<Project>;
 
-    reporter: Reporter;
+    reporter?: Reporter;
 
-    status: _Status;
+    status?: _Status;
 
-    timeoriginalestimate?: number | null;
+    timeoriginalestimate?: Maybe<number>;
 
-    timespent?: number | null;
+    timespent?: Maybe<number>;
 
-    updated: string;
+    updated?: string;
   };
 
   export type Assignee = {
     __typename?: "JiraIssueUser";
 
-    key: string;
+    key?: string;
 
-    self: string;
+    self?: string;
   };
 
   export type Components = {
     __typename?: "JiraIssueComponent";
 
-    id: string;
+    id?: string;
 
-    self: string;
+    self?: string;
   };
 
   export type Creator = {
     __typename?: "JiraIssueUser";
 
-    key: string;
+    key?: string;
 
-    self: string;
+    self?: string;
   };
 
   export type IssueType = {
     __typename?: "JiraIssueType";
 
-    subtask: boolean;
+    subtask?: boolean;
   };
 
   export type Parent = {
     __typename?: "JiraIssueParent";
 
-    self?: string | null;
+    self?: Maybe<string>;
 
-    id?: string | null;
+    id?: Maybe<string>;
 
-    key?: string | null;
+    key?: Maybe<string>;
 
-    fields?: _Fields | null;
+    fields?: Maybe<_Fields>;
   };
 
   export type _Fields = {
     __typename?: "JiraSubTaskFields";
 
-    issueType: _IssueType;
+    issueType?: _IssueType;
 
-    priority: Priority;
+    priority?: Priority;
 
-    status: Status;
+    status?: Status;
   };
 
   export type _IssueType = {
     __typename?: "JiraIssueType";
 
-    subtask: boolean;
+    subtask?: boolean;
   };
 
   export type Priority = {
     __typename?: "JiraIssuePriority";
 
-    self: string;
+    self?: string;
 
-    name: string;
+    name?: string;
 
-    id: string;
+    id?: string;
   };
 
   export type Status = {
     __typename?: "JiraIssueStatus";
 
-    self: string;
+    self?: string;
 
-    statusCategory: StatusCategory;
+    statusCategory?: StatusCategory;
 
-    id: string;
+    id?: string;
   };
 
   export type StatusCategory = {
     __typename?: "JiraIssueStatusCategory";
 
-    id: number;
+    id?: number;
   };
 
   export type _Priority = {
     __typename?: "JiraIssuePriority";
 
-    id: string;
+    id?: string;
 
-    name: string;
+    name?: string;
 
-    self: string;
+    self?: string;
   };
 
   export type Project = {
     __typename?: "JiraProject";
 
-    id: string;
+    id?: string;
 
-    key: string;
+    key?: string;
 
-    projectTypeKey: string;
+    projectTypeKey?: string;
 
-    self: string;
+    self?: string;
   };
 
   export type Reporter = {
     __typename?: "JiraIssueUser";
 
-    key: string;
+    key?: string;
 
-    self: string;
+    self?: string;
   };
 
   export type _Status = {
     __typename?: "JiraIssueStatus";
 
-    statusCategory: _StatusCategory;
+    statusCategory?: _StatusCategory;
 
-    self: string;
+    self?: string;
 
-    id: string;
+    id?: string;
   };
 
   export type _StatusCategory = {
     __typename?: "JiraIssueStatusCategory";
 
-    colorName: string;
+    colorName?: string;
 
-    id: number;
+    id?: number;
 
-    key: string;
+    key?: string;
 
-    name: string;
+    name?: string;
 
-    self: string;
+    self?: string;
   };
 
   export type User = {
     __typename?: "JiraIssueUser";
 
-    key: string;
+    key?: string;
 
-    self: string;
+    self?: string;
   };
 
   export type Changelog = {
     __typename?: "JiraIssueChangelog";
 
-    id: string;
+    id?: string;
 
-    items: (Items | null)[];
+    items?: (Maybe<Items>)[];
   };
 
   export type Items = {
     __typename?: "JiraIssueChangelogItem";
 
-    field: string;
+    field?: string;
 
-    fieldtype: string;
+    fieldtype?: string;
 
-    fromString: string;
+    fromString?: string;
 
-    from: string;
+    from?: string;
 
-    toString: string;
+    toString?: string;
 
-    to: string;
+    to?: string;
   };
 
   export type Comment = {
     __typename?: "JiraIssueComment";
 
-    author: Author;
+    author?: Author;
 
-    created: string;
+    created?: string;
 
-    id: string;
+    id?: string;
 
-    self: string;
+    self?: string;
 
-    updateAuthor?: UpdateAuthor | null;
+    updateAuthor?: Maybe<UpdateAuthor>;
 
-    updated?: string | null;
+    updated?: Maybe<string>;
   };
 
   export type Author = {
     __typename?: "JiraIssueUser";
 
-    self: string;
+    self?: string;
 
-    key: string;
+    key?: string;
   };
 
   export type UpdateAuthor = {
     __typename?: "JiraIssueUser";
 
-    self: string;
+    self?: string;
 
-    key: string;
+    key?: string;
+  };
+}
+
+export namespace GetPersonByChatId {
+  export type Variables = {
+    chatId: string;
+  };
+
+  export type Query = {
+    __typename?: "Query";
+
+    Person?: Maybe<(Maybe<Person>)[]>;
+  };
+
+  export type Person = {
+    __typename?: "Person";
+
+    scmId?: Maybe<ScmId>;
+
+    chatId?: Maybe<ChatId>;
+  };
+
+  export type ScmId = {
+    __typename?: "SCMId";
+
+    login?: string;
+  };
+
+  export type ChatId = {
+    __typename?: "ChatId";
+
+    id?: Maybe<string>;
+  };
+}
+
+export namespace GetRepoByOwnerName {
+  export type Variables = {
+    name: string;
+    owner: string;
+  };
+
+  export type Query = {
+    __typename?: "Query";
+
+    Repo?: Maybe<(Maybe<Repo>)[]>;
+  };
+
+  export type Repo = {
+    __typename?: "Repo";
+
+    owner?: Maybe<string>;
+
+    name?: Maybe<string>;
+
+    org?: Maybe<Org>;
+  };
+
+  export type Org = {
+    __typename?: "Org";
+
+    ownerType?: Maybe<OwnerType>;
+
+    provider?: Maybe<Provider>;
+
+    scmProvider?: Maybe<ScmProvider>;
+  };
+
+  export type Provider = {
+    __typename?: "GitHubProvider";
+
+    apiUrl?: Maybe<string>;
+
+    url?: Maybe<string>;
+
+    gitUrl?: Maybe<string>;
+
+    providerType?: Maybe<ProviderType>;
+  };
+
+  export type ScmProvider = {
+    __typename?: "SCMProvider";
+
+    providerId?: Maybe<string>;
+
+    providerType?: Maybe<ProviderType>;
   };
 }
 
@@ -1434,236 +1504,236 @@ export namespace OnJiraIssueEvent {
   export type Subscription = {
     __typename?: "Subscription";
 
-    JiraIssue?: (JiraIssue | null)[] | null;
+    JiraIssue?: Maybe<(Maybe<JiraIssue>)[]>;
   };
 
   export type JiraIssue = {
     __typename?: "JiraIssue";
 
-    timestamp: string;
+    timestamp?: string;
 
-    webhookEvent: string;
+    webhookEvent?: string;
 
-    issue_event_type_name: string;
+    issue_event_type_name?: string;
 
-    issue: Issue;
+    issue?: Issue;
 
-    user?: User | null;
+    user?: Maybe<User>;
 
-    changelog?: Changelog | null;
+    changelog?: Maybe<Changelog>;
 
-    comment?: Comment | null;
+    comment?: Maybe<Comment>;
   };
 
   export type Issue = {
     __typename?: "JiraIssueDetail";
 
-    id: string;
+    id?: string;
 
-    self: string;
+    self?: string;
 
-    key: string;
+    key?: string;
 
-    fields: Fields;
+    fields?: Fields;
   };
 
   export type Fields = {
     __typename?: "JiraIssueFields";
 
-    issueType: IssueType;
+    issueType?: IssueType;
 
-    parent?: Parent | null;
+    parent?: Maybe<Parent>;
 
-    components?: (Components | null)[] | null;
+    components?: Maybe<(Maybe<Components>)[]>;
 
-    timespent?: number | null;
+    timespent?: Maybe<number>;
 
-    timeoriginalestimate?: number | null;
+    timeoriginalestimate?: Maybe<number>;
 
-    project?: Project | null;
+    project?: Maybe<Project>;
 
-    aggregatetimespent?: number | null;
+    aggregatetimespent?: Maybe<number>;
 
-    creator: Creator;
+    creator?: Creator;
 
-    reporter: Reporter;
+    reporter?: Reporter;
 
-    priority: _Priority;
+    priority?: _Priority;
 
-    labels?: (string | null)[] | null;
+    labels?: Maybe<(Maybe<string>)[]>;
 
-    assignee?: Assignee | null;
+    assignee?: Maybe<Assignee>;
 
-    status: _Status;
+    status?: _Status;
 
-    created: string;
+    created?: string;
 
-    updated: string;
+    updated?: string;
   };
 
   export type IssueType = {
     __typename?: "JiraIssueType";
 
-    subtask: boolean;
+    subtask?: boolean;
   };
 
   export type Parent = {
     __typename?: "JiraIssueParent";
 
-    id?: string | null;
+    id?: Maybe<string>;
 
-    key?: string | null;
+    key?: Maybe<string>;
 
-    self?: string | null;
+    self?: Maybe<string>;
 
-    fields?: _Fields | null;
+    fields?: Maybe<_Fields>;
   };
 
   export type _Fields = {
     __typename?: "JiraSubTaskFields";
 
-    status: Status;
+    status?: Status;
 
-    priority: Priority;
+    priority?: Priority;
 
-    issueType: _IssueType;
+    issueType?: _IssueType;
   };
 
   export type Status = {
     __typename?: "JiraIssueStatus";
 
-    self: string;
+    self?: string;
   };
 
   export type Priority = {
     __typename?: "JiraIssuePriority";
 
-    self: string;
+    self?: string;
   };
 
   export type _IssueType = {
     __typename?: "JiraIssueType";
 
-    subtask: boolean;
+    subtask?: boolean;
   };
 
   export type Components = {
     __typename?: "JiraIssueComponent";
 
-    self: string;
+    self?: string;
 
-    id: string;
+    id?: string;
   };
 
   export type Project = {
     __typename?: "JiraProject";
 
-    self: string;
+    self?: string;
 
-    id: string;
+    id?: string;
 
-    key: string;
+    key?: string;
 
-    projectTypeKey: string;
+    projectTypeKey?: string;
   };
 
   export type Creator = {
     __typename?: "JiraIssueUser";
 
-    self: string;
+    self?: string;
 
-    key: string;
+    key?: string;
   };
 
   export type Reporter = {
     __typename?: "JiraIssueUser";
 
-    self: string;
+    self?: string;
 
-    key: string;
+    key?: string;
   };
 
   export type _Priority = {
     __typename?: "JiraIssuePriority";
 
-    self: string;
+    self?: string;
   };
 
   export type Assignee = {
     __typename?: "JiraIssueUser";
 
-    self: string;
+    self?: string;
 
-    key: string;
+    key?: string;
   };
 
   export type _Status = {
     __typename?: "JiraIssueStatus";
 
-    self: string;
+    self?: string;
   };
 
   export type User = {
     __typename?: "JiraIssueUser";
 
-    self: string;
+    self?: string;
 
-    key: string;
+    key?: string;
   };
 
   export type Changelog = {
     __typename?: "JiraIssueChangelog";
 
-    id: string;
+    id?: string;
 
-    items: (Items | null)[];
+    items?: (Maybe<Items>)[];
   };
 
   export type Items = {
     __typename?: "JiraIssueChangelogItem";
 
-    field: string;
+    field?: string;
 
-    fieldtype: string;
+    fieldtype?: string;
 
-    from: string;
+    from?: string;
 
-    fromString: string;
+    fromString?: string;
 
-    to: string;
+    to?: string;
 
-    toString: string;
+    toString?: string;
   };
 
   export type Comment = {
     __typename?: "JiraIssueComment";
 
-    self: string;
+    self?: string;
 
-    id: string;
+    id?: string;
 
-    author: Author;
+    author?: Author;
 
-    updateAuthor?: UpdateAuthor | null;
+    updateAuthor?: Maybe<UpdateAuthor>;
 
-    created: string;
+    created?: string;
 
-    updated?: string | null;
+    updated?: Maybe<string>;
   };
 
   export type Author = {
     __typename?: "JiraIssueUser";
 
-    self: string;
+    self?: string;
 
-    key: string;
+    key?: string;
   };
 
   export type UpdateAuthor = {
     __typename?: "JiraIssueUser";
 
-    self: string;
+    self?: string;
 
-    key: string;
+    key?: string;
   };
 }
