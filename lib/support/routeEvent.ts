@@ -121,9 +121,8 @@ export const routeEvent = async (
     // Create menu spec for issue transitions
     const transitionOptions: MenuSpecification = {
         text: "Set Status",
-        options: issueTransitions.transitions.map(t => {
-            return {text: t.name, value: t.id};
-        }),
+        options: issueTransitions.hasOwnProperty("transitions") && issueTransitions.transitions.length > 0 ?
+            issueTransitions.transitions.map(t => ({text: t.name, value: t.id})) : [],
     };
 
     // Dedupe channels and send message
@@ -140,14 +139,15 @@ export const routeEvent = async (
                     fallback: `Footer`,
                     footer: buildJiraFooter(issueDetail),
                     actions: [
-                        event.webhookEvent !== "jira:issue_deleted" ?
-                            buttonForCommand({text: "Comment"}, "JiraCommentOnIssue", {issueId: event.issue.id}) : undefined,
-                        issueTransitions.transitions.length > 0 ?
-                            menuForCommand(
+                        ...(
+                            event.webhookEvent !== "jira:issue_deleted" ?
+                            [buttonForCommand({text: "Comment"}, "JiraCommentOnIssue", {issueId: event.issue.id})] : []),
+                        ...(issueTransitions.transitions.length > 0 ?
+                            [menuForCommand(
                                 transitionOptions,
                                 "SetIssueStatus",
                                 "transitionId",
-                                {selfUrl: `${issueDetail.self}/transitions`}) : undefined,
+                                {selfUrl: `${issueDetail.self}/transitions`})] : []),
                     ],
                 },
             ],
