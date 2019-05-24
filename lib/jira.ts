@@ -1,5 +1,5 @@
-import { GraphQL } from "@atomist/automation-client";
-import { ExtensionPack, metadata } from "@atomist/sdm";
+import {configurationValue, GraphQL, logger} from "@atomist/automation-client";
+import {ExtensionPack, metadata, SdmContext} from "@atomist/sdm";
 import * as NodeCache from "node-cache";
 import { onJiraIssueEvent } from "./event/onJiraIssueEvent";
 import {onJiraIssueEventCache} from "./event/onJiraIssueEventCache";
@@ -12,10 +12,31 @@ import {removeComponentMapFromChannelReg} from "./support/commands/removeCompone
 import {removeProjectMapFromChannelReg} from "./support/commands/removeProjectMap";
 import {commentOnIssue, setIssueStatus} from "./support/helpers/issueActions";
 
-export const jiraSupport = (): ExtensionPack => {
+/**
+ * This type represents the function used to retrieve credentials that are returned as an HTTP Authorization Header
+ */
+export type JiraAuthenticator = (ctx?: SdmContext) => Promise<{Authorization: string}>;
+
+/**
+ * The default Authenticator.  Always uses service account for authentication to the REST API.
+ * @param ctx
+ */
+export const defaultJiraAuthenticator: JiraAuthenticator = async ctx => {
+    const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
+    return { Authorization: `Basic ${Buffer.from(jiraConfig.user + ":" + jiraConfig.password).toString("base64")}`};
+};
+
+export async function getJiraAuth(ctx?: SdmContext): Promise<{Authorization: string}> {
+    return configurationValue<JiraAuthenticator>("sdm.jiraAuthenticator")(ctx);
+}
+
+export const jiraSupport = (
+    authenticator: JiraAuthenticator = defaultJiraAuthenticator,
+): ExtensionPack => {
     return {
         ...metadata(),
         requiredConfigurationValues: [
+            "sdm.jira.url",
         ],
         configure: sdm => {
             sdm.addIngester(GraphQL.ingester({ name: "jiraIssue" }));
@@ -38,6 +59,8 @@ export const jiraSupport = (): ExtensionPack => {
                 stdTTL: 3600,
                 checkperiod: 30,
             });
+
+            sdm.configuration.sdm.jiraAuthenticator = authenticator;
             return sdm;
         },
     };

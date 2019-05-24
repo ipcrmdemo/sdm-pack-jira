@@ -61,7 +61,7 @@ export async function jiraFindAndAssign(ci: CommandListenerInvocation<{project: 
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
 
     // Present list of projects
-    const projectValues = await prepProjectSelect(ci.parameters.project);
+    const projectValues = await prepProjectSelect(ci.parameters.project, ci);
     if (projectValues) {
         let issues: JiraQueryLanguageIssueResults;
         const projectKey = await ci.promptFor<{ key: string }>({
@@ -148,6 +148,7 @@ export async function jiraFindAndAssign(ci: CommandListenerInvocation<{project: 
             `${jiraConfig.url}/rest/api/2/issue/${myIssue.issue}/assignee`,
             {name: issueOwner},
             true,
+            ci,
         );
 
         const scmId = await ci.context.graphClient.query<types.GetPersonByChatId.Query, types.GetPersonByChatId.Variables>({

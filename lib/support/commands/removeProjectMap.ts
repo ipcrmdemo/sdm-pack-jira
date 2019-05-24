@@ -3,7 +3,6 @@ import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata
 import {CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage} from "@atomist/sdm";
 import objectHash = require("object-hash");
 import {JiraConfig} from "../../jira";
-import * as types from "../../typings/types";
 import {getMappedProjectsbyChannel} from "../helpers/channelLookup";
 import {getJiraDetails} from "../jiraDataLookup";
 import {Project} from "../jiraDefs";
@@ -16,7 +15,7 @@ export function removeProjectMapFromChannel(ci: CommandListenerInvocation<JiraHa
 
         // Get current channel projects
         const projects = await getMappedProjectsbyChannel(ci.context, ci.parameters.slackChannelName);
-        const projectDetails = await lookupJiraProjectDetails(projects);
+        const projectDetails = await lookupJiraProjectDetails(projects, ci);
 
         const projectValues: Option[] = [];
 
@@ -48,7 +47,7 @@ export function removeProjectMapFromChannel(ci: CommandListenerInvocation<JiraHa
             );
 
             const projectDetail =
-                await getJiraDetails<Project>(`${jiraConfig.url}/rest/api/2/project/${project.project}`, true);
+                await getJiraDetails<Project>(`${jiraConfig.url}/rest/api/2/project/${project.project}`, true, undefined, ci);
             const subject = `JIRA Project mapping removed successfully!`;
             const message = `Removed mapping from Project *${projectDetail.name}* to *${ci.parameters.slackChannelName}*`;
 

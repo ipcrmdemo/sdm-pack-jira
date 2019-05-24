@@ -1,6 +1,5 @@
 import {configurationValue} from "@atomist/automation-client";
 import {JiraConfig} from "../jira";
-import * as types from "../typings/types";
 import {getJiraDetails} from "./jiraDataLookup";
 import * as jiraTypes from "./jiraDefs";
 

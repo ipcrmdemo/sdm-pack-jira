@@ -1,11 +1,12 @@
 import {
-    configurationValue,
+    configurationValue, HandlerContext,
     HttpClientFactory,
     HttpMethod,
     logger,
 } from "@atomist/automation-client";
+import {SdmContext} from "@atomist/sdm";
 import * as NodeCache from "node-cache";
-import { JiraConfig } from "../jira";
+import {getJiraAuth, JiraAuthenticator, JiraConfig} from "../jira";
 
 /**
  * This function retrieves details from JIRA.  You must supply the full "self"
@@ -17,13 +18,13 @@ import { JiraConfig } from "../jira";
  * @param {string} jiraSelfUrl Supply the api endpoint to the given user
  * @param {boolean} cache Can we store the result of this query? Default false
  * @param {number} ttl If we cache, how long should we store this? Default 3600
- * @returns {User} JIRA user object
+ * @param {HandlerContext} ctx Passed to supply detail to getJiraAuth.  Where present in calling functions, should be passed in.
+ * @returns {T}
  */
-export async function getJiraDetails<T>(jiraSelfUrl: string, cache: boolean = false, ttl: number = 3600): Promise<T> {
+export async function getJiraDetails<T>(jiraSelfUrl: string, cache: boolean = false, ttl: number = 3600, ctx?: SdmContext): Promise<T> {
     return new Promise<T>( async (resolve, reject) => {
         const useCache = configurationValue<boolean>("sdm.jira.useCache", false) && cache ? true : false;
         const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create();
-        const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
         const jiraCache = configurationValue<NodeCache>("sdm.jiraCache");
         const cacheResult = jiraCache.get<T>(jiraSelfUrl);
 
@@ -32,19 +33,13 @@ export async function getJiraDetails<T>(jiraSelfUrl: string, cache: boolean = fa
             resolve(cacheResult);
         } else {
             logger.debug(`JIRA getJiraDetails => ${jiraSelfUrl}: Cache ${useCache ? "miss" : "disabled"}, querying...`);
-
             await httpClient.exchange(
                 jiraSelfUrl,
                 {
                     method: HttpMethod.Get,
                     headers: {
                         Accept: "application/json",
-                    },
-                    options: {
-                        auth: {
-                            username: jiraConfig.user,
-                            password: jiraConfig.password,
-                        },
+                        ...await getJiraAuth(ctx),
                     },
                 },
             )
@@ -91,19 +86,13 @@ export async function getJiraIssueRepos(issueId: string): Promise<string[]> {
 
         logger.debug(`JIRA getJiraIssueRepos: using issueID => ${issueId}`);
         logger.debug(`JIRA getJiraIssueRepos: using lookupUrl => ${JSON.stringify(lookupUrl)}`);
-
         await httpClient.exchange(
             lookupUrl,
             {
                 method: HttpMethod.Get,
                 headers: {
                     Accept: "application/json",
-                },
-                options: {
-                    auth: {
-                        username: jiraConfig.user,
-                        password: jiraConfig.password,
-                    },
+                    ...await getJiraAuth(),
                 },
             },
         )

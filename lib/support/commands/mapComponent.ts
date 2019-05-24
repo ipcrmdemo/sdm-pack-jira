@@ -28,7 +28,7 @@ export function mapComponentToChannel(ci: CommandListenerInvocation<MapComponent
         }
 
         // Present list of projects
-        const projectValues = await prepProjectSelect(ci.parameters.projectSearch);
+        const projectValues = await prepProjectSelect(ci.parameters.projectSearch, ci);
         let project: { project: string };
         if (projectValues) {
             project = await ci.promptFor<{ project: string }>({
@@ -51,7 +51,7 @@ export function mapComponentToChannel(ci: CommandListenerInvocation<MapComponent
         }
 
         // Present list of components
-        const componentValues = await prepComponentSelect(project.project);
+        const componentValues = await prepComponentSelect(project.project, ci);
         let component: {component: string};
         if (componentValues) {
            component = await ci.promptFor<{component: string}>({
@@ -87,7 +87,7 @@ export function mapComponentToChannel(ci: CommandListenerInvocation<MapComponent
             );
 
             const componentDetails =
-                await getJiraDetails<Component>(`${jiraConfig.url}/rest/api/2/component/${component.component}`, true);
+                await getJiraDetails<Component>(`${jiraConfig.url}/rest/api/2/component/${component.component}`, true, undefined, ci);
 
             await ci.addressChannels(slackSuccessMessage(
                 `New JIRA Component mapping created successfully!`,

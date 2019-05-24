@@ -20,7 +20,7 @@ export function removeComponentMapFromChannel(ci: CommandListenerInvocation<Jira
         logger.debug(`JIRA removeComponentMapFromChannel: components found for channel => ${JSON.stringify(components)}`);
 
         const projectsToLookup = await findRequiredProjects(components, []);
-        const projectDetails = await lookupJiraProjectDetails(projectsToLookup);
+        const projectDetails = await lookupJiraProjectDetails(projectsToLookup, ci);
 
         const componentDetails: Option[] = [];
 
@@ -63,7 +63,7 @@ export function removeComponentMapFromChannel(ci: CommandListenerInvocation<Jira
 
             const compInfo =
                 await getJiraDetails<Component>(
-                    `${jiraConfig.url}/rest/api/2/component/${component.component.split(":")[1]}`);
+                    `${jiraConfig.url}/rest/api/2/component/${component.component.split(":")[1]}`, undefined, undefined, ci);
 
             await ci.addressChannels(slackSuccessMessage(
                 `Removed JIRA Component mapping successfully!`,

@@ -27,7 +27,7 @@ export function createBugIssue(ci: CommandListenerInvocation<JiraProjectLookup>)
             components.map(async c => {
             // Get Search pattern for project lookup
             const lookupUrl = `${jiraConfig.url}/rest/api/2/project/${c.projectId}`;
-            const project = await getJiraDetails<Project>(lookupUrl, true, 30);
+            const project = await getJiraDetails<Project>(lookupUrl, true, 30, ci);
             const comp = project.components.filter(nc => nc.id === c.componentId)[0];
             componentOptions.push({description: `${project.name}/${comp.name}`, value: `${comp.id}:${project.id}`});
              }),
@@ -137,7 +137,7 @@ export function createBugIssue(ci: CommandListenerInvocation<JiraProjectLookup>)
 
             // Submit new issue
             try {
-                const res = await createJiraTicket({fields: data});
+                const res = await createJiraTicket({fields: data}, ci);
                 await ci.addressChannels(`Created new JIRA Bug issue successfully!` +
                     `Link: ${slack.url(jiraConfig.url + `/browse/` + res.key, res.key)}`, {
                     ttl: 60 * 1000,

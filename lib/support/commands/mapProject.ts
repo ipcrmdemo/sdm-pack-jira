@@ -30,7 +30,7 @@ function mapProjectToChannel(ci: CommandListenerInvocation<MapProjectToChannelPa
 
         // Present list of projects
         let project: { project: string };
-        const projectValues = await prepProjectSelect(ci.parameters.projectSearch);
+        const projectValues = await prepProjectSelect(ci.parameters.projectSearch, ci);
         if (projectValues) {
              project = await ci.promptFor<{ project: string }>({
                 project: {
@@ -64,7 +64,7 @@ function mapProjectToChannel(ci: CommandListenerInvocation<MapProjectToChannelPa
             );
 
             const projectDetails =
-                await getJiraDetails<Project>(`${jiraConfig.url}/rest/api/2/project/${project.project}`, true);
+                await getJiraDetails<Project>(`${jiraConfig.url}/rest/api/2/project/${project.project}`, true, undefined, ci);
             const subject = `New JIRA Project mapping created successfully!`;
             const message = `Added new mapping from Project *${projectDetails.name}* to *${ci.parameters.slackChannelName}*`;
 

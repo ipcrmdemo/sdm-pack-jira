@@ -9,7 +9,7 @@ import {
     Parameters,
 } from "@atomist/automation-client";
 import {CommandHandlerRegistration, CommandListenerInvocation, ParametersDefinition, slackErrorMessage} from "@atomist/sdm";
-import {JiraConfig} from "../../jira";
+import {getJiraAuth, JiraConfig} from "../../jira";
 import * as types from "../../typings/types";
 import {createJiraResource} from "../commands/shared";
 import {convertEmailtoJiraUser} from "../shared";
@@ -83,21 +83,15 @@ export async function commentOnIssueHandler(cli: CommandListenerInvocation<Comme
     }
 
     logger.debug(`JIRA commentOnIssueHandler: Data payload => ${JSON.stringify(data)}`);
-    // TODO: Change auth here to use token
     await httpClient.exchange(
         issueUrl,
         {
             method: HttpMethod.Put,
             headers: {
                 "Content-Type": "application/json",
+                ...await getJiraAuth(cli),
             },
             body: data,
-            options: {
-                auth: {
-                    username: jiraConfig.user,
-                    password: jiraConfig.password,
-                },
-            },
         },
     ).catch(async e => {
         await cli.addressChannels(slackErrorMessage(
@@ -121,7 +115,7 @@ export const commentOnIssue: CommandHandlerRegistration<CommentOnIssueParams> = 
 
 export async function setIssueStatusHandler(cli: CommandListenerInvocation<{transitionId: string, selfUrl: string}>): Promise<HandlerResult> {
     const data = {transition: {id: cli.parameters.transitionId}};
-    await createJiraResource(cli.parameters.selfUrl, data);
+    await createJiraResource(cli.parameters.selfUrl, data, undefined, cli);
     return { code: 0};
 }
 

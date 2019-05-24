@@ -36,7 +36,7 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
 
         // Present list of projects
         let project: { project: string };
-        const projectValues = await prepProjectSelect(ci.parameters.projectSearch);
+        const projectValues = await prepProjectSelect(ci.parameters.projectSearch, ci);
         if (projectValues) {
             project = await ci.promptFor<{ project: string }>({
                 project: {
@@ -59,7 +59,8 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
 
         // Now we have the project
         // Get Issue Types
-        const availIssueTypes = await getJiraDetails<jiraTypes.Project>(`${jiraConfig.url}/rest/api/2/project/${project.project}`, true);
+        const availIssueTypes =
+            await getJiraDetails<jiraTypes.Project>(`${jiraConfig.url}/rest/api/2/project/${project.project}`, true, undefined, ci);
         const issueOptions: Option[] = [];
         availIssueTypes.issueTypes.forEach(t => {
             issueOptions.push({
@@ -180,7 +181,7 @@ export function createIssue(ci: CommandListenerInvocation<JiraProjectLookup>): P
 
         // Submit new issue
         try {
-            const res = await createJiraTicket({fields: data});
+            const res = await createJiraTicket({fields: data}, ci);
             await ci.addressChannels(`Created new JIRA issue successfully! Link: ${slack.url(jiraConfig.url + `/browse/` + res.key, res.key)}`, {
                 ttl: 60 * 1000,
                 id: `createJiraIssue-${ci.parameters.screenName}`,

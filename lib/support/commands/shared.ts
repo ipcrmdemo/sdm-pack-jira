@@ -1,6 +1,6 @@
 import {
     addressEvent,
-    configurationValue,
+    configurationValue, HandlerContext,
     HttpClientFactory,
     HttpMethod,
     logger,
@@ -9,8 +9,8 @@ import {
     Parameters,
 } from "@atomist/automation-client";
 import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata";
-import {CommandListenerInvocation} from "@atomist/sdm";
-import {JiraConfig} from "../../jira";
+import {CommandListenerInvocation, SdmContext} from "@atomist/sdm";
+import {getJiraAuth, JiraConfig} from "../../jira";
 import {purgeCacheEntry} from "../cache/manage";
 import {getJiraDetails} from "../jiraDataLookup";
 import {Issue, Project} from "../jiraDefs";
@@ -63,9 +63,9 @@ export function submitMappingPayload(
     });
 }
 
-export const createJiraTicket = async (data: any): Promise<JiraItemCreated> => {
+export const createJiraTicket = async (data: any, ctx?: SdmContext): Promise<JiraItemCreated> => {
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
-    return createJiraResource(`${jiraConfig.url}/rest/api/2/issue`, data);
+    return createJiraResource(`${jiraConfig.url}/rest/api/2/issue`, data, undefined, ctx);
 };
 
 export interface JiraProjectDefinition {
@@ -81,6 +81,7 @@ export interface JiraProjectDefinition {
 
 export async function createJiraProject(
     data: JiraProjectDefinition,
+    ctx?: SdmContext,
 ): Promise<JiraItemCreated> {
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
     return createJiraResource(`${jiraConfig.url}/rest/api/2/project`, {
@@ -92,7 +93,7 @@ export async function createJiraProject(
         projectTemplateKey: data.projectTemplateKey,
         assigneeType: data.assigneeType,
         ...data.extraData,
-    });
+    }, undefined, ctx);
 }
 
 export interface JiraComponentDefinition {
@@ -105,6 +106,7 @@ export interface JiraComponentDefinition {
 
 export async function createJiraComponent(
     data: JiraComponentDefinition,
+    ctx?: SdmContext,
 ): Promise<JiraItemCreated> {
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
     return createJiraResource(`${jiraConfig.url}/rest/api/2/component`, {
@@ -113,13 +115,11 @@ export async function createJiraComponent(
         project: data.project,
         assigneeType: data.assigneeType,
         ...data.extraData,
-    });
+    }, undefined, ctx);
 }
 
-export const createJiraResource = async (apiUrl: string, data: any, update: boolean = false): Promise<JiraItemCreated> => {
+export const createJiraResource = async (apiUrl: string, data: any, update: boolean = false, ctx?: SdmContext): Promise<JiraItemCreated> => {
     const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create();
-    const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
-
     logger.warn(`JIRA createJiraResource: Data payload => ${JSON.stringify(data)}`);
 
     const result = await httpClient.exchange(
@@ -128,14 +128,9 @@ export const createJiraResource = async (apiUrl: string, data: any, update: bool
             method: update ? HttpMethod.Put : HttpMethod.Post,
             headers: {
                 "Content-Type": "application/json",
+                ...await getJiraAuth(ctx),
             },
             body: data,
-            options: {
-                auth: {
-                    username: jiraConfig.user,
-                    password: jiraConfig.password,
-                },
-            },
         },
     ).catch(e => {
         logger.error(
@@ -148,7 +143,7 @@ export const createJiraResource = async (apiUrl: string, data: any, update: bool
     return result.body as JiraItemCreated;
 };
 
-export async function prepProjectSelect(search: string): Promise<Option[] | undefined> {
+export async function prepProjectSelect(search: string, ctx: SdmContext): Promise<Option[] | undefined> {
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
 
     // Get Search pattern for project lookup
@@ -156,7 +151,7 @@ export async function prepProjectSelect(search: string): Promise<Option[] | unde
 
     // Find projects that match project search string
     const projectValues: Option[] = [];
-    const result = await getJiraDetails<Project[]>(lookupUrl, true);
+    const result = await getJiraDetails<Project[]>(lookupUrl, true, undefined, ctx);
 
     result.forEach(p => {
         if (p.name.toLowerCase().includes(search.toLowerCase())) {
@@ -174,10 +169,11 @@ export async function prepProjectSelect(search: string): Promise<Option[] | unde
 
 export async function prepComponentSelect(
     project: string,
+    ctx: SdmContext,
 ): Promise<Option[] | undefined> {
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
     const componentLookupUrl = `${jiraConfig.url}/rest/api/2/project/${project}`;
-    const projectDetails = await getJiraDetails<Project>(componentLookupUrl, false);
+    const projectDetails = await getJiraDetails<Project>(componentLookupUrl, false, undefined, ctx);
     const componentValues: Option[] = [];
 
     projectDetails.components.forEach(c => {

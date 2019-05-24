@@ -1,13 +1,13 @@
 import {
-  buttonForCommand,
-  configurationValue,
-  HandlerResult,
-  logger,
-  MappedParameter,
-  MappedParameters,
-  Parameters,
+    buttonForCommand,
+    configurationValue, HandlerContext,
+    HandlerResult,
+    logger,
+    MappedParameter,
+    MappedParameters,
+    Parameters,
 } from "@atomist/automation-client";
-import { CommandHandlerRegistration, CommandListenerInvocation, slackTs } from "@atomist/sdm";
+import {CommandHandlerRegistration, CommandListenerInvocation, SdmContext, slackTs} from "@atomist/sdm";
 import * as slack from "@atomist/slack-messages";
 import { JiraConfig } from "../../jira";
 import { getMappedComponentsbyChannel, getMappedProjectsbyChannel, JiraProjectComponentMap } from "../helpers/channelLookup";
@@ -44,13 +44,13 @@ export const findRequiredProjects = async (components: JiraProjectComponentMap[]
     return projects;
 };
 
-export const lookupJiraProjectDetails = async (projectsToLookup: string[]): Promise<Project[]> => {
+export const lookupJiraProjectDetails = async (projectsToLookup: string[], ctx?: SdmContext): Promise<Project[]> => {
     // Lookup JIRA details
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
     const projectDetails: Project[] = [];
     await Promise.all(projectsToLookup.map(async p => {
             const lookupUrl = `${jiraConfig.url}/rest/api/2/project/${p}`;
-            const localProjectDetails = await getJiraDetails<Project>(lookupUrl, true);
+            const localProjectDetails = await getJiraDetails<Project>(lookupUrl, true, undefined, ctx);
             projectDetails.push(localProjectDetails);
     }));
 
@@ -104,7 +104,7 @@ export function getCurrentChannelMappings(ci: CommandListenerInvocation<JiraGetC
             // Get current components
             const components = await getMappedComponentsbyChannel(ci.context, ci.parameters.slackChannelName);
             const projectsToLookup = await findRequiredProjects(components, projects);
-            const projectDetails = await lookupJiraProjectDetails(projectsToLookup);
+            const projectDetails = await lookupJiraProjectDetails(projectsToLookup, ci);
 
             // Prepare message
             const componentMapped = await prepareFriendlyComponentNames(components, projectDetails);
