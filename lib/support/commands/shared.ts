@@ -203,12 +203,14 @@ export interface JiraQueryLanguageIssueResults {
  * @param {String} jql: JQL syntax only
  * @param {String} startAt?: The index to start retrieving from (for pagination)
  * @param {String} maxResults?: The max number of issues to retrieve
+ * @param {SdmContext} ctx?: SdmContext to pass for authentication purposes.  Should be used when calling this function from a command handler.
  * @returns {JiraQueryLanguageIssueResults}
  */
 export async function searchIssues(
     jql: string,
     startAt?: string,
     maxResults?: string,
+    ctx?: SdmContext,
 ): Promise<JiraQueryLanguageIssueResults> {
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
     let issueLookup = `${jiraConfig.url}/rest/api/2/search?jql=${jql}`;
@@ -218,5 +220,5 @@ export async function searchIssues(
     if (maxResults) {
         issueLookup = issueLookup + `&maxResults=${maxResults}`;
     }
-    return getJiraDetails<JiraQueryLanguageIssueResults>(issueLookup, false);
+    return getJiraDetails<JiraQueryLanguageIssueResults>(issueLookup, false, undefined, ctx);
 }

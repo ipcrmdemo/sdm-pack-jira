@@ -76,7 +76,7 @@ export async function jiraFindAndAssign(ci: CommandListenerInvocation<{project: 
         });
 
         try {
-            issues = await searchIssues(`project=${projectKey.key}+AND+assignee=null+AND+status!=Closed`);
+            issues = await searchIssues(`project=${projectKey.key}+AND+assignee=null+AND+status!=Closed`, ci);
             if (!(issues.issues.length > 0)) {
                 throw new Error("No issues found!");
             }
