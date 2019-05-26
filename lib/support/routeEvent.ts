@@ -22,19 +22,31 @@ import {
 import {getJiraDetails} from "./jiraDataLookup";
 import * as jiraTypes from "./jiraDefs";
 
+/**
+ * routeEvent
+ *
+ * This function is used to determine what type of inbound JIRA Issue event we have received, what data
+ * should be included in the messages that are sent to the Chat platform, and what actions should be
+ * available on those messages.
+ *
+ * @param {HandlerContext} ctx
+ * @param {OnJiraIssueEvent.JiraIssue} event
+ * @param {Boolean} newEvent Controls what the message options should be, update only or always-post
+ */
 export const routeEvent = async (
     ctx: HandlerContext,
     event: types.OnJiraIssueEvent.JiraIssue,
     newEvent: boolean,
 ): Promise<void> => {
-    // Build one object with all the stuff that we'll convert into a slack message
+    // Build one array with all the stuff that we'll convert into a slack message
     const message: slack.Attachment[] = [];
+
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
     let issueDetail: jiraTypes.Issue;
     let issueTransitions: jiraTypes.JiraIssueTransitions;
     let msgOptions: MessageOptions;
 
-    // Set a description
+    // Set a description and provide a static (and reproducible) message id
     let description: string;
     switch (event.webhookEvent) {
         case("comment_created"):
@@ -154,7 +166,6 @@ export const routeEvent = async (
         };
 
         if (notifyChannels.length > 0) {
-            // logger.debug(`JIRA routeEvent: Final list of channels => ${JSON.stringify(notifyChannels, undefined, 2)}`);
             await ctx.messageClient.addressChannels(finalMessage, notifyChannels.map(c => c.channel), msgOptions);
         }
     } else {

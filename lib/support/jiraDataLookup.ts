@@ -71,9 +71,11 @@ interface JiraIssueRepo {
 }
 
 /**
- * Return the list of repos associated with this JIRA issue.
- * @param {number} issueId The ID of the JIRA issue.
- * @param {Configuration} config Atomist Configuration
+ * Return the list of repos associated with this JIRA issue (ie a commit is linked to this Issue).
+ * Note: This is dependant on the VCS type in use which needs to be supplied in your configuration
+ * see docs for details
+ *
+ * @param {issueId} issueId The ID of the JIRA issue.
  * @returns {string[]} List of repo names
  */
 export async function getJiraIssueRepos(issueId: string): Promise<string[]> {

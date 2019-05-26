@@ -4,6 +4,17 @@ import {purgeCacheEntry} from "../support/cache/manage";
 import { routeEvent } from "../support/routeEvent";
 import * as types from "../typings/types";
 
+/**
+ * onJiraIssueEventHandler
+ *
+ * This handler is called anytime there is an inbound JIRA Issue event and is responsible for:
+ *
+ * - Querying any previous events for this issue
+ * - Purging any present cache entries for this Issue
+ * - Sending this new event and all previous events to the routeEvent function for message building
+ * and ultimately sending of chat messages.  Note, previous events are reprocessed so that any relevant
+ * footer detail can be updated by re-writing the same message id with the new detail
+ */
 function onJiraIssueEventHandler():
     OnEvent<types.OnJiraIssueEvent.Subscription> {
     return async (e, ctx) => {

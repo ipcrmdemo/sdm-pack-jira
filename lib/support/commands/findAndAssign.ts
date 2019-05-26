@@ -12,7 +12,7 @@ import {
     DeclarationType,
     ParametersDefinition,
     ProjectLoader, RepoRefResolver,
-    resolveCredentialsPromise, slackErrorMessage,
+    resolveCredentialsPromise, SdmContext, slackErrorMessage,
     slackSuccessMessage,
 } from "@atomist/sdm";
 import {SlackMessage, url} from "@atomist/slack-messages";
@@ -76,7 +76,7 @@ export async function jiraFindAndAssign(ci: CommandListenerInvocation<{project: 
         });
 
         try {
-            issues = await searchIssues(`project=${projectKey.key}+AND+assignee=null+AND+status!=Closed`, ci);
+            issues = await searchIssues(`project=${projectKey.key}+AND+assignee=null+AND+status!=Closed`, undefined, undefined, ci);
             if (!(issues.issues.length > 0)) {
                 throw new Error("No issues found!");
             }
