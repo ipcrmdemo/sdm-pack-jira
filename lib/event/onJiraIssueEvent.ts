@@ -39,21 +39,14 @@ function onJiraIssueEventHandler():
 
         logger.debug(`JIRA onJiraIssueEventHandler: Found ${events.JiraIssue.length} events`);
         const routeEm = async () => {
-            await asyncForEach(events.JiraIssue, async (j: any) => {
-                    await routeEvent(ctx, j, false);
-             });
+            for (const event of events.JiraIssue) {
+                await routeEvent(ctx, event, false);
+            }
         };
         await routeEm();
         await routeEvent(ctx, e.data.JiraIssue[0], true);
         return Success;
     };
-}
-
-// https://codeburst.io/javascript-async-await-with-foreach-b6ba62bbf404
-async function asyncForEach(array: any, callback: any): Promise<void> {
-    for (let index = 0; index < array.length; index++) {
-        await callback(array[index], index, array);
-    }
 }
 
 export const onJiraIssueEvent: EventHandlerRegistration<types.OnJiraIssueEvent.Subscription> = {
