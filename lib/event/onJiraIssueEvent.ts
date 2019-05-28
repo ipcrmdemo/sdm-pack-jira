@@ -40,11 +40,11 @@ function onJiraIssueEventHandler():
         logger.debug(`JIRA onJiraIssueEventHandler: Found ${events.JiraIssue.length} events`);
         const routeEm = async () => {
             for (const event of events.JiraIssue) {
-                await routeEvent(ctx, event, false);
+                await routeEvent(ctx, event, event.timestamp === e.data.JiraIssue[0].timestamp);
             }
         };
+
         await routeEm();
-        await routeEvent(ctx, e.data.JiraIssue[0], true);
         return Success;
     };
 }
