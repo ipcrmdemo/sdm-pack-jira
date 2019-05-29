@@ -7,7 +7,7 @@ import {getMappedComponentsbyChannel} from "../helpers/channelLookup";
 import {getJiraDetails} from "../jiraDataLookup";
 import {Component} from "../jiraDefs";
 import {findRequiredProjects, lookupJiraProjectDetails} from "./getCurrentChannelMappings";
-import {JiraHandlerParam, submitMappingPayload} from "./shared";
+import {buildJiraHashKey, JiraHandlerParam, submitMappingPayload} from "./shared";
 
 export function removeComponentMapFromChannel(ci: CommandListenerInvocation<JiraHandlerParam>): Promise<HandlerResult> {
     return new Promise(async (resolve, reject) => {
@@ -55,10 +55,8 @@ export function removeComponentMapFromChannel(ci: CommandListenerInvocation<Jira
                     channel: ci.parameters.slackChannelName,
                     projectId: component.component.split(":")[0],
                     componentId: component.component.split(":")[1],
-                    active: false,
                 },
-                "JiraComponentMap",
-                `${ci.context.workspaceId}-GetAllComponentMappingsforChannel-${objectHash({channel: [ci.parameters.slackChannelName]})}`,
+                false,
             );
 
             const compInfo =
@@ -88,4 +86,5 @@ export const removeComponentMapFromChannelReg: CommandHandlerRegistration<JiraHa
     paramsMaker: JiraHandlerParam,
     intent: "jira disable component map",
     listener: removeComponentMapFromChannel,
+    autoSubmit: true,
 };

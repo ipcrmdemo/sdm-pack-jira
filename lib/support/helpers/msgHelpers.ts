@@ -10,25 +10,25 @@ export const upperCaseFirstLetter = (word: string): string => {
     return word.charAt(0).toUpperCase() + word.slice(1);
 };
 
-export const prepareIssueCommentedMessage = async (event: types.OnJiraIssueEvent.JiraIssue): Promise<slack.Attachment[]> => {
-    if (
-        event.issue &&
-        event.issue.hasOwnProperty("self") &&
-        event.issue.self &&
-        event.hasOwnProperty("comment") &&
-        event.comment !== null &&
-        event.comment.self !== null
-    ) {
-        const comment = await getJiraDetails<jiraTypes.Comment>(event.comment.self, true, 30);
+export const prepareIssueCommentedMessage = async (
+    issueEventTypeName: string,
+    issueDetail: jiraTypes.Issue,
+): Promise<slack.Attachment[]> => {
+    if ( issueDetail.fields.comment.comments.length > 0) {
+        const comment = await getJiraDetails<jiraTypes.Comment>(
+            issueDetail.fields.comment.comments.pop().self,
+           true,
+           30,
+        );
 
-        const title = event.issue_event_type_name === "issue_comment_edited" ? `New Comment (edited)` : `New Comment`;
+        const title = issueEventTypeName === "issue_comment_edited" ? `New Comment (edited)` : `New Comment`;
         return [
             {
                 pretext: slack.bold(title),
                 color: "#45B254",
                 author_name: `@${comment.author.name}`,
                 author_icon: comment.author.avatarUrls["48x48"],
-                fallback: `New comment on issue ${event.issue.key} by ${comment.author.name}`,
+                fallback: `New comment on issue ${issueDetail.key} by ${comment.author.name}`,
                 text: jira2slack.toSlack(comment.body),
             },
         ];
@@ -37,14 +37,17 @@ export const prepareIssueCommentedMessage = async (event: types.OnJiraIssueEvent
     }
 };
 
-export const prepareStateChangeMessage = async (event: types.OnJiraIssueEvent.JiraIssue): Promise<slack.Attachment[]> => {
-    if (
-        event.hasOwnProperty("changelog") &&
-        event.changelog !== null &&
-        event.webhookEvent !== "jira:issue_created"
+export const prepareStateChangeMessage = async (
+    webHookEvent: string,
+    issueDetail: jiraTypes.Issue,
+): Promise<slack.Attachment[]> => {
+    if (issueDetail.changelog !== undefined &&
+        issueDetail.changelog.hasOwnProperty("items") &&
+        issueDetail.changelog.histories.slice(-1)[0].items.length > 0 &&
+        webHookEvent !== "jira:issue_created"
     ) {
         const fields: slack.Field[] = [];
-        event.changelog.items.forEach(c => {
+        issueDetail.changelog.histories.slice(-1)[0].items.forEach(c => {
             if (c.field === "description") {
                 fields.push(
                     {
@@ -79,7 +82,7 @@ export const prepareStateChangeMessage = async (event: types.OnJiraIssueEvent.Ji
         });
 
         return [{
-            fallback: `New state change on issue ${event.issue.key}`,
+            fallback: `New state change on issue ${issueDetail.key}`,
             fields,
         }];
     } else {
@@ -87,7 +90,8 @@ export const prepareStateChangeMessage = async (event: types.OnJiraIssueEvent.Ji
     }
 };
 
-export const prepareIssueDeletedMessage = async (event: types.OnJiraIssueEvent.JiraIssue): Promise<slack.Attachment[]> => {
+export const prepareIssueDeletedMessage = async (
+    event: types.OnJiraIssueEvent.JiraIssue): Promise<slack.Attachment[]> => {
     if (event.webhookEvent === "jira:issue_deleted") {
         const userDetail = await getJiraDetails<jiraTypes.User>(event.user.self, true);
         return [
@@ -104,16 +108,18 @@ export const prepareIssueDeletedMessage = async (event: types.OnJiraIssueEvent.J
 
 };
 
-export const prepareNewIssueMessage = async (event: types.OnJiraIssueEvent.JiraIssue): Promise<slack.Attachment[]> => {
+export const prepareNewIssueMessage = async (
+    webHookEvent: string,
+    issueDetail: jiraTypes.Issue,
+): Promise<slack.Attachment[]> => {
 
-    if (event.webhookEvent === "jira:issue_created") {
-        const issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self, true, 30);
+    if (webHookEvent === "jira:issue_created") {
         return [
             {
                 color: "#45B254",
                 author_name: `@${issueDetail.fields.reporter.name}`,
                 author_icon: issueDetail.fields.reporter.avatarUrls["48x48"],
-                fallback: `New issue ${event.issue.key} by ${issueDetail.fields.reporter.name}`,
+                fallback: `New issue ${issueDetail.key} by ${issueDetail.fields.reporter.name}`,
                 fields: [
                     {
                         title: "Issue Type",

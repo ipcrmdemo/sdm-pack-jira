@@ -2,24 +2,24 @@ import { configurationValue, GitHubRepoRef, GraphQL, logger, OnEvent, Success } 
 import { EventHandlerRegistration, findSdmGoalOnCommit, Goal, SdmGoalState, updateGoal } from "@atomist/sdm";
 import { JiraConfig } from "../jira";
 import { getJiraDetails } from "../support/jiraDataLookup";
-import { Issue } from "../support/jiraDefs";
+import * as jiraTypes from "../support/jiraDefs";
 import * as types from "../typings/types";
 
 export const onJiraIssueEventApprovalHandler = (goal: Goal): OnEvent<types.OnJiraIssueEvent.Subscription> => {
     return async (e, ctx) => {
         const event =  e.data.JiraIssue[0];
+        const issue = await getJiraDetails<jiraTypes.Issue>(event.issue.self + "?expand=changelog", true, 30);
 
         // Validate new state is approved (only process if this issue is a state change)
         if (
             event.webhookEvent !== "jira:issue_updated" ||
             !event.issue_event_type_name.match(/^(issue_generic|issue_updated|issue_assigned)$/) ||
-            event.changelog === null
+            issue.changelog === null
         ) {
             logger.info(`JIRA onJiraIssueEventApprovalHandler: Not searching for approval, wrong event type.`);
             return Success;
         }
 
-        const issue = await getJiraDetails<Issue>(e.data.JiraIssue[0].issue.self);
         // Search environment for tags
         let sha: string;
         let owner: string;
@@ -36,7 +36,7 @@ export const onJiraIssueEventApprovalHandler = (goal: Goal): OnEvent<types.OnJir
         }
 
         // Get new status
-        const status = event.changelog.items.filter(c => c.field === "status");
+        const status = issue.changelog.histories.slice(-1)[0].items.filter(c => c.field === "status");
         logger.info(`JIRA onJiraIssueEventApprovalHandler: New status => ${JSON.stringify(status)}`);
         // TODO: Make the 'status' required configuration
         if (status[0].toString === "Done") {

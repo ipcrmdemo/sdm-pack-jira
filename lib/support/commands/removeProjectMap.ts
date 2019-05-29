@@ -1,7 +1,6 @@
 import {configurationValue, HandlerResult, logger} from "@atomist/automation-client";
 import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata";
 import {CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage} from "@atomist/sdm";
-import objectHash = require("object-hash");
 import {JiraConfig} from "../../jira";
 import {getMappedProjectsbyChannel} from "../helpers/channelLookup";
 import {getJiraDetails} from "../jiraDataLookup";
@@ -40,10 +39,8 @@ export function removeProjectMapFromChannel(ci: CommandListenerInvocation<JiraHa
                 {
                     channel: ci.parameters.slackChannelName,
                     projectId: project.project,
-                    active: false,
                 },
-                "JiraProjectMap",
-                `${ci.context.workspaceId}-GetAllProjectMappingsforChannel-${objectHash({channel: [ci.parameters.slackChannelName]})}`,
+                false,
             );
 
             const projectDetail =
@@ -74,4 +71,5 @@ export const removeProjectMapFromChannelReg: CommandHandlerRegistration<JiraHand
     paramsMaker: JiraHandlerParam,
     intent: "jira disable project map",
     listener: removeProjectMapFromChannel,
+    autoSubmit: true,
 };

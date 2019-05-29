@@ -70,37 +70,148 @@ export interface TagInput {
 
   value: string;
 }
-/** Enum for IssueState */
-export enum IssueState {
-  open = "open",
-  closed = "closed"
+
+export interface ScmOrgsInput {
+  orgs: ScmOrgInput[];
 }
-/** Ordering Enum for Issue */
-export enum _IssueOrdering {
+
+export interface ScmOrgInput {
+  name: string;
+
+  id?: Maybe<string>;
+
+  url?: Maybe<string>;
+
+  ownerType: OwnerType;
+}
+
+export interface ScmReposInput {
+  /** The id of the org as represented in the Atomist graph */
+  orgId: string;
+
+  owner: string;
+  /** The list of repos to ingest */
+  repos: ScmRepoInput[];
+}
+
+export interface ScmRepoInput {
+  /** The the id of the repo as provided by the SCM provider not the Atomist graph */
+  repoId: string;
+  /** The http url of the repo in the SCM provider */
+  url?: Maybe<string>;
+  /** The name of the repo */
+  name: string;
+  /** The default branch of the repo (master if unknown) */
+  defaultBranch?: Maybe<string>;
+}
+
+export interface ScmCommitInput {
+  /** The id of the repo as it appears in the graph */
+  repoId: string;
+  /** The sha of the commit */
+  sha: string;
+  /** The email address of the commit */
+  email?: Maybe<EmailInput>;
+  /** The commit message */
+  message: string;
+  /** The http url of the commit in the SCM provider */
+  url?: Maybe<string>;
+  /** The commit timestamp */
+  timestamp: string;
+  /** The name of the branch this commit is being ingested on */
+  branchName: string;
+  /** The author of the commit - optional but helpful if available */
+  author?: Maybe<ScmAuthorInput>;
+}
+
+export interface EmailInput {
+  address: string;
+}
+
+export interface ScmAuthorInput {
+  /** The login of the commit author in the SCM provider */
+  login: string;
+  /** The authors email address */
+  email?: Maybe<EmailInput>;
+  /** The name of the author */
+  name?: Maybe<string>;
+}
+/** Ordering Enum for Person */
+export enum _PersonOrdering {
   atmTeamId_asc = "atmTeamId_asc",
   atmTeamId_desc = "atmTeamId_desc",
   id_asc = "id_asc",
   id_desc = "id_desc",
-  number_asc = "number_asc",
-  number_desc = "number_desc",
+  forename_asc = "forename_asc",
+  forename_desc = "forename_desc",
+  surname_asc = "surname_asc",
+  surname_desc = "surname_desc",
+  name_asc = "name_asc",
+  name_desc = "name_desc"
+}
+
+export enum ResourceProviderStateName {
+  converged = "converged",
+  unconverged = "unconverged",
+  misconfigured = "misconfigured",
+  unauthorized = "unauthorized"
+}
+
+export enum WebhookAuthType {
+  hmac_sha1 = "hmac_sha1",
+  none = "none"
+}
+
+export enum WebhookState {
+  enabled = "enabled",
+  disabled = "disabled"
+}
+/** Enum for ProviderType */
+export enum ProviderType {
+  bitbucket_cloud = "bitbucket_cloud",
+  github_com = "github_com",
+  ghe = "ghe",
+  bitbucket = "bitbucket",
+  gitlab = "gitlab"
+}
+/** Ordering Enum for Org */
+export enum _OrgOrdering {
+  atmTeamId_asc = "atmTeamId_asc",
+  atmTeamId_desc = "atmTeamId_desc",
+  id_asc = "id_asc",
+  id_desc = "id_desc",
+  owner_asc = "owner_asc",
+  owner_desc = "owner_desc",
+  ownerType_asc = "ownerType_asc",
+  ownerType_desc = "ownerType_desc"
+}
+
+export enum OwnerType {
+  user = "user",
+  organization = "organization"
+}
+/** Ordering Enum for Repo */
+export enum _RepoOrdering {
+  atmTeamId_asc = "atmTeamId_asc",
+  atmTeamId_desc = "atmTeamId_desc",
+  id_asc = "id_asc",
+  id_desc = "id_desc",
+  owner_asc = "owner_asc",
+  owner_desc = "owner_desc",
   name_asc = "name_asc",
   name_desc = "name_desc",
-  title_asc = "title_asc",
-  title_desc = "title_desc",
-  body_asc = "body_asc",
-  body_desc = "body_desc",
-  state_asc = "state_asc",
-  state_desc = "state_desc",
-  timestamp_asc = "timestamp_asc",
-  timestamp_desc = "timestamp_desc",
-  action_asc = "action_asc",
-  action_desc = "action_desc",
-  createdAt_asc = "createdAt_asc",
-  createdAt_desc = "createdAt_desc",
-  updatedAt_asc = "updatedAt_asc",
-  updatedAt_desc = "updatedAt_desc",
-  closedAt_asc = "closedAt_asc",
-  closedAt_desc = "closedAt_desc"
+  allowRebaseMerge_asc = "allowRebaseMerge_asc",
+  allowRebaseMerge_desc = "allowRebaseMerge_desc",
+  allowSquashMerge_asc = "allowSquashMerge_asc",
+  allowSquashMerge_desc = "allowSquashMerge_desc",
+  allowMergeCommit_asc = "allowMergeCommit_asc",
+  allowMergeCommit_desc = "allowMergeCommit_desc",
+  repoId_asc = "repoId_asc",
+  repoId_desc = "repoId_desc",
+  gitHubId_asc = "gitHubId_asc",
+  gitHubId_desc = "gitHubId_desc",
+  defaultBranch_asc = "defaultBranch_asc",
+  defaultBranch_desc = "defaultBranch_desc"
 }
 /** Ordering Enum for Label */
 export enum _LabelOrdering {
@@ -136,89 +247,12 @@ export enum _ChatChannelOrdering {
   archived_asc = "archived_asc",
   archived_desc = "archived_desc"
 }
-/** Ordering Enum for Person */
-export enum _PersonOrdering {
-  atmTeamId_asc = "atmTeamId_asc",
-  atmTeamId_desc = "atmTeamId_desc",
-  id_asc = "id_asc",
-  id_desc = "id_desc",
-  forename_asc = "forename_asc",
-  forename_desc = "forename_desc",
-  surname_asc = "surname_asc",
-  surname_desc = "surname_desc",
-  name_asc = "name_asc",
-  name_desc = "name_desc"
-}
-/** Enum for ProviderType */
-export enum ProviderType {
-  bitbucket_cloud = "bitbucket_cloud",
-  github_com = "github_com",
-  ghe = "ghe",
-  bitbucket = "bitbucket",
-  gitlab = "gitlab"
-}
-
-export enum ResourceProviderStateName {
-  converged = "converged",
-  unconverged = "unconverged",
-  misconfigured = "misconfigured",
-  unauthorized = "unauthorized"
-}
-
-export enum WebhookAuthType {
-  hmac_sha1 = "hmac_sha1",
-  none = "none"
-}
-
-export enum WebhookState {
-  enabled = "enabled",
-  disabled = "disabled"
-}
 /** Ordering Enum for Email */
 export enum _EmailOrdering {
   atmTeamId_asc = "atmTeamId_asc",
   atmTeamId_desc = "atmTeamId_desc",
   address_asc = "address_asc",
   address_desc = "address_desc"
-}
-/** Ordering Enum for Org */
-export enum _OrgOrdering {
-  atmTeamId_asc = "atmTeamId_asc",
-  atmTeamId_desc = "atmTeamId_desc",
-  id_asc = "id_asc",
-  id_desc = "id_desc",
-  owner_asc = "owner_asc",
-  owner_desc = "owner_desc",
-  ownerType_asc = "ownerType_asc",
-  ownerType_desc = "ownerType_desc"
-}
-/** Enum for OwnerType */
-export enum OwnerType {
-  user = "user",
-  organization = "organization"
-}
-/** Ordering Enum for Repo */
-export enum _RepoOrdering {
-  atmTeamId_asc = "atmTeamId_asc",
-  atmTeamId_desc = "atmTeamId_desc",
-  id_asc = "id_asc",
-  id_desc = "id_desc",
-  owner_asc = "owner_asc",
-  owner_desc = "owner_desc",
-  name_asc = "name_asc",
-  name_desc = "name_desc",
-  allowRebaseMerge_asc = "allowRebaseMerge_asc",
-  allowRebaseMerge_desc = "allowRebaseMerge_desc",
-  allowSquashMerge_asc = "allowSquashMerge_asc",
-  allowSquashMerge_desc = "allowSquashMerge_desc",
-  allowMergeCommit_asc = "allowMergeCommit_asc",
-  allowMergeCommit_desc = "allowMergeCommit_desc",
-  repoId_asc = "repoId_asc",
-  repoId_desc = "repoId_desc",
-  gitHubId_asc = "gitHubId_asc",
-  gitHubId_desc = "gitHubId_desc",
-  defaultBranch_asc = "defaultBranch_asc",
-  defaultBranch_desc = "defaultBranch_desc"
 }
 /** Ordering Enum for ChatId */
 export enum _ChatIdOrdering {
@@ -245,40 +279,6 @@ export enum _ChatIdOrdering {
   timezoneLabel_asc = "timezoneLabel_asc",
   timezoneLabel_desc = "timezoneLabel_desc"
 }
-/** Ordering Enum for SCMProvider */
-export enum _ScmProviderOrdering {
-  atmTeamId_asc = "atmTeamId_asc",
-  atmTeamId_desc = "atmTeamId_desc",
-  id_asc = "id_asc",
-  id_desc = "id_desc",
-  url_asc = "url_asc",
-  url_desc = "url_desc",
-  providerId_asc = "providerId_asc",
-  providerId_desc = "providerId_desc",
-  apiUrl_asc = "apiUrl_asc",
-  apiUrl_desc = "apiUrl_desc",
-  gitUrl_asc = "gitUrl_asc",
-  gitUrl_desc = "gitUrl_desc",
-  providerType_asc = "providerType_asc",
-  providerType_desc = "providerType_desc"
-}
-/** Ordering Enum for ChatTeam */
-export enum _ChatTeamOrdering {
-  atmTeamId_asc = "atmTeamId_asc",
-  atmTeamId_desc = "atmTeamId_desc",
-  id_asc = "id_asc",
-  id_desc = "id_desc",
-  name_asc = "name_asc",
-  name_desc = "name_desc",
-  provider_asc = "provider_asc",
-  provider_desc = "provider_desc",
-  domain_asc = "domain_asc",
-  domain_desc = "domain_desc",
-  messageCount_asc = "messageCount_asc",
-  messageCount_desc = "messageCount_desc",
-  emailDomain_asc = "emailDomain_asc",
-  emailDomain_desc = "emailDomain_desc"
-}
 /** Ordering Enum for ChannelLink */
 export enum _ChannelLinkOrdering {
   atmTeamId_asc = "atmTeamId_asc",
@@ -286,65 +286,48 @@ export enum _ChannelLinkOrdering {
   id_asc = "id_asc",
   id_desc = "id_desc"
 }
-/** Ordering Enum for PullRequest */
-export enum _PullRequestOrdering {
+/** Enum for IssueState */
+export enum IssueState {
+  open = "open",
+  closed = "closed"
+}
+/** Ordering Enum for Issue */
+export enum _IssueOrdering {
   atmTeamId_asc = "atmTeamId_asc",
   atmTeamId_desc = "atmTeamId_desc",
   id_asc = "id_asc",
   id_desc = "id_desc",
   number_asc = "number_asc",
   number_desc = "number_desc",
-  prId_asc = "prId_asc",
-  prId_desc = "prId_desc",
   name_asc = "name_asc",
   name_desc = "name_desc",
+  title_asc = "title_asc",
+  title_desc = "title_desc",
   body_asc = "body_asc",
   body_desc = "body_desc",
   state_asc = "state_asc",
   state_desc = "state_desc",
-  merged_asc = "merged_asc",
-  merged_desc = "merged_desc",
   timestamp_asc = "timestamp_asc",
   timestamp_desc = "timestamp_desc",
-  baseBranchName_asc = "baseBranchName_asc",
-  baseBranchName_desc = "baseBranchName_desc",
-  branchName_asc = "branchName_asc",
-  branchName_desc = "branchName_desc",
-  title_asc = "title_asc",
-  title_desc = "title_desc",
+  action_asc = "action_asc",
+  action_desc = "action_desc",
   createdAt_asc = "createdAt_asc",
   createdAt_desc = "createdAt_desc",
   updatedAt_asc = "updatedAt_asc",
   updatedAt_desc = "updatedAt_desc",
   closedAt_asc = "closedAt_asc",
-  closedAt_desc = "closedAt_desc",
-  mergedAt_asc = "mergedAt_asc",
-  mergedAt_desc = "mergedAt_desc",
-  mergeStatus_asc = "mergeStatus_asc",
-  mergeStatus_desc = "mergeStatus_desc"
+  closedAt_desc = "closedAt_desc"
 }
-/** Enum for MergeStatus */
-export enum MergeStatus {
-  can_be_merged = "can_be_merged",
-  unchecked = "unchecked",
-  cannot_be_merged = "cannot_be_merged"
-}
-
-export enum PullRequestAction {
-  assigned = "assigned",
-  created = "created",
-  unassigned = "unassigned",
-  review_requested = "review_requested",
-  review_request_removed = "review_request_removed",
-  labeled = "labeled",
-  unlabeled = "unlabeled",
-  opened = "opened",
-  edited = "edited",
-  closed = "closed",
-  reopened = "reopened",
-  synchronize = "synchronize",
-  submitted = "submitted",
-  ready_for_review = "ready_for_review"
+/** Ordering Enum for Commit */
+export enum _CommitOrdering {
+  atmTeamId_asc = "atmTeamId_asc",
+  atmTeamId_desc = "atmTeamId_desc",
+  sha_asc = "sha_asc",
+  sha_desc = "sha_desc",
+  message_asc = "message_asc",
+  message_desc = "message_desc",
+  timestamp_asc = "timestamp_asc",
+  timestamp_desc = "timestamp_desc"
 }
 /** Enum for BuildStatus */
 export enum BuildStatus {
@@ -403,17 +386,6 @@ export enum _BuildOrdering {
   data_asc = "data_asc",
   data_desc = "data_desc"
 }
-/** Ordering Enum for Commit */
-export enum _CommitOrdering {
-  atmTeamId_asc = "atmTeamId_asc",
-  atmTeamId_desc = "atmTeamId_desc",
-  sha_asc = "sha_asc",
-  sha_desc = "sha_desc",
-  message_asc = "message_asc",
-  message_desc = "message_desc",
-  timestamp_asc = "timestamp_asc",
-  timestamp_desc = "timestamp_desc"
-}
 /** Enum for PipelineStatus */
 export enum PipelineStatus {
   running = "running",
@@ -463,6 +435,138 @@ export enum SdmGoalDisplayFormat {
 export enum SdmGoalDisplayState {
   show_current = "show_current",
   show_all = "show_all"
+}
+/** Enum for MergeStatus */
+export enum MergeStatus {
+  can_be_merged = "can_be_merged",
+  unchecked = "unchecked",
+  cannot_be_merged = "cannot_be_merged"
+}
+
+export enum PullRequestAction {
+  assigned = "assigned",
+  created = "created",
+  unassigned = "unassigned",
+  review_requested = "review_requested",
+  review_request_removed = "review_request_removed",
+  labeled = "labeled",
+  unlabeled = "unlabeled",
+  opened = "opened",
+  edited = "edited",
+  closed = "closed",
+  reopened = "reopened",
+  synchronize = "synchronize",
+  submitted = "submitted",
+  ready_for_review = "ready_for_review"
+}
+/** Ordering Enum for SCMId */
+export enum _ScmIdOrdering {
+  atmTeamId_asc = "atmTeamId_asc",
+  atmTeamId_desc = "atmTeamId_desc",
+  login_asc = "login_asc",
+  login_desc = "login_desc",
+  name_asc = "name_asc",
+  name_desc = "name_desc",
+  avatar_asc = "avatar_asc",
+  avatar_desc = "avatar_desc"
+}
+/** Ordering Enum for PullRequest */
+export enum _PullRequestOrdering {
+  atmTeamId_asc = "atmTeamId_asc",
+  atmTeamId_desc = "atmTeamId_desc",
+  id_asc = "id_asc",
+  id_desc = "id_desc",
+  number_asc = "number_asc",
+  number_desc = "number_desc",
+  prId_asc = "prId_asc",
+  prId_desc = "prId_desc",
+  name_asc = "name_asc",
+  name_desc = "name_desc",
+  body_asc = "body_asc",
+  body_desc = "body_desc",
+  state_asc = "state_asc",
+  state_desc = "state_desc",
+  merged_asc = "merged_asc",
+  merged_desc = "merged_desc",
+  timestamp_asc = "timestamp_asc",
+  timestamp_desc = "timestamp_desc",
+  baseBranchName_asc = "baseBranchName_asc",
+  baseBranchName_desc = "baseBranchName_desc",
+  branchName_asc = "branchName_asc",
+  branchName_desc = "branchName_desc",
+  title_asc = "title_asc",
+  title_desc = "title_desc",
+  createdAt_asc = "createdAt_asc",
+  createdAt_desc = "createdAt_desc",
+  updatedAt_asc = "updatedAt_asc",
+  updatedAt_desc = "updatedAt_desc",
+  closedAt_asc = "closedAt_asc",
+  closedAt_desc = "closedAt_desc",
+  mergedAt_asc = "mergedAt_asc",
+  mergedAt_desc = "mergedAt_desc",
+  mergeStatus_asc = "mergeStatus_asc",
+  mergeStatus_desc = "mergeStatus_desc"
+}
+/** Enum for ReviewState */
+export enum ReviewState {
+  requested = "requested",
+  pending = "pending",
+  approved = "approved",
+  commented = "commented",
+  unapproved = "unapproved",
+  changes_requested = "changes_requested"
+}
+/** Ordering Enum for Review */
+export enum _ReviewOrdering {
+  atmTeamId_asc = "atmTeamId_asc",
+  atmTeamId_desc = "atmTeamId_desc",
+  id_asc = "id_asc",
+  id_desc = "id_desc",
+  gitHubId_asc = "gitHubId_asc",
+  gitHubId_desc = "gitHubId_desc",
+  reviewId_asc = "reviewId_asc",
+  reviewId_desc = "reviewId_desc",
+  body_asc = "body_asc",
+  body_desc = "body_desc",
+  state_asc = "state_asc",
+  state_desc = "state_desc",
+  submittedAt_asc = "submittedAt_asc",
+  submittedAt_desc = "submittedAt_desc",
+  htmlUrl_asc = "htmlUrl_asc",
+  htmlUrl_desc = "htmlUrl_desc"
+}
+/** Ordering Enum for Comment */
+export enum _CommentOrdering {
+  atmTeamId_asc = "atmTeamId_asc",
+  atmTeamId_desc = "atmTeamId_desc",
+  id_asc = "id_asc",
+  id_desc = "id_desc",
+  body_asc = "body_asc",
+  body_desc = "body_desc",
+  timestamp_asc = "timestamp_asc",
+  timestamp_desc = "timestamp_desc",
+  createdAt_asc = "createdAt_asc",
+  createdAt_desc = "createdAt_desc",
+  updatedAt_asc = "updatedAt_asc",
+  updatedAt_desc = "updatedAt_desc",
+  commentId_asc = "commentId_asc",
+  commentId_desc = "commentId_desc",
+  gitHubId_asc = "gitHubId_asc",
+  gitHubId_desc = "gitHubId_desc",
+  path_asc = "path_asc",
+  path_desc = "path_desc",
+  position_asc = "position_asc",
+  position_desc = "position_desc",
+  htmlUrl_asc = "htmlUrl_asc",
+  htmlUrl_desc = "htmlUrl_desc",
+  commentType_asc = "commentType_asc",
+  commentType_desc = "commentType_desc"
+}
+/** Enum for CommentCommentType */
+export enum CommentCommentType {
+  review = "review",
+  pullRequest = "pullRequest",
+  issue = "issue"
 }
 /** Ordering Enum for DockerImage */
 export enum _DockerImageOrdering {
@@ -632,78 +736,6 @@ export enum _FingerprintOrdering {
   data_asc = "data_asc",
   data_desc = "data_desc"
 }
-/** Ordering Enum for SCMId */
-export enum _ScmIdOrdering {
-  atmTeamId_asc = "atmTeamId_asc",
-  atmTeamId_desc = "atmTeamId_desc",
-  login_asc = "login_asc",
-  login_desc = "login_desc",
-  name_asc = "name_asc",
-  name_desc = "name_desc",
-  avatar_asc = "avatar_asc",
-  avatar_desc = "avatar_desc"
-}
-/** Enum for ReviewState */
-export enum ReviewState {
-  requested = "requested",
-  pending = "pending",
-  approved = "approved",
-  commented = "commented",
-  unapproved = "unapproved",
-  changes_requested = "changes_requested"
-}
-/** Ordering Enum for Review */
-export enum _ReviewOrdering {
-  atmTeamId_asc = "atmTeamId_asc",
-  atmTeamId_desc = "atmTeamId_desc",
-  id_asc = "id_asc",
-  id_desc = "id_desc",
-  gitHubId_asc = "gitHubId_asc",
-  gitHubId_desc = "gitHubId_desc",
-  reviewId_asc = "reviewId_asc",
-  reviewId_desc = "reviewId_desc",
-  body_asc = "body_asc",
-  body_desc = "body_desc",
-  state_asc = "state_asc",
-  state_desc = "state_desc",
-  submittedAt_asc = "submittedAt_asc",
-  submittedAt_desc = "submittedAt_desc",
-  htmlUrl_asc = "htmlUrl_asc",
-  htmlUrl_desc = "htmlUrl_desc"
-}
-/** Ordering Enum for Comment */
-export enum _CommentOrdering {
-  atmTeamId_asc = "atmTeamId_asc",
-  atmTeamId_desc = "atmTeamId_desc",
-  id_asc = "id_asc",
-  id_desc = "id_desc",
-  body_asc = "body_asc",
-  body_desc = "body_desc",
-  timestamp_asc = "timestamp_asc",
-  timestamp_desc = "timestamp_desc",
-  createdAt_asc = "createdAt_asc",
-  createdAt_desc = "createdAt_desc",
-  updatedAt_asc = "updatedAt_asc",
-  updatedAt_desc = "updatedAt_desc",
-  commentId_asc = "commentId_asc",
-  commentId_desc = "commentId_desc",
-  gitHubId_asc = "gitHubId_asc",
-  gitHubId_desc = "gitHubId_desc",
-  path_asc = "path_asc",
-  path_desc = "path_desc",
-  position_asc = "position_asc",
-  position_desc = "position_desc",
-  htmlUrl_asc = "htmlUrl_asc",
-  htmlUrl_desc = "htmlUrl_desc",
-  commentType_asc = "commentType_asc",
-  commentType_desc = "commentType_desc"
-}
-/** Enum for CommentCommentType */
-export enum CommentCommentType {
-  review = "review",
-  pullRequest = "pullRequest",
-  issue = "issue"
-}
 /** Ordering Enum for Branch */
 export enum _BranchOrdering {
   atmTeamId_asc = "atmTeamId_asc",
@@ -718,6 +750,40 @@ export enum _BranchOrdering {
   isRemote_desc = "isRemote_desc",
   remoteRepoHtmlUrl_asc = "remoteRepoHtmlUrl_asc",
   remoteRepoHtmlUrl_desc = "remoteRepoHtmlUrl_desc"
+}
+/** Ordering Enum for SCMProvider */
+export enum _ScmProviderOrdering {
+  atmTeamId_asc = "atmTeamId_asc",
+  atmTeamId_desc = "atmTeamId_desc",
+  id_asc = "id_asc",
+  id_desc = "id_desc",
+  url_asc = "url_asc",
+  url_desc = "url_desc",
+  providerId_asc = "providerId_asc",
+  providerId_desc = "providerId_desc",
+  apiUrl_asc = "apiUrl_asc",
+  apiUrl_desc = "apiUrl_desc",
+  gitUrl_asc = "gitUrl_asc",
+  gitUrl_desc = "gitUrl_desc",
+  providerType_asc = "providerType_asc",
+  providerType_desc = "providerType_desc"
+}
+/** Ordering Enum for ChatTeam */
+export enum _ChatTeamOrdering {
+  atmTeamId_asc = "atmTeamId_asc",
+  atmTeamId_desc = "atmTeamId_desc",
+  id_asc = "id_asc",
+  id_desc = "id_desc",
+  name_asc = "name_asc",
+  name_desc = "name_desc",
+  provider_asc = "provider_asc",
+  provider_desc = "provider_desc",
+  domain_asc = "domain_asc",
+  domain_desc = "domain_desc",
+  messageCount_asc = "messageCount_asc",
+  messageCount_desc = "messageCount_desc",
+  emailDomain_asc = "emailDomain_asc",
+  emailDomain_desc = "emailDomain_desc"
 }
 /** Ordering Enum for Workflow */
 export enum _WorkflowOrdering {
@@ -856,14 +922,14 @@ export enum _Ordering {
   asc = "asc"
 }
 
-export enum SdmDeployState {
-  requested = "requested",
-  disabled = "disabled"
-}
-
 export enum CommitIssueRelationshipType {
   references = "references",
   fixes = "fixes"
+}
+
+export enum SdmDeployState {
+  requested = "requested",
+  disabled = "disabled"
 }
 
 export enum ScmProviderStateName {
@@ -952,97 +1018,6 @@ export namespace GetEmailByChatId {
   };
 }
 
-export namespace GetAllComponentMappingsforChannel {
-  export type Variables = {
-    channel?: Maybe<string[]>;
-  };
-
-  export type Query = {
-    __typename?: "Query";
-
-    JiraComponentMap?: Maybe<(Maybe<JiraComponentMap>)[]>;
-  };
-
-  export type JiraComponentMap = {
-    __typename?: "JiraComponentMap";
-
-    projectId?: Maybe<string>;
-
-    componentId?: Maybe<string>;
-
-    active?: Maybe<boolean>;
-  };
-}
-
-export namespace GetAllProjectMappingsforChannel {
-  export type Variables = {
-    channel?: Maybe<string[]>;
-  };
-
-  export type Query = {
-    __typename?: "Query";
-
-    JiraProjectMap?: Maybe<(Maybe<JiraProjectMap>)[]>;
-  };
-
-  export type JiraProjectMap = {
-    __typename?: "JiraProjectMap";
-
-    channel?: Maybe<string>;
-
-    projectId?: Maybe<string>;
-
-    active?: Maybe<boolean>;
-  };
-}
-
-export namespace GetChannelByComponent {
-  export type Variables = {
-    componentId: string;
-    projectId: string;
-  };
-
-  export type Query = {
-    __typename?: "Query";
-
-    JiraComponentMap?: Maybe<(Maybe<JiraComponentMap>)[]>;
-  };
-
-  export type JiraComponentMap = {
-    __typename?: "JiraComponentMap";
-
-    channel?: Maybe<string>;
-
-    projectId?: Maybe<string>;
-
-    componentId?: Maybe<string>;
-
-    active?: Maybe<boolean>;
-  };
-}
-
-export namespace GetChannelByProject {
-  export type Variables = {
-    projectid: (Maybe<string>)[];
-  };
-
-  export type Query = {
-    __typename?: "Query";
-
-    JiraProjectMap?: Maybe<(Maybe<JiraProjectMap>)[]>;
-  };
-
-  export type JiraProjectMap = {
-    __typename?: "JiraProjectMap";
-
-    channel?: Maybe<string>;
-
-    projectId?: Maybe<string>;
-
-    active?: Maybe<boolean>;
-  };
-}
-
 export namespace GetChannelByRepo {
   export type Variables = {
     name: string;
@@ -1097,44 +1072,6 @@ export namespace GetGoalByJiraIssueId {
   };
 }
 
-export namespace GetJiraChannelPrefs {
-  export type Variables = {
-    channel: string[];
-  };
-
-  export type Query = {
-    __typename?: "Query";
-
-    JiraChannelPrefs?: Maybe<(Maybe<JiraChannelPrefs>)[]>;
-  };
-
-  export type JiraChannelPrefs = {
-    __typename?: "JiraChannelPrefs";
-
-    channel?: Maybe<string>;
-
-    issueState?: Maybe<boolean>;
-
-    issueStatus?: Maybe<boolean>;
-
-    issueComment?: Maybe<boolean>;
-
-    issueCreated?: Maybe<boolean>;
-
-    issueDeleted?: Maybe<boolean>;
-
-    bug?: Maybe<boolean>;
-
-    task?: Maybe<boolean>;
-
-    epic?: Maybe<boolean>;
-
-    story?: Maybe<boolean>;
-
-    subtask?: Maybe<boolean>;
-  };
-}
-
 export namespace GetJiraIssueByKey {
   export type Variables = {
     key: string;
@@ -1158,10 +1095,6 @@ export namespace GetJiraIssueByKey {
     issue?: Issue;
 
     user?: Maybe<User>;
-
-    changelog?: Maybe<Changelog>;
-
-    comment?: Maybe<Comment>;
   };
 
   export type Issue = {
@@ -1172,180 +1105,6 @@ export namespace GetJiraIssueByKey {
     self?: string;
 
     key?: string;
-
-    fields?: Fields;
-  };
-
-  export type Fields = {
-    __typename?: "JiraIssueFields";
-
-    aggregatetimespent?: Maybe<number>;
-
-    assignee?: Maybe<Assignee>;
-
-    components?: Maybe<(Maybe<Components>)[]>;
-
-    created?: string;
-
-    creator?: Creator;
-
-    issueType?: IssueType;
-
-    labels?: Maybe<(Maybe<string>)[]>;
-
-    parent?: Maybe<Parent>;
-
-    priority?: _Priority;
-
-    project?: Maybe<Project>;
-
-    reporter?: Reporter;
-
-    status?: _Status;
-
-    timeoriginalestimate?: Maybe<number>;
-
-    timespent?: Maybe<number>;
-
-    updated?: string;
-  };
-
-  export type Assignee = {
-    __typename?: "JiraIssueUser";
-
-    key?: string;
-
-    self?: string;
-  };
-
-  export type Components = {
-    __typename?: "JiraIssueComponent";
-
-    id?: string;
-
-    self?: string;
-  };
-
-  export type Creator = {
-    __typename?: "JiraIssueUser";
-
-    key?: string;
-
-    self?: string;
-  };
-
-  export type IssueType = {
-    __typename?: "JiraIssueType";
-
-    subtask?: boolean;
-  };
-
-  export type Parent = {
-    __typename?: "JiraIssueParent";
-
-    self?: Maybe<string>;
-
-    id?: Maybe<string>;
-
-    key?: Maybe<string>;
-
-    fields?: Maybe<_Fields>;
-  };
-
-  export type _Fields = {
-    __typename?: "JiraSubTaskFields";
-
-    issueType?: _IssueType;
-
-    priority?: Priority;
-
-    status?: Status;
-  };
-
-  export type _IssueType = {
-    __typename?: "JiraIssueType";
-
-    subtask?: boolean;
-  };
-
-  export type Priority = {
-    __typename?: "JiraIssuePriority";
-
-    self?: string;
-
-    name?: string;
-
-    id?: string;
-  };
-
-  export type Status = {
-    __typename?: "JiraIssueStatus";
-
-    self?: string;
-
-    statusCategory?: StatusCategory;
-
-    id?: string;
-  };
-
-  export type StatusCategory = {
-    __typename?: "JiraIssueStatusCategory";
-
-    id?: number;
-  };
-
-  export type _Priority = {
-    __typename?: "JiraIssuePriority";
-
-    id?: string;
-
-    name?: string;
-
-    self?: string;
-  };
-
-  export type Project = {
-    __typename?: "JiraProject";
-
-    id?: string;
-
-    key?: string;
-
-    projectTypeKey?: string;
-
-    self?: string;
-  };
-
-  export type Reporter = {
-    __typename?: "JiraIssueUser";
-
-    key?: string;
-
-    self?: string;
-  };
-
-  export type _Status = {
-    __typename?: "JiraIssueStatus";
-
-    statusCategory?: _StatusCategory;
-
-    self?: string;
-
-    id?: string;
-  };
-
-  export type _StatusCategory = {
-    __typename?: "JiraIssueStatusCategory";
-
-    colorName?: string;
-
-    id?: number;
-
-    key?: string;
-
-    name?: string;
-
-    self?: string;
   };
 
   export type User = {
@@ -1354,62 +1113,6 @@ export namespace GetJiraIssueByKey {
     key?: string;
 
     self?: string;
-  };
-
-  export type Changelog = {
-    __typename?: "JiraIssueChangelog";
-
-    id?: string;
-
-    items?: (Maybe<Items>)[];
-  };
-
-  export type Items = {
-    __typename?: "JiraIssueChangelogItem";
-
-    field?: string;
-
-    fieldtype?: string;
-
-    fromString?: string;
-
-    from?: string;
-
-    toString?: string;
-
-    to?: string;
-  };
-
-  export type Comment = {
-    __typename?: "JiraIssueComment";
-
-    author?: Author;
-
-    created?: string;
-
-    id?: string;
-
-    self?: string;
-
-    updateAuthor?: Maybe<UpdateAuthor>;
-
-    updated?: Maybe<string>;
-  };
-
-  export type Author = {
-    __typename?: "JiraIssueUser";
-
-    self?: string;
-
-    key?: string;
-  };
-
-  export type UpdateAuthor = {
-    __typename?: "JiraIssueUser";
-
-    self?: string;
-
-    key?: string;
   };
 }
 
@@ -1519,10 +1222,6 @@ export namespace OnJiraIssueEvent {
     issue?: Issue;
 
     user?: Maybe<User>;
-
-    changelog?: Maybe<Changelog>;
-
-    comment?: Maybe<Comment>;
   };
 
   export type Issue = {
@@ -1533,203 +1232,9 @@ export namespace OnJiraIssueEvent {
     self?: string;
 
     key?: string;
-
-    fields?: Fields;
-  };
-
-  export type Fields = {
-    __typename?: "JiraIssueFields";
-
-    issueType?: IssueType;
-
-    parent?: Maybe<Parent>;
-
-    components?: Maybe<(Maybe<Components>)[]>;
-
-    timespent?: Maybe<number>;
-
-    timeoriginalestimate?: Maybe<number>;
-
-    project?: Maybe<Project>;
-
-    aggregatetimespent?: Maybe<number>;
-
-    creator?: Creator;
-
-    reporter?: Reporter;
-
-    priority?: _Priority;
-
-    labels?: Maybe<(Maybe<string>)[]>;
-
-    assignee?: Maybe<Assignee>;
-
-    status?: _Status;
-
-    created?: string;
-
-    updated?: string;
-  };
-
-  export type IssueType = {
-    __typename?: "JiraIssueType";
-
-    subtask?: boolean;
-  };
-
-  export type Parent = {
-    __typename?: "JiraIssueParent";
-
-    id?: Maybe<string>;
-
-    key?: Maybe<string>;
-
-    self?: Maybe<string>;
-
-    fields?: Maybe<_Fields>;
-  };
-
-  export type _Fields = {
-    __typename?: "JiraSubTaskFields";
-
-    status?: Status;
-
-    priority?: Priority;
-
-    issueType?: _IssueType;
-  };
-
-  export type Status = {
-    __typename?: "JiraIssueStatus";
-
-    self?: string;
-  };
-
-  export type Priority = {
-    __typename?: "JiraIssuePriority";
-
-    self?: string;
-  };
-
-  export type _IssueType = {
-    __typename?: "JiraIssueType";
-
-    subtask?: boolean;
-  };
-
-  export type Components = {
-    __typename?: "JiraIssueComponent";
-
-    self?: string;
-
-    id?: string;
-  };
-
-  export type Project = {
-    __typename?: "JiraProject";
-
-    self?: string;
-
-    id?: string;
-
-    key?: string;
-
-    projectTypeKey?: string;
-  };
-
-  export type Creator = {
-    __typename?: "JiraIssueUser";
-
-    self?: string;
-
-    key?: string;
-  };
-
-  export type Reporter = {
-    __typename?: "JiraIssueUser";
-
-    self?: string;
-
-    key?: string;
-  };
-
-  export type _Priority = {
-    __typename?: "JiraIssuePriority";
-
-    self?: string;
-  };
-
-  export type Assignee = {
-    __typename?: "JiraIssueUser";
-
-    self?: string;
-
-    key?: string;
-  };
-
-  export type _Status = {
-    __typename?: "JiraIssueStatus";
-
-    self?: string;
   };
 
   export type User = {
-    __typename?: "JiraIssueUser";
-
-    self?: string;
-
-    key?: string;
-  };
-
-  export type Changelog = {
-    __typename?: "JiraIssueChangelog";
-
-    id?: string;
-
-    items?: (Maybe<Items>)[];
-  };
-
-  export type Items = {
-    __typename?: "JiraIssueChangelogItem";
-
-    field?: string;
-
-    fieldtype?: string;
-
-    from?: string;
-
-    fromString?: string;
-
-    to?: string;
-
-    toString?: string;
-  };
-
-  export type Comment = {
-    __typename?: "JiraIssueComment";
-
-    self?: string;
-
-    id?: string;
-
-    author?: Author;
-
-    updateAuthor?: Maybe<UpdateAuthor>;
-
-    created?: string;
-
-    updated?: Maybe<string>;
-  };
-
-  export type Author = {
-    __typename?: "JiraIssueUser";
-
-    self?: string;
-
-    key?: string;
-  };
-
-  export type UpdateAuthor = {
     __typename?: "JiraIssueUser";
 
     self?: string;

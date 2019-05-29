@@ -80,10 +80,7 @@ export function mapComponentToChannel(ci: CommandListenerInvocation<MapComponent
                     channel: ci.parameters.slackChannelName,
                     projectId: project.project,
                     componentId: component.component,
-                    active: true,
                 },
-               "JiraComponentMap",
-               `${ci.context.workspaceId}-GetAllComponentMappingsforChannel-${objectHash({channel: [ci.parameters.slackChannelName]})}`,
             );
 
             const componentDetails =

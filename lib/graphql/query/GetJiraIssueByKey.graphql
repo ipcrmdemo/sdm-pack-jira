@@ -7,106 +7,10 @@ query GetJiraIssueByKey($key: String!){
             id
             self
             key
-            fields {
-                aggregatetimespent
-                assignee {
-                    key
-                    self
-                }
-                components {
-                    id
-                    self
-                }
-                created
-                creator {
-                    key
-                    self
-                }
-                issueType {
-                    subtask
-                }
-                labels
-                parent {
-                    self
-                    id
-                    key
-                    fields {
-                        issueType {
-                            subtask
-                        }
-                        priority {
-                            self
-                            name
-                            id
-                        }
-                        status {
-                            self
-                            statusCategory {
-                                id
-                            }
-                            id
-                        }
-                    }
-                }
-                priority {
-                    id
-                    name
-                    self
-                }
-                project {
-                    id
-                    key
-                    projectTypeKey
-                    self
-                }
-                reporter {
-                    key
-                    self
-                }
-                status {
-                    statusCategory {
-                        colorName
-                        id
-                        key
-                        name
-                        self
-                    }
-                    self
-                    id
-                }
-                timeoriginalestimate
-                timespent
-                updated
-            }
         }
         user {
             key
             self
-        }
-        changelog {
-            id
-            items {
-                field
-                fieldtype
-                fromString
-                from
-                toString
-                to
-            }
-        }
-        comment {
-            author {
-                self
-                key
-            }
-            created
-            id
-            self
-            updateAuthor {
-                self
-                key
-            }
-            updated
         }
     }
 }

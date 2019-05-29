@@ -12,7 +12,7 @@ import { CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMess
 import {SlackMessage} from "@atomist/slack-messages";
 import * as objectHash from "object-hash";
 import * as types from "../../typings/types";
-import {cachedJiraMappingLookup} from "../cache/lookup";
+import {cachedJiraMappingLookup, cachedJiraPreferenceLookup, JiraPreference} from "../cache/lookup";
 import {purgeCacheEntry} from "../cache/manage";
 
 @Parameters()
@@ -121,11 +121,10 @@ export async function setJiraChannelPrefs(
         story: ci.parameters.story,
         subtask: ci.parameters.subtask,
     };
-    await ci.context.messageClient.send(payload, addressEvent("JiraChannelPrefs"));
 
-    await purgeCacheEntry(
-        `${ci.context.workspaceId}-GetJiraChannelPrefs-${objectHash({channel: [ci.parameters.slackChannelName]})}`);
-
+    const key = `${ci.context.workspaceId}-preferences-${ci.parameters.slackChannelName}`;
+    await ci.preferences.put(key, payload, {scope: "JIRAPreferences"});
+    await purgeCacheEntry(key);
     await ci.addressChannels(slackSuccessMessage(
         `Updated JIRA notification preferences for channel ${ci.parameters.slackChannelName}`,
         `Successfully updated channel notification preferences.`,
@@ -142,8 +141,8 @@ export const setJiraChannelPrefsReg: CommandHandlerRegistration<JiraChannelPrefs
     listener: setJiraChannelPrefs,
 };
 
-export function mungeJiraPrefs(prefs: types.GetJiraChannelPrefs.JiraChannelPrefs): types.GetJiraChannelPrefs.JiraChannelPrefs {
-    const a = (b: null | boolean) => b !== null ? b : true;
+export function mungeJiraPrefs(prefs: JiraPreference): JiraPreference {
+    const a = (b: undefined | boolean) => b !== undefined ? b : true;
     return {
         channel: prefs.channel,
         issueComment: a(prefs.issueComment),
@@ -162,14 +161,12 @@ export function mungeJiraPrefs(prefs: types.GetJiraChannelPrefs.JiraChannelPrefs
 export const queryJiraChannelPrefs = async (
     ctx: HandlerContext,
     channel: string,
-): Promise<types.GetJiraChannelPrefs.JiraChannelPrefs> => {
-    const result =
-        await cachedJiraMappingLookup<types.GetJiraChannelPrefs.Query, types.GetJiraChannelPrefs.Variables>(
-            ctx, "GetJiraChannelPrefs", {channel: [channel]});
+): Promise<JiraPreference> => {
+    const result = await cachedJiraPreferenceLookup(ctx, channel);
 
-    let setPrefs: types.GetJiraChannelPrefs.JiraChannelPrefs;
-    if (result.JiraChannelPrefs.length > 0) {
-        setPrefs = mungeJiraPrefs(result.JiraChannelPrefs[0]);
+    let setPrefs: JiraPreference;
+    if (result) {
+        setPrefs = mungeJiraPrefs(result);
     } else {
         setPrefs = {
             channel,

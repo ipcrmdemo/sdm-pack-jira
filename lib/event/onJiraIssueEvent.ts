@@ -25,7 +25,7 @@ function onJiraIssueEventHandler():
          * to make sure we retrieve the latest data per event.  Once we've retrieved the data for THIS event
          * we'll use the cached version
          */
-        await purgeCacheEntry(e.data.JiraIssue[0].issue.self);
+        await purgeCacheEntry(e.data.JiraIssue[0].issue.self + "?expand=changelog");
 
         /**
          * Let's go collect all events for this Issue key and resubmit them to be processed

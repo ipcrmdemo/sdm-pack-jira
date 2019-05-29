@@ -7,90 +7,10 @@ subscription OnJiraIssueEvent {
             id
             self
             key
-            fields {
-                issueType {
-                    subtask
-                }
-                parent {
-                    id
-                    key
-                    self
-                    fields {
-                        status {
-                            self
-                        }
-                        priority {
-                            self
-                        }
-                        issueType {
-                           subtask 
-                        }
-                    }
-                }
-                components {
-                    self
-                    id
-                }
-                timespent
-                timeoriginalestimate
-                project {
-                    self
-                    id
-                    key
-                    projectTypeKey
-                }
-                aggregatetimespent
-                creator {
-                    self
-                    key
-                }
-                reporter {
-                    self
-                    key
-                }
-                priority {
-                    self
-                }
-                labels
-                assignee {
-                    self
-                    key
-                }
-                status {
-                    self
-                }
-                created
-                updated
-            }
         }
         user {
             self
             key
-        }
-        changelog {
-            id
-            items {
-                field
-                fieldtype
-                from
-                fromString
-                to
-                toString
-            }
-        }
-        comment {
-            self
-            id
-            author {
-                self
-                key
-            }
-            updateAuthor {
-                self
-                key
-            }
-            created
-            updated
         }
     }
 }

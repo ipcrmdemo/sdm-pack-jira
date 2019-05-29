@@ -1,7 +1,0 @@
- query GetAllProjectMappingsforChannel($channel: [String!]) {
-    JiraProjectMap(channel: $channel, active: [true]){
-        channel
-        projectId
-        active
-    }
- } 

@@ -40,9 +40,6 @@ export const jiraSupport = (
         ],
         configure: sdm => {
             sdm.addIngester(GraphQL.ingester({ name: "jiraIssue" }));
-            sdm.addIngester(GraphQL.ingester({ name: "jiraComponentMap" }));
-            sdm.addIngester(GraphQL.ingester({ name: "jiraProjectMap" }));
-            sdm.addIngester(GraphQL.ingester({ name: "jiraChannelPrefs" }));
             sdm.addEvent(onJiraIssueEvent);
             sdm.addEvent(onJiraIssueEventCache);
             sdm.addCommand(getCurrentChannelMappingsReg);

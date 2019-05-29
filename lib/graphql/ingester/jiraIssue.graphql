@@ -4,94 +4,13 @@ type JiraIssue @rootType {
     issue_event_type_name: String!
     issue(key: String): JiraIssueDetail!
     user: JiraIssueUser
-    changelog: JiraIssueChangelog
-    comment: JiraIssueComment
 }
 type JiraIssueDetail {
     id: String!
     self: String!
     key: String!
-    fields: JiraIssueFields!
-}
-type JiraIssueChangelog {
-    id: String!
-    items: [JiraIssueChangelogItem]!
-}
-type JiraIssueChangelogItem {
-    field: String!
-    fieldtype: String!
-    from: String!
-    fromString: String!
-    to: String!
-    toString: String!
-}
-type JiraIssueComment {
-    self: String!
-    id: String!
-    author: JiraIssueUser!
-    updateAuthor: JiraIssueUser
-    created: String!
-    updated: String
 }
 type JiraIssueUser {
     self: String!
     key: String!
-}
-type JiraIssueFields {
-    issueType: JiraIssueType!
-    parent: JiraIssueParent
-    components: [JiraIssueComponent]
-    timespent: Int
-    timeoriginalestimate: Int
-    project: JiraProject
-    aggregatetimespent: Int
-    creator: JiraIssueUser!
-    reporter: JiraIssueUser!
-    priority: JiraIssuePriority!
-    labels: [String]
-    assignee: JiraIssueUser
-    status: JiraIssueStatus!
-    created: String!
-    updated: String!
-}
-type JiraProject {
-    self: String!
-    id: String!
-    key: String!
-    projectTypeKey: String!
-}
-type JiraIssueType {
-    subtask: Boolean!
-}
-type JiraIssueComponent {
-    self: String!
-    id: String!
-}
-type JiraIssueParent {
-    id: String
-    key: String
-    self: String
-    fields: JiraSubTaskFields
-}
-type JiraSubTaskFields {
-    status: JiraIssueStatus!
-    priority: JiraIssuePriority!
-    issueType: JiraIssueType!
-}
-type JiraIssueStatus {
-    self: String!
-    id: String!
-    statusCategory: JiraIssueStatusCategory!
-}
-type JiraIssueStatusCategory {
-    self: String!
-    id: Int!
-    key: String!
-    colorName: String!
-    name: String!
-}
-type JiraIssuePriority {
-    self: String!
-    name: String!
-    id: String!
 }

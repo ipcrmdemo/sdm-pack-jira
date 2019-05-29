@@ -11,6 +11,7 @@ import * as slack from "@atomist/slack-messages";
 import _ = require("lodash");
 import {JiraConfig} from "../jira";
 import * as types from "../typings/types";
+import {JiraPreference} from "./cache/lookup";
 import {jiraDetermineNotifyChannels, jiraParseChannels} from "./helpers/channelLookup";
 import {
     buildJiraFooter,
@@ -42,7 +43,7 @@ export const routeEvent = async (
     const message: slack.Attachment[] = [];
 
     const jiraConfig = configurationValue<JiraConfig>("sdm.jira");
-    let issueDetail: jiraTypes.Issue;
+    const issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self + "?expand=changelog", true, 30);
     let issueTransitions: jiraTypes.JiraIssueTransitions;
     let msgOptions: MessageOptions;
 
@@ -51,7 +52,6 @@ export const routeEvent = async (
     switch (event.webhookEvent) {
         case("comment_created"):
         case("jira:issue_updated"): {
-            issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self, true, 30);
             issueTransitions = await getJiraDetails<jiraTypes.JiraIssueTransitions>(event.issue.self + "/transitions", true, 5);
             description = `JIRA Issue updated ` + slack.url(
                 `${jiraConfig.url}/browse/${event.issue.key}`,
@@ -65,7 +65,6 @@ export const routeEvent = async (
         }
 
         case("jira:issue_created"): {
-            issueDetail = await getJiraDetails<jiraTypes.Issue>(event.issue.self, true, 30);
             issueTransitions = await getJiraDetails<jiraTypes.JiraIssueTransitions>(event.issue.self + "/transitions", true, 5);
             description = `JIRA Issue created ` + slack.url(
                 `${jiraConfig.url}/browse/${event.issue.key}`,
@@ -89,7 +88,7 @@ export const routeEvent = async (
     }
 
     // Get all the channels to notify
-    const channels: types.GetJiraChannelPrefs.JiraChannelPrefs[] = [];
+    const channels: JiraPreference[] = [];
     const newChannels = await jiraDetermineNotifyChannels(ctx, event);
 
     // Apply channel preferences to filter out who to alert
@@ -125,10 +124,10 @@ export const routeEvent = async (
     }
 
     // Extract message details
-    message.push(...(await prepareNewIssueMessage(event)));
+    message.push(...(await prepareNewIssueMessage(event.webhookEvent, issueDetail)));
     message.push(...(await prepareIssueDeletedMessage(event)));
-    message.push(...(await prepareStateChangeMessage(event)));
-    message.push(...(await prepareIssueCommentedMessage(event)));
+    message.push(...(await prepareStateChangeMessage(event.webhookEvent, issueDetail)));
+    message.push(...(await prepareIssueCommentedMessage(event.webhookEvent, issueDetail)));
 
     // Create menu spec for issue transitions
     const transitionOptions: MenuSpecification = {

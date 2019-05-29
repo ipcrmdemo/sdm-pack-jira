@@ -234,6 +234,7 @@ export interface Issue {
     self: string;
     key: string;
     fields: Fields;
+    changelog: JiraChangelog;
 }
 
 export interface Component {
@@ -252,11 +253,6 @@ export interface ChangelogItem {
     toString: string;
 }
 
-export interface JiraChangelog {
-    id: string;
-    items: ChangelogItem[];
-}
-
 export interface JiraIssueTransitions {
     transitions: JiraIssueTransition[];
 }
@@ -264,4 +260,18 @@ export interface JiraIssueTransition {
    id: string;
    name: string;
    self: string;
+}
+
+export interface JiraChangelog {
+    startAt: number;
+    maxresults: number;
+    total: number;
+    histories: JiraChangelogRecord[];
+}
+
+export interface JiraChangelogRecord {
+    id: string;
+    author: Author;
+    created: string;
+    items: ChangelogItem[];
 }

@@ -9,8 +9,10 @@ import {
     Parameters,
 } from "@atomist/automation-client";
 import {Option} from "@atomist/automation-client/lib/metadata/automationMetadata";
-import {CommandListenerInvocation, SdmContext} from "@atomist/sdm";
+import {CommandListenerInvocation, PreferenceStoreFactory, SdmContext} from "@atomist/sdm";
+import * as objectHash from "object-hash";
 import {getJiraAuth, JiraConfig} from "../../jira";
+import {JiraPreference} from "../cache/lookup";
 import {purgeCacheEntry} from "../cache/manage";
 import {getJiraDetails} from "../jiraDataLookup";
 import {Issue, Project} from "../jiraDefs";
@@ -24,17 +26,10 @@ export class JiraHandlerParam {
     public slackChannel: string;
 }
 
-interface ProjectMapPayload {
-    channel: string;
+export interface JiraMapping {
     projectId: string;
-    active: boolean;
-}
-
-interface ComponentMapPayload {
     channel: string;
-    projectId: string;
-    componentId: string;
-    active: boolean;
+    componentId?: string;
 }
 
 export interface JiraItemCreated {
@@ -43,18 +38,39 @@ export interface JiraItemCreated {
     self: string;
 }
 
+export function buildJiraHashKey(workspaceId: string, payload: JiraMapping): string {
+    const hash = `${workspaceId}` +
+        `${"-" + payload.componentId || ""}` +
+        `${"-" + payload.projectId || ""}`   +
+        `${"-" + payload.channel || ""}`     +
+        `-${objectHash(payload)}`;
+    logger.debug(`JIRA buildJiraHashKey: generated hashkey [${hash}] for payload ${JSON.stringify(payload)}`);
+    return hash;
+}
+
 export function submitMappingPayload(
     ci: CommandListenerInvocation<JiraHandlerParam>,
-    payload: ProjectMapPayload | ComponentMapPayload,
-    eventRootType: string,
-    cacheEntry?: string,
+    payload: JiraMapping,
+    active: boolean = true,
 ): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
         try {
-            await ci.context.messageClient.send(payload, addressEvent(eventRootType));
-            if (cacheEntry) {
-                await purgeCacheEntry(cacheEntry);
+            const prefStore = await configurationValue<PreferenceStoreFactory>("sdm.preferenceStoreFactory")(ci.context);
+            if (active) {
+                await prefStore.put<JiraMapping>(
+                    buildJiraHashKey(ci.context.workspaceId, payload),
+                    payload,
+                    {scope: "JIRAMappings"},
+                );
+            } else {
+                await prefStore.delete(
+                    buildJiraHashKey(ci.context.workspaceId, payload),
+                    {scope: "JIRAMappings"},
+                );
             }
+            // Purge cache entry for this payload as well as for channel lookups (which just use the channel in the payload)
+            await purgeCacheEntry(buildJiraHashKey(ci.context.workspaceId, payload));
+            await purgeCacheEntry(buildJiraHashKey(ci.context.workspaceId, {channel: payload.channel, projectId: undefined, componentId: undefined}));
             resolve();
         } catch (e) {
             logger.error(`JIRA submitMappingPayload: Error found => ${e}`);

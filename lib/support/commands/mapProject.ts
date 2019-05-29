@@ -57,10 +57,7 @@ function mapProjectToChannel(ci: CommandListenerInvocation<MapProjectToChannelPa
                 {
                     channel: ci.parameters.slackChannelName,
                     projectId: project.project,
-                    active: true,
                 },
-                "JiraProjectMap",
-                `${ci.context.workspaceId}-GetAllProjectMappingsforChannel-${objectHash({channel: [ci.parameters.slackChannelName]})}`,
             );
 
             const projectDetails =
