@@ -5,6 +5,17 @@ type JiraIssue @rootType {
     issue(key: String): JiraIssueDetail!
     user: JiraIssueUser
     changelog: JiraIssueChangelog
+    comment: JiraIssueComment
+}
+type JiraIssueComment {
+    self: String!
+    id: String!
+    created: String!
+    updated: String
+}
+type JiraIssueUser {
+    self: String!
+    key: String!
 }
 type JiraIssueDetail {
     id: String!

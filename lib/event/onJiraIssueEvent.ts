@@ -37,14 +37,17 @@ function onJiraIssueEventHandler():
             options: QueryNoCacheOptions,
         });
 
+        // Send historical events
         logger.debug(`JIRA onJiraIssueEventHandler: Found ${events.JiraIssue.length} events`);
         const routeEm = async () => {
             for (const event of events.JiraIssue) {
-                await routeEvent(ctx, event, event.timestamp === e.data.JiraIssue[0].timestamp);
+                await routeEvent(ctx, event, false);
             }
         };
-
         await routeEm();
+
+        // Send this event
+        await routeEvent(ctx, e.data.JiraIssue[0], true);
         return Success;
     };
 }

@@ -23,5 +23,11 @@ subscription OnJiraIssueEvent {
                 toString
             }
         }
+        comment {
+            self
+            id
+            created
+            updated
+        }
     }
 }

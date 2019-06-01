@@ -92,10 +92,7 @@ export const routeEvent = async (
     const newChannels = await jiraDetermineNotifyChannels(ctx, event);
 
     // Apply channel preferences to filter out who to alert
-    if (
-        event.issue_event_type_name !== null && event.issue_event_type_name.match(/^(issue_comment_edited|issue_commented)$/) ||
-        event.webhookEvent === "comment_created"
-    ) {
+    if ( event.comment !== null ) {
         channels.push(...(await jiraParseChannels(newChannels, event, `issueComment`)));
     }
 
@@ -127,7 +124,7 @@ export const routeEvent = async (
     message.push(...(await prepareNewIssueMessage(event.webhookEvent, issueDetail)));
     message.push(...(await prepareIssueDeletedMessage(event)));
     message.push(...(await prepareStateChangeMessage(event)));
-    message.push(...(await prepareIssueCommentedMessage(event.webhookEvent, issueDetail)));
+    message.push(...(await prepareIssueCommentedMessage(event, issueDetail)));
 
     // Create menu spec for issue transitions
     const transitionOptions: MenuSpecification = {

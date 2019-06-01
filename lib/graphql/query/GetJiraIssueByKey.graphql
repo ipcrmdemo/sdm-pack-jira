@@ -23,5 +23,11 @@ query GetJiraIssueByKey($key: String!){
                 toString
             }
         }
+        comment {
+            self
+            id
+            created
+            updated
+        }
     }
 }

@@ -8,6 +8,11 @@ import * as types from "../typings/types";
 export const onJiraIssueEventApprovalHandler = (goal: Goal): OnEvent<types.OnJiraIssueEvent.Subscription> => {
     return async (e, ctx) => {
         const event =  e.data.JiraIssue[0];
+
+        // Some events are sent with null values - throw those out
+        if (event.issue === null || event.issue.self === null) {
+            return Success;
+        }
         const issue = await getJiraDetails<jiraTypes.Issue>(event.issue.self + "?expand=changelog", true, 30);
 
         // Validate new state is approved (only process if this issue is a state change)

@@ -11,17 +11,19 @@ export const upperCaseFirstLetter = (word: string): string => {
 };
 
 export const prepareIssueCommentedMessage = async (
-    issueEventTypeName: string,
+    event: OnJiraIssueEvent.JiraIssue,
     issueDetail: jiraTypes.Issue,
 ): Promise<slack.Attachment[]> => {
-    if ( issueDetail.fields.comment.comments.length > 0) {
-        const comment = await getJiraDetails<jiraTypes.Comment>(
-            issueDetail.fields.comment.comments.pop().self,
-           true,
-           30,
-        );
-
-        const title = issueEventTypeName === "issue_comment_edited" ? `New Comment (edited)` : `New Comment`;
+    if (
+        event.issue &&
+        event.issue.hasOwnProperty("self") &&
+        event.issue.self &&
+        event.hasOwnProperty("comment") &&
+        event.comment !== null &&
+        event.comment.self !== null
+    ) {
+        const comment = await getJiraDetails<jiraTypes.Comment>(event.comment.self, true, 30);
+        const title = event.issue_event_type_name === "issue_comment_edited" ? `New Comment (edited)` : `New Comment`;
         return [
             {
                 pretext: slack.bold(title),

@@ -1106,6 +1106,8 @@ export namespace GetJiraIssueByKey {
     user?: Maybe<User>;
 
     changelog?: Maybe<Changelog>;
+
+    comment?: Maybe<Comment>;
   };
 
   export type Issue = {
@@ -1148,6 +1150,18 @@ export namespace GetJiraIssueByKey {
     to?: string;
 
     toString?: string;
+  };
+
+  export type Comment = {
+    __typename?: "JiraIssueComment";
+
+    self?: string;
+
+    id?: string;
+
+    created?: string;
+
+    updated?: Maybe<string>;
   };
 }
 
@@ -1259,6 +1273,8 @@ export namespace OnJiraIssueEvent {
     user?: Maybe<User>;
 
     changelog?: Maybe<Changelog>;
+
+    comment?: Maybe<Comment>;
   };
 
   export type Issue = {
@@ -1301,5 +1317,17 @@ export namespace OnJiraIssueEvent {
     to?: string;
 
     toString?: string;
+  };
+
+  export type Comment = {
+    __typename?: "JiraIssueComment";
+
+    self?: string;
+
+    id?: string;
+
+    created?: string;
+
+    updated?: Maybe<string>;
   };
 }
