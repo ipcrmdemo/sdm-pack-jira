@@ -39,7 +39,7 @@ export async function cachedJiraPreferenceLookup(
             resolve(result);
         } else {
             logger.debug(`JIRA cachedJiraPreferenceLookup => ${hashKey}: Cache ${enable ? "miss" : "disabled"}, querying...`);
-            const prefStore = await configurationValue<PreferenceStoreFactory>("sdm.preferenceStoreFactory")(ctx);
+            const prefStore = configurationValue<PreferenceStoreFactory>("sdm.preferenceStoreFactory")(ctx);
             const preferences = await prefStore.get<JiraPreference>(hashKey, {scope: "JIRAPreferences"});
             if (enable) {
                 jiraCache.set(hashKey, preferences);
@@ -68,7 +68,7 @@ export async function cachedJiraMappingLookup(
             resolve(result);
         } else {
             logger.debug(`JIRA cachedJiraMappingLookup => ${hashKey}: Cache ${enable ? "miss" : "disabled"}, querying...`);
-            const mappings = await configurationValue<PreferenceStoreFactory>("sdm.preferenceStoreFactory")(ctx);
+            const mappings = configurationValue<PreferenceStoreFactory>("sdm.preferenceStoreFactory")(ctx);
             const allMaps = await mappings.list<JiraMapping>("JIRAMappings");
 
             const filteredMaps = allMaps.filter(m =>

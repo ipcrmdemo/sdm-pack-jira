@@ -12,5 +12,16 @@ query GetJiraIssueByKey($key: String!){
             key
             self
         }
+        changelog {
+            id
+            items {
+                field
+                fieldtype
+                from
+                fromString
+                to
+                toString
+            }
+        }
     }
 }

@@ -126,7 +126,7 @@ export const routeEvent = async (
     // Extract message details
     message.push(...(await prepareNewIssueMessage(event.webhookEvent, issueDetail)));
     message.push(...(await prepareIssueDeletedMessage(event)));
-    message.push(...(await prepareStateChangeMessage(event.webhookEvent, issueDetail)));
+    message.push(...(await prepareStateChangeMessage(event)));
     message.push(...(await prepareIssueCommentedMessage(event.webhookEvent, issueDetail)));
 
     // Create menu spec for issue transitions

@@ -12,5 +12,16 @@ subscription OnJiraIssueEvent {
             self
             key
         }
+        changelog {
+            id
+            items {
+                field
+                fieldtype
+                from
+                fromString
+                to
+                toString
+            }
+        }
     }
 }

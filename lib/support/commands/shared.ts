@@ -55,7 +55,7 @@ export function submitMappingPayload(
 ): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
         try {
-            const prefStore = await configurationValue<PreferenceStoreFactory>("sdm.preferenceStoreFactory")(ci.context);
+            const prefStore = configurationValue<PreferenceStoreFactory>("sdm.preferenceStoreFactory")(ci.context);
             if (active) {
                 await prefStore.put<JiraMapping>(
                     buildJiraHashKey(ci.context.workspaceId, payload),

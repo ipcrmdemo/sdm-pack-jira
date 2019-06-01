@@ -2,7 +2,7 @@ import {configurationValue, logger} from "@atomist/automation-client";
 import * as slack from "@atomist/slack-messages";
 import jira2slack = require("jira2slack");
 import { JiraConfig } from "../../jira";
-import * as types from "../../typings/types";
+import {OnJiraIssueEvent} from "../../typings/types";
 import { getJiraDetails } from "../jiraDataLookup";
 import * as jiraTypes from "../jiraDefs";
 
@@ -38,16 +38,15 @@ export const prepareIssueCommentedMessage = async (
 };
 
 export const prepareStateChangeMessage = async (
-    webHookEvent: string,
-    issueDetail: jiraTypes.Issue,
+    event: OnJiraIssueEvent.JiraIssue,
 ): Promise<slack.Attachment[]> => {
-    if (issueDetail.changelog !== undefined &&
-        issueDetail.changelog.hasOwnProperty("items") &&
-        issueDetail.changelog.histories.slice(-1)[0].items.length > 0 &&
-        webHookEvent !== "jira:issue_created"
+    if (
+        event.hasOwnProperty("changelog") &&
+        event.changelog !== null &&
+        event.webhookEvent !== "jira:issue_created"
     ) {
         const fields: slack.Field[] = [];
-        issueDetail.changelog.histories.slice(-1)[0].items.forEach(c => {
+        event.changelog.items.forEach(c => {
             if (c.field === "description") {
                 fields.push(
                     {
@@ -82,7 +81,7 @@ export const prepareStateChangeMessage = async (
         });
 
         return [{
-            fallback: `New state change on issue ${issueDetail.key}`,
+            fallback: `New state change on issue ${event.issue.key}`,
             fields,
         }];
     } else {
@@ -91,7 +90,7 @@ export const prepareStateChangeMessage = async (
 };
 
 export const prepareIssueDeletedMessage = async (
-    event: types.OnJiraIssueEvent.JiraIssue): Promise<slack.Attachment[]> => {
+    event: OnJiraIssueEvent.JiraIssue): Promise<slack.Attachment[]> => {
     if (event.webhookEvent === "jira:issue_deleted") {
         const userDetail = await getJiraDetails<jiraTypes.User>(event.user.self, true);
         return [

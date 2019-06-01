@@ -33,27 +33,27 @@ export async function getJiraDetails<T>(jiraSelfUrl: string, cache: boolean = fa
             resolve(cacheResult);
         } else {
             logger.debug(`JIRA getJiraDetails => ${jiraSelfUrl}: Cache ${useCache ? "miss" : "disabled"}, querying...`);
-            await httpClient.exchange(
-                jiraSelfUrl,
-                {
-                    method: HttpMethod.Get,
-                    headers: {
-                        Accept: "application/json",
-                        ...await getJiraAuth(ctx),
+            try {
+                const result = await httpClient.exchange<T>(
+                    jiraSelfUrl,
+                    {
+                        method: HttpMethod.Get,
+                        headers: {
+                            Accept: "application/json",
+                            ...await getJiraAuth(ctx),
+                        },
                     },
-                },
-            )
-                .then(result => {
-                    if (cache) {
-                        jiraCache.set(jiraSelfUrl, result.body, ttl);
-                    }
-                    resolve(result.body as T);
-                })
-                .catch(e => {
-                    const error = `JIRA getJiraDetails: Failed to retrieve details for ${jiraSelfUrl}, error thrown: ${e}`;
-                    logger.error(error);
-                    reject(error);
-                });
+                );
+
+                if (cache) {
+                    jiraCache.set(jiraSelfUrl, result.body, ttl);
+                }
+                resolve(result.body);
+            } catch (e) {
+                const error = `JIRA getJiraDetails: Failed to retrieve details for ${jiraSelfUrl}, error thrown: ${e}`;
+                logger.error(error);
+                reject(error);
+            }
         }
     });
 }

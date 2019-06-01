@@ -136,6 +136,15 @@ export interface ScmAuthorInput {
   /** The name of the author */
   name?: Maybe<string>;
 }
+/** For submitting new RepoFingerprints */
+export interface FingerprintInput {
+  /** Optional data, such as dependency version */
+  data?: Maybe<string>;
+  /** The unique name for this fingerprint, such as the name of a dependency */
+  name: string;
+  /** The hash of this fingerprint - forms ID of a SourceFingerprint */
+  sha: string;
+}
 /** Ordering Enum for Person */
 export enum _PersonOrdering {
   atmTeamId_asc = "atmTeamId_asc",
@@ -1095,6 +1104,8 @@ export namespace GetJiraIssueByKey {
     issue?: Issue;
 
     user?: Maybe<User>;
+
+    changelog?: Maybe<Changelog>;
   };
 
   export type Issue = {
@@ -1113,6 +1124,30 @@ export namespace GetJiraIssueByKey {
     key?: string;
 
     self?: string;
+  };
+
+  export type Changelog = {
+    __typename?: "JiraIssueChangelog";
+
+    id?: string;
+
+    items?: (Maybe<Items>)[];
+  };
+
+  export type Items = {
+    __typename?: "JiraIssueChangelogItem";
+
+    field?: string;
+
+    fieldtype?: string;
+
+    from?: string;
+
+    fromString?: string;
+
+    to?: string;
+
+    toString?: string;
   };
 }
 
@@ -1222,6 +1257,8 @@ export namespace OnJiraIssueEvent {
     issue?: Issue;
 
     user?: Maybe<User>;
+
+    changelog?: Maybe<Changelog>;
   };
 
   export type Issue = {
@@ -1240,5 +1277,29 @@ export namespace OnJiraIssueEvent {
     self?: string;
 
     key?: string;
+  };
+
+  export type Changelog = {
+    __typename?: "JiraIssueChangelog";
+
+    id?: string;
+
+    items?: (Maybe<Items>)[];
+  };
+
+  export type Items = {
+    __typename?: "JiraIssueChangelogItem";
+
+    field?: string;
+
+    fieldtype?: string;
+
+    from?: string;
+
+    fromString?: string;
+
+    to?: string;
+
+    toString?: string;
   };
 }

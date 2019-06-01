@@ -4,6 +4,7 @@ type JiraIssue @rootType {
     issue_event_type_name: String!
     issue(key: String): JiraIssueDetail!
     user: JiraIssueUser
+    changelog: JiraIssueChangelog
 }
 type JiraIssueDetail {
     id: String!
@@ -14,3 +15,17 @@ type JiraIssueUser {
     self: String!
     key: String!
 }
+type JiraIssueChangelog {
+    id: String!
+    items: [JiraIssueChangelogItem]!
+}
+type JiraIssueChangelogItem {
+    field: String!
+    fieldtype: String!
+    from: String!
+    fromString: String!
+    to: String!
+    toString: String!
+}
+
+
