@@ -141,6 +141,12 @@ export const setJiraChannelPrefsReg: CommandHandlerRegistration<JiraChannelPrefs
     listener: setJiraChannelPrefs,
 };
 
+/**
+ * For supplied preferences, if there is data missing automatically set that missing preference to true
+ *
+ * @param {JiraPreference} prefs
+ * @returns {JiraPreference}
+ */
 export function mungeJiraPrefs(prefs: JiraPreference): JiraPreference {
     const a = (b: undefined | boolean) => b !== undefined ? b : true;
     return {
@@ -173,8 +179,8 @@ export const queryJiraChannelPrefs = async (
             issueComment: true,
             issueDeleted: true,
             issueCreated: true,
-            issueState: true,
-            issueStatus: true,
+            issueState: false,
+            issueStatus: false,
             bug: true,
             task: true,
             epic: true,
