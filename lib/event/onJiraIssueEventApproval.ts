@@ -5,6 +5,13 @@ import { getJiraDetails } from "../support/jiraDataLookup";
 import * as jiraTypes from "../support/jiraDefs";
 import * as types from "../typings/types";
 
+/**
+ * This event handler is used in conjunction with the JiraApproval goal.  Given an issue created with the JiraApproval goal, this
+ * handler searches the description of the issue for specific markers and provided they are there and the issue state is approved,
+ * this event handler will set the approval goal to success.
+ *
+ * @param {Goal} goal
+ */
 export const onJiraIssueEventApprovalHandler = (goal: Goal): OnEvent<types.OnJiraIssueEvent.Subscription> => {
     return async (e, ctx) => {
         const event =  e.data.JiraIssue[0];

@@ -2,6 +2,12 @@ import {configurationValue, Failure, HandlerContext, HandlerResult, logger, NoPa
 import {CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage} from "@atomist/sdm";
 import * as NodeCache from "node-cache";
 
+// TODO: Turn cache into abstract class
+/**
+ * Flush Cache is used to complete delete the JIRA Cache.
+ *
+ * @returns {void}
+ */
 export async function flushCache(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         try {
@@ -16,6 +22,12 @@ export async function flushCache(): Promise<void> {
     });
 }
 
+/**
+ * PurgeCacheEntry is used to purge individual items from the JIRA cache.
+ *
+ * @param {string} key name to purge
+ * @returns {void}
+ */
 export async function purgeCacheEntry(key: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         try {
@@ -30,6 +42,9 @@ export async function purgeCacheEntry(key: string): Promise<void> {
     });
 }
 
+/**
+ * getStats returns the usage information from the JIRA cache
+ */
 export async function getStats(): Promise<NodeCache.Stats> {
     return new Promise<NodeCache.Stats>((resolve, reject) => {
         try {

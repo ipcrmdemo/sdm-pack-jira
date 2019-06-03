@@ -52,6 +52,8 @@ export const jiraSupport = (
             sdm.addCommand(removeComponentMapFromChannelReg);
             sdm.addCommand(createIssueReg);
             sdm.addCommand(setIssueStatus);
+
+            // TODO: Turn this into abstract class or interface
             sdm.configuration.sdm.jiraCache = new NodeCache({
                 stdTTL: 3600,
                 checkperiod: 30,

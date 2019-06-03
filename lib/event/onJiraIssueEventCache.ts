@@ -4,6 +4,10 @@ import {JiraConfig} from "../jira";
 import {purgeCacheEntry} from "../support/cache/manage";
 import * as types from "../typings/types";
 
+/**
+ * This event handler is used to trigger cache purge events.  If the incoming event is a project change event (created, updated, or
+ * deleted) this will cause the project endpoint to be purged from the cache.
+ */
 function onJiraIssueEventCacheHandler():
     OnEvent<types.OnJiraIssueEvent.Subscription> {
     return async e => {

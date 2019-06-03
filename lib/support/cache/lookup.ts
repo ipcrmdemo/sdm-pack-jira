@@ -1,9 +1,3 @@
-/**
- * Query Graph for JIRA Mappings using cache if available
- * @param {HandlerContext} ctx
- * @param {string} queryName
- * @param variables
- */
 import {configurationValue, HandlerContext, logger } from "@atomist/automation-client";
 import {PreferenceStoreFactory} from "@atomist/sdm";
 import * as NodeCache from "node-cache";
@@ -23,6 +17,12 @@ export interface JiraPreference {
     subtask: boolean;
 }
 
+/**
+ * Lookup JiraPreferences for the supplied channel
+ * @param {HandlerContext} ctx
+ * @param {string} channel
+ * @returns {JiraPreference}
+ */
 export async function cachedJiraPreferenceLookup(
     ctx: HandlerContext,
     channel: string,
@@ -49,13 +49,21 @@ export async function cachedJiraPreferenceLookup(
     });
 }
 
+interface JiraMappingLookupSearch {
+    projectId?: string;
+    componentId?: string;
+    channel?: string;
+}
+
+/**
+ * Query for JIRA Mappings using cache if available
+ * @param {HandlerContext} ctx
+ * @param {JiraMappingLookupSearch} search
+ * @returns {JiraMapping[]}
+ */
 export async function cachedJiraMappingLookup(
     ctx: HandlerContext,
-    search?: {
-        projectId?: string,
-        componentId?: string,
-        channel?: string,
-    },
+    search?: JiraMappingLookupSearch,
 ): Promise<JiraMapping[]> {
     const hashKey = buildJiraHashKey(ctx.workspaceId, {projectId: search.projectId, componentId: search.componentId, channel: search.channel});
     const enable = configurationValue<boolean>("sdm.jira.useCache", false);

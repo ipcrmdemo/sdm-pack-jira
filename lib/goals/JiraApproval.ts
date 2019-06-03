@@ -5,6 +5,14 @@ import {JiraConfig} from "../jira";
 import {createJiraTicket} from "../support/commands/shared";
 import {convertEmailtoJiraUser} from "../support/shared";
 
+/**
+ * The JIRA Approval goal allows you to insert an approval goal into a goal set.  The workflow is that when the goal
+ * is scheduled it will execute and create a new sub-issue.  It determines where to create the sub-issue by reading the
+ * JIRA issue from the commit message of the push that started the goal set.  IF there is NOT a issue key in the commit message
+ * this goal will fail and print a notification that it's missing an issue key.  Once the issue is approved, there is another event
+ * handler (onJiraIssueEventApproval) that will parse the incoming message and if the issue was approved (set to Done) set this goal status
+ * to success.
+ */
 export const JiraApproval = new GoalWithFulfillment({
     uniqueName: "jiraApprovalGoal",
     displayName: "Approval Goal",
@@ -58,6 +66,7 @@ export const JiraApproval = new GoalWithFulfillment({
             }
         }));
 
+        // TODO: Allow customization of the description and summary fields
         let data = {
             fields: {
                 description: `[${gi.id.repo}] Requesting approval to deploy version ${newVersion} (${gi.id.sha})` +
