@@ -2,14 +2,46 @@
   <img src="https://images.atomist.com/sdm/SDM-Logo-Dark.png">
 </p>
 
-# @atomist-seeds/sdm-pack
+# @atomist/sdm-pack-jira
 
 [![atomist sdm goals](http://badge.atomist.com/T29E48P34/atomist-seeds/sdm-pack/24939d09-fe00-4a7a-8d52-0fc4c9672100)](https://app.atomist.com/workspace/T29E48P34)
 [![npm version](https://img.shields.io/npm/v/@atomist-seeds/sdm-pack.svg)](https://www.npmjs.com/package/@atomist-seeds/sdm-pack)
 
-A starting point for an extension pack for an [Atomist][atomist]
-software delivery machine (SDM).
+To add support for JIRA to your SDM install this pack into your package.json and add the following to your `machine.ts` file:
 
+```typescript
+    sdm.addExtensionPacks(
+        jiraSupport(),
+    );
+```
+
+Next, add the relevant configuration to your Atomist config:
+
+```typescript
+    "jira": {
+      "url": "https://jirahostname",
+      "vcstype": "github",
+      "user": "",
+      "password": "",
+      "useDynamicChannels": boolean,
+      "useCache": boolean
+    },
+```
+
+`url`: The base URL for your JIRA instance
+
+`vcstype`: The type of version control system you have linked to JIRA, if any
+
+`user`: A service account Atomist can use to interact with JIRA
+
+`password`: The service account password
+
+`useDynamicChannels`: Should Atomist automatically determine which channels to notify based on commits registered to this Issue?  If yes, Atomist will find that repository and it's linked channels in the graph to determine who to notify
+
+`useCache`: Should the pack leverage a (configurable) caching solution to reduce the load on the JIRA server?
+
+
+### About SDMs
 Software delivery machines enable you to control your delivery process
 in code.  Think of it as an API for your software delivery.  See the
 [Atomist documentation][atomist-doc] for more information on the
