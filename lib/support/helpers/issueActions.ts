@@ -29,9 +29,9 @@ export class CommentOnIssueParams {
 }
 
 export async function commentOnIssueHandler(cli: CommandListenerInvocation<CommentOnIssueParams>): Promise<HandlerResult> {
-    const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create();
     const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
     const issueUrl = `${jiraConfig.url}/rest/api/2/issue/${cli.parameters.issueId}`;
+    const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create(issueUrl);
 
     logger.debug(`JIRA commentOnIssueHandler: Issue ID ${cli.parameters.issueId} Data payload => ${JSON.stringify(cli.parameters.comment)}`);
 

@@ -24,7 +24,7 @@ import {getJiraAuth, JiraConfig} from "../jira";
 export async function getJiraDetails<T>(jiraSelfUrl: string, cache: boolean = false, ttl: number = 3600, ctx?: SdmContext): Promise<T> {
     return new Promise<T>( async (resolve, reject) => {
         const useCache = configurationValue<boolean>("sdm.jira.useCache", false) && cache;
-        const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create();
+        const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create(jiraSelfUrl);
         const jiraCache = configurationValue<NodeCache>("sdm.jiraCache");
         const cacheResult = jiraCache.get<T>(jiraSelfUrl);
 
@@ -80,7 +80,6 @@ interface JiraIssueRepo {
  */
 export async function getJiraIssueRepos(issueId: string): Promise<string[]> {
     return new Promise<string[]>(async (resolve, reject ) => {
-        const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create();
         const jiraConfig = configurationValue<object>("sdm.jira") as JiraConfig;
         const lookupUrl =
             // tslint:disable-next-line:max-line-length
@@ -88,6 +87,7 @@ export async function getJiraIssueRepos(issueId: string): Promise<string[]> {
 
         logger.debug(`JIRA getJiraIssueRepos: using issueID => ${issueId}`);
         logger.debug(`JIRA getJiraIssueRepos: using lookupUrl => ${JSON.stringify(lookupUrl)}`);
+        const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create(lookupUrl);
         await httpClient.exchange(
             lookupUrl,
             {

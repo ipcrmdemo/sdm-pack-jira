@@ -135,7 +135,7 @@ export async function createJiraComponent(
 }
 
 export const createJiraResource = async (apiUrl: string, data: any, update: boolean = false, ctx?: SdmContext): Promise<JiraItemCreated> => {
-    const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create();
+    const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create(apiUrl);
     logger.warn(`JIRA createJiraResource: Data payload => ${JSON.stringify(data)}`);
 
     const result = await httpClient.exchange(
