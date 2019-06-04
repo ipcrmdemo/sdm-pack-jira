@@ -5,8 +5,8 @@ import {
     logger,
 } from "@atomist/automation-client";
 import {SdmContext} from "@atomist/sdm";
-import * as NodeCache from "node-cache";
 import {getJiraAuth, JiraConfig} from "../jira";
+import {JiraCache} from "./cache/jiraCache";
 
 /**
  * This function retrieves details from JIRA.  You must supply the full "self"
@@ -25,7 +25,7 @@ export async function getJiraDetails<T>(jiraSelfUrl: string, cache: boolean = fa
     return new Promise<T>( async (resolve, reject) => {
         const useCache = configurationValue<boolean>("sdm.jira.useCache", false) && cache;
         const httpClient = configurationValue<HttpClientFactory>("http.client.factory").create(jiraSelfUrl);
-        const jiraCache = configurationValue<NodeCache>("sdm.jiraCache");
+        const jiraCache = configurationValue<JiraCache>("sdm.jiraCache");
         const cacheResult = jiraCache.get<T>(jiraSelfUrl);
 
         if (useCache && cacheResult !== undefined) {

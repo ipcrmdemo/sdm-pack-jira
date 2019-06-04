@@ -1,6 +1,6 @@
-import {configurationValue, Failure, HandlerContext, HandlerResult, logger, NoParameters, Success} from "@atomist/automation-client";
+import {configurationValue, Failure, HandlerResult, logger, NoParameters, Success} from "@atomist/automation-client";
 import {CommandHandlerRegistration, CommandListenerInvocation, slackSuccessMessage} from "@atomist/sdm";
-import * as NodeCache from "node-cache";
+import {JiraCache, JiraCacheStats} from "./jiraCache";
 
 // TODO: Turn cache into abstract class
 /**
@@ -11,7 +11,7 @@ import * as NodeCache from "node-cache";
 export async function flushCache(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         try {
-            const cache = configurationValue<NodeCache>("sdm.jiraCache");
+            const cache = configurationValue<JiraCache>("sdm.jiraCache");
             cache.flushAll();
             logger.info(`JIRA flushCache: Successfully purged JIRA cache entries`);
             resolve();
@@ -31,7 +31,7 @@ export async function flushCache(): Promise<void> {
 export async function purgeCacheEntry(key: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         try {
-            const cache = configurationValue<NodeCache>("sdm.jiraCache");
+            const cache = configurationValue<JiraCache>("sdm.jiraCache");
             const deleted = cache.del(key);
             logger.info(`JIRA purgeCacheEntry: Successfully purged key ${key} from JIRA cache. Deleted ${deleted} entries`);
             resolve();
@@ -45,10 +45,10 @@ export async function purgeCacheEntry(key: string): Promise<void> {
 /**
  * getStats returns the usage information from the JIRA cache
  */
-export async function getStats(): Promise<NodeCache.Stats> {
-    return new Promise<NodeCache.Stats>((resolve, reject) => {
+export async function getStats(): Promise<JiraCacheStats> {
+    return new Promise<JiraCacheStats>((resolve, reject) => {
         try {
-            const cache = configurationValue<NodeCache>("sdm.jiraCache");
+            const cache = configurationValue<JiraCache>("sdm.jiraCache");
             resolve(cache.getStats());
         } catch (e) {
             logger.error(`JIRA getStats: Failed to retrieve JIRA cache stats.  Error => ${e}`);

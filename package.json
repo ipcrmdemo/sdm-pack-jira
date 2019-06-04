@@ -34,9 +34,9 @@
     "@atomist/sdm-core": "*"
   },
   "devDependencies": {
-    "@atomist/automation-client": "1.5.0",
-    "@atomist/sdm": "1.5.0",
-    "@atomist/sdm-core": "1.5.0",
+    "@atomist/automation-client": "1.5.3",
+    "@atomist/sdm": "1.5.1",
+    "@atomist/sdm-core": "1.5.2",
     "@atomist/sdm-pack-build": "^1.0.3",
     "@atomist/sdm-pack-docker": "^1.0.2",
     "@atomist/sdm-pack-k8s": "1.1.0-v2.20190118211301",

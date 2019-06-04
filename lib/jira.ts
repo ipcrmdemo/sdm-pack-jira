@@ -1,8 +1,9 @@
 import {configurationValue, GraphQL, logger} from "@atomist/automation-client";
 import {ExtensionPack, metadata, SdmContext} from "@atomist/sdm";
-import * as NodeCache from "node-cache";
 import { onJiraIssueEvent } from "./event/onJiraIssueEvent";
 import {onJiraIssueEventCache} from "./event/onJiraIssueEventCache";
+import {JiraCache} from "./support/cache/jiraCache";
+import {JiraNodeCache} from "./support/cache/jiraNodeCache";
 import { getJiraChannelPrefsReg, setJiraChannelPrefsReg } from "./support/commands/configureChannelPrefs";
 import {createIssueReg} from "./support/commands/createIssue";
 import { getCurrentChannelMappingsReg } from "./support/commands/getCurrentChannelMappings";
@@ -32,6 +33,7 @@ export async function getJiraAuth(ctx?: SdmContext): Promise<{Authorization: str
 
 export const jiraSupport = (
     authenticator: JiraAuthenticator = defaultJiraAuthenticator,
+    cache?: JiraCache,
 ): ExtensionPack => {
     return {
         ...metadata(),
@@ -53,11 +55,14 @@ export const jiraSupport = (
             sdm.addCommand(createIssueReg);
             sdm.addCommand(setIssueStatus);
 
-            // TODO: Turn this into abstract class or interface
-            sdm.configuration.sdm.jiraCache = new NodeCache({
-                stdTTL: 3600,
-                checkperiod: 30,
-            });
+            if (cache) {
+                sdm.configuration.sdm.jiraCache = cache;
+            } else {
+                sdm.configuration.sdm.jiraCache = new JiraNodeCache({
+                    stdTTL: 3600,
+                    checkperiod: 30,
+                });
+            }
 
             sdm.configuration.sdm.jiraAuthenticator = authenticator;
             return sdm;

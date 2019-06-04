@@ -1,7 +1,7 @@
 import {configurationValue, HandlerContext, logger } from "@atomist/automation-client";
 import {PreferenceStoreFactory} from "@atomist/sdm";
-import * as NodeCache from "node-cache";
 import {buildJiraHashKey, JiraMapping} from "../commands/shared";
+import {JiraCache} from "./jiraCache";
 
 export interface JiraPreference {
     channel: string;
@@ -31,7 +31,7 @@ export async function cachedJiraPreferenceLookup(
     const hashKey = `${ctx.workspaceId}-preferences-${channel}`;
 
     return new Promise<JiraPreference>( async (resolve, reject) => {
-        const jiraCache = configurationValue<NodeCache>("sdm.jiraCache");
+        const jiraCache = configurationValue<JiraCache>("sdm.jiraCache");
         const result = jiraCache.get<JiraPreference>(hashKey);
 
         if (result !== undefined && enable) {
@@ -68,7 +68,7 @@ export async function cachedJiraMappingLookup(
     const hashKey = buildJiraHashKey(ctx.workspaceId, {projectId: search.projectId, componentId: search.componentId, channel: search.channel});
     const enable = configurationValue<boolean>("sdm.jira.useCache", false);
     return new Promise<JiraMapping[]>(async (resolve, reject) => {
-        const jiraCache = configurationValue<NodeCache>("sdm.jiraCache");
+        const jiraCache = configurationValue<JiraCache>("sdm.jiraCache");
         const result = jiraCache.get<JiraMapping[]>(hashKey);
 
         if (result !== undefined && enable) {
