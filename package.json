@@ -39,7 +39,7 @@
     "@atomist/sdm-core": "1.5.2",
     "@atomist/sdm-pack-build": "^1.0.3",
     "@atomist/sdm-pack-docker": "^1.0.2",
-    "@atomist/sdm-pack-k8s": "1.1.0-v2.20190118211301",
+    "@atomist/sdm-pack-k8s": "^1.10.0",
     "@atomist/sdm-pack-spring": "1.1.1-master.20190114125827",
     "@types/mocha": "^5.2.5",
     "@types/power-assert": "^1.5.0",
